@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="Cinema.DataAccess/Cinema.DataAccess.csproj" />
-  <Project Path="Cinema.Models/Cinema.Models.csproj" />
-  <Project Path="Cinema.Utility/Cinema.Utility.csproj" />
-  <Project Path="Cinema.Web/Cinema.Web.csproj" />
+  <Project Path="CinemaSystem.DataAccess/CinemaSystem.DataAccess.csproj" />
+  <Project Path="CinemaSystem.Models/CinemaSystem.Models.csproj" />
+  <Project Path="CinemaSystem.Utility/CinemaSystem.Utility.csproj" />
+  <Project Path="CinemaSystem.Web/CinemaSystem.Web.csproj" />
 </Solution>

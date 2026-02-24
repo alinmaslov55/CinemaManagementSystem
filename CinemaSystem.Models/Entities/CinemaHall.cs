@@ -8,6 +8,7 @@ namespace CinemaSystem.Models.Entities
         public CinemaHall()
         {
             Seats = new List<Seat>();
+            Showtimes = new List<Showtime>();
         }
 
         [Required]
@@ -25,5 +26,6 @@ namespace CinemaSystem.Models.Entities
         public virtual Cinema Cinema { get; set; }
 
         public virtual List<Seat> Seats { get; set; }
+        public virtual List<Showtime> Showtimes { get; set; }
     }
 }

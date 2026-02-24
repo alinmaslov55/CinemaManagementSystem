@@ -28,7 +28,7 @@ namespace CinemaSystem.Models.Entities
         public PaymentStatus PaymentStatus { get; set; }
 
         [Required]
-        public double TotalAmount { get; set; }
+        public decimal TotalAmount { get; set; }
 
         [Required]
         public string ConfirmationCode { get; set; }
@@ -37,5 +37,6 @@ namespace CinemaSystem.Models.Entities
         public int LoyaltyPointsEarned { get; set; }
 
         public virtual List<Ticket> Tickets { get; set; }
+        public virtual ApplicationUser User { get; set; }
     }
 }

@@ -20,4 +20,8 @@
     <ProjectReference Include="..\CinemaSystem.Utility\CinemaSystem.Utility.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\cinema\" />
+  </ItemGroup>
+
 </Project>

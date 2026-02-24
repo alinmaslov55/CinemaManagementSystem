@@ -1,0 +1,67 @@
+﻿@using CinemaSystem.Models.Entities;
+@model Actor
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-primary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">@(Model.Id != 0 ? "Update" : "Create") Actor</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <form method="post" class="row" enctype="multipart/form-data">
+            <input asp-for="Id" hidden />
+            <input asp-for="ProfilePictureURL" hidden />
+
+            <div class="col-10">
+                <div class="border p-3">
+                    @* Full Name Input *@
+                    <div class="form-floating py-2 col-12">
+                        <input asp-for="FullName" class="form-control border-0 shadow" />
+                        <label asp-for="FullName" class="ms-2"></label>
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    @* Bio Textarea *@
+                    <div class="form-floating py-2 col-12">
+                        <textarea asp-for="Bio" class="form-control border-0 shadow" style="height:150px"></textarea>
+                        <label asp-for="Bio" class="ms-2"></label>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                    </div>
+
+                    @* File Upload *@
+                    <div class="form-floating py-2 col-12">
+                        <input type="file" name="file" class="form-control border-0 shadow" />
+                        <label asp-for="ProfilePictureURL" class="ms-2"></label>
+                    </div>
+
+                    <div class="row pt-2">
+                        <div class="col-6 col-md-3">
+                            <button type="submit" class="btn btn-primary form-control">
+                                @(Model.Id != 0 ? "Update" : "Create")
+                            </button>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a asp-action="Index" class="btn btn-outline-primary border form-control">
+                                Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Image Preview Column *@
+            <div class="col-2">
+                <img src="@Model.ProfilePictureURL" width="100%"
+                     style="border-radius:10px; border:1px solid #bbb9b9" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

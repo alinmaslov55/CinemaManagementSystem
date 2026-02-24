@@ -1,0 +1,36 @@
+﻿@using CinemaSystem.Models.Entities;
+@model IEnumerable<Actor>
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">Actor List</h2>
+        </div>
+        <div class="col-6 text-end">
+            <a asp-action="Upsert" class="btn btn-primary">Create New Actor</a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Profile</th>
+                <th>Full Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obj in Model)
+            {
+                <tr>
+                    <td><img src="@obj.ProfilePictureURL" style="width:50px; height:50px; border-radius:50%; object-fit:cover;" /></td>
+                    <td>@obj.FullName</td>
+                    <td>
+                        <a asp-action="Upsert" asp-route-id="@obj.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

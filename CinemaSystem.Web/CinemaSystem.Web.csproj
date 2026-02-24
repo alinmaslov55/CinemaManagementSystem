@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\cinema\" />
+    <Folder Include="wwwroot\images\actor\" />
   </ItemGroup>
 
 </Project>

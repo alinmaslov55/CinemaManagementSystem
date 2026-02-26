@@ -1,0 +1,44 @@
+﻿@using CinemaSystem.Models.Entities;
+@model IEnumerable<Movie>
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">Movie List</h2>
+        </div>
+        <div class="col-6 text-end">
+            <a asp-action="Upsert" class="btn btn-primary">Add Movie</a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obj in Model)
+            {
+                <tr>
+                    <td>@obj.Title</td>
+                    <td>@obj.MovieCategory</td>
+                    <td>@obj.Price.ToString("c")</td>
+                    <td>
+                        <span class="badge @(obj.IsReleased ? "bg-success" : "bg-warning")">
+                            @(obj.IsReleased ? "Available" : "Upcoming")
+                        </span>
+                    </td>
+                    <td>
+                        <a asp-action="Upsert" asp-route-id="@obj.Id" class="btn btn-primary btn-sm">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

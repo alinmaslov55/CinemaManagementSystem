@@ -1,5 +1,7 @@
 ﻿using CinemaSystem.Models.Data.Enums;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
 
 namespace CinemaSystem.Models.Entities
@@ -22,8 +24,8 @@ namespace CinemaSystem.Models.Entities
         [Required]
         public decimal Price { get; set; }
 
-        [Required]
-        public string ImageUrl { get; set; }
+        [ValidateNever]
+        public string? ImageUrl { get; set; }
 
         public string? TrailerUrl { get; set; }
 
@@ -42,8 +44,8 @@ namespace CinemaSystem.Models.Entities
         [Required]
         public AgeRating AgeRating { get; set; }
 
-        [Required]
         public bool IsReleased { get; set; } = false;
+
 
         public virtual List<Actor> Actors { get; set; }
         public virtual List<Showtime> Showtimes { get; set; }

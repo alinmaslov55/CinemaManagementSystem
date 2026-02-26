@@ -20,5 +20,7 @@ namespace CinemaSystem.Models.ViewModels
         [Required]
         [Range(1, 30, ErrorMessage = "Columns must be between 1 and 30")]
         public int Cols { get; set; } = 10;
+
+        public string SeatLayoutData { get; set; }
     }
 }

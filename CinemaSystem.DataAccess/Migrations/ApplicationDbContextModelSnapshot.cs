@@ -67,7 +67,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Actors");
+                    b.ToTable("Actors", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.ApplicationUser", b =>
@@ -191,7 +191,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasIndex("ShowtimeId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Cinema", b =>
@@ -227,7 +227,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cinemas");
+                    b.ToTable("Cinemas", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.CinemaHall", b =>
@@ -264,7 +264,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasIndex("CinemaId");
 
-                    b.ToTable("CinemaHalls");
+                    b.ToTable("CinemaHalls", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Movie", b =>
@@ -322,7 +322,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Movies");
+                    b.ToTable("Movies", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Review", b =>
@@ -359,7 +359,7 @@ namespace CinemaSystem.DataAccess.Migrations
                     b.HasIndex("MovieId", "ApplicationUserId")
                         .IsUnique();
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Seat", b =>
@@ -399,7 +399,7 @@ namespace CinemaSystem.DataAccess.Migrations
                     b.HasIndex("CinemaHallId", "Row", "Column")
                         .IsUnique();
 
-                    b.ToTable("Seats");
+                    b.ToTable("Seats", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Showtime", b =>
@@ -446,7 +446,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasIndex("MovieId");
 
-                    b.ToTable("Showtimes");
+                    b.ToTable("Showtimes", (string)null);
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Ticket", b =>
@@ -477,7 +477,7 @@ namespace CinemaSystem.DataAccess.Migrations
 
                     b.HasIndex("SeatId");
 
-                    b.ToTable("Tickets");
+                    b.ToTable("Tickets", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

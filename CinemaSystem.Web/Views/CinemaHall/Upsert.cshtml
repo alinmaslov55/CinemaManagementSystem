@@ -49,6 +49,12 @@
                             <label class="small text-muted">Columns per Row</label>
                             <input asp-for="Cols" type="number" id="colsInput" class="form-control shadow-sm" min="1" max="30" />
                         </div>
+                        <div class="col-12 mt-2">
+                            <button type="button" onclick="clearLayout()" class="btn btn-outline-danger btn-sm shadow-sm">
+                                <i class="bi bi-trash"></i> Clear All Customizations
+                            </button>
+                            <p class="text-muted small mt-2 mb-0 italic">Click on seats in the preview to cycle types.</p>
+                        </div>
 
                         @* Interactive Legend *@
                         <div class="col-12 mt-3 d-flex justify-content-between border-top pt-2">
@@ -96,18 +102,28 @@
 
         let seatMap = [];
 
+        function clearLayout() {
+            if (confirm("Are you sure you want to reset all seats to 'Standard'? This cannot be undone.")) {
+                // Clear the hidden field so renderGrid defaults to Standard
+                layoutHidden.value = "";
+                renderGrid();
+                TempDataNotify("Layout reset locally. Save to apply changes.");
+            }
+        }
+
         function renderGrid() {
             const r = parseInt(rowsInput.value) || 0;
             const c = parseInt(colsInput.value) || 0;
             hiddenTotal.value = r * c;
 
-            // Try to parse existing data from the hidden field
             let existingData = [];
             try {
                 if (layoutHidden.value) {
                     existingData = JSON.parse(layoutHidden.value);
                 }
-            } catch (e) { console.error("Invalid JSON in layout data"); }
+            } catch (e) {
+                console.warn("Starting with fresh layout data.");
+            }
 
             container.innerHTML = '';
             container.style.display = 'grid';
@@ -120,13 +136,12 @@
                 const currentRow = String.fromCharCode(65 + Math.floor(i / c));
                 const currentCol = (i % c) + 1;
 
-                // Check if this specific seat exists in existingData
                 const savedSeat = existingData.find(s => s.Row === currentRow && s.Col === currentCol);
 
                 const seatData = {
                     Row: currentRow,
                     Col: currentCol,
-                    Type: savedSeat ? savedSeat.Type : 1, // Use saved type or default to Standard
+                    Type: savedSeat ? savedSeat.Type : 1,
                     IsAcc: savedSeat ? savedSeat.IsAcc : false
                 };
                 seatMap.push(seatData);
@@ -135,27 +150,17 @@
                 seat.className = "rounded shadow-sm text-center d-flex align-items-center justify-content-center cursor-pointer";
                 seat.style.height = "22px";
                 seat.style.fontSize = "10px";
-                seat.style.cursor = "pointer";
                 seat.innerText = `${currentRow}${currentCol}`;
 
-                // Set initial color based on Type
                 setSeatStyle(seat, seatData);
 
                 seat.onclick = () => {
-                    if (seatData.Type === 1 && !seatData.IsAcc) {
-                        seatData.Type = 2; // Premium
-                    }
-                    else if (seatData.Type === 2) {
-                        seatData.Type = 3; // VIP
-                    }
-                    else if (seatData.Type === 3) {
-                        seatData.Type = 4; // Handicap
-                        seatData.IsAcc = true;
-                    }
-                    else {
-                        seatData.Type = 1; // Standard
-                        seatData.IsAcc = false;
-                    }
+                    // Logic: 1->2->3->4->1
+                    if (seatData.Type === 1 && !seatData.IsAcc) seatData.Type = 2;
+                    else if (seatData.Type === 2) seatData.Type = 3;
+                    else if (seatData.Type === 3) { seatData.Type = 4; seatData.IsAcc = true; }
+                    else { seatData.Type = 1; seatData.IsAcc = false; }
+
                     setSeatStyle(seat, seatData);
                     updateLayoutData();
                 };
@@ -167,21 +172,12 @@
 
         function setSeatStyle(element, data) {
             element.style.color = "white";
+            element.style.cursor = "pointer";
             switch(data.Type) {
-                case 1: // Standard
-                    element.style.backgroundColor = "#6c757d";
-                    break;
-                case 2: // Premium
-                    element.style.backgroundColor = "#198754";
-                    break;
-                case 3: // VIP
-                    element.style.backgroundColor = "#ffc107";
-                    element.style.color = "black";
-                    break;
-                case 4: // Handicap
-                    element.style.backgroundColor = "#0dcaf0";
-                    element.style.color = "black";
-                    break;
+                case 1: element.style.backgroundColor = "#6c757d"; break; // Standard
+                case 2: element.style.backgroundColor = "#198754"; break; // Premium
+                case 3: element.style.backgroundColor = "#ffc107"; element.style.color = "black"; break; // VIP
+                case 4: element.style.backgroundColor = "#0dcaf0"; element.style.color = "black"; break; // Handicap
             }
         }
 

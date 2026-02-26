@@ -106,6 +106,47 @@ namespace CinemaSystem.Web.Controllers
             }
             return View(vm);
         }
+
+        // GET: CinemaHall/Delete/5
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            // Include Cinema to show the location in the confirmation view
+            var hallFromDb = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Cinema");
+
+            if (hallFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(hallFromDb);
+        }
+
+        // POST: CinemaHall/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePOST(int? id)
+        {
+            var obj = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Seats");
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            // Logic Check: You might want to block deletion if showtimes exist
+            // if (_unitOfWork.Showtime.Any(u => u.CinemaHallId == id)) { ... }
+
+            _unitOfWork.CinemaHall.Remove(obj);
+            _unitOfWork.Save();
+
+            TempData["success"] = "Cinema Hall and all associated seats deleted successfully.";
+            return RedirectToAction("Index");
+        }
     }
 
     public class SeatLayoutDto

@@ -1,21 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace CinemaSystem.Models.Entities
 {
     public class Showtime : BaseEntity
     {
-        [Required]
+        [ValidateNever]
         public int MovieId { get; set; }
         public virtual Movie Movie { get; set; }
 
-        [Required]
+        [ValidateNever]
         public int CinemaHallId { get; set; }
         public virtual CinemaHall CinemaHall { get; set; }
 
         [Required]
         public DateTime StartTime { get; set; }
 
-        [Required]
+        [ValidateNever]
         public DateTime EndTime { get; set; }
 
         public decimal? Price { get; set; }

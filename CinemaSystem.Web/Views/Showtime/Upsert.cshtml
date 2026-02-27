@@ -1,0 +1,227 @@
+﻿@model CinemaSystem.Models.ViewModels.ShowtimeCalendarVM
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-primary bg-gradient py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <a asp-action="Index" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Halls
+            </a>
+            <div class="text-center text-white">
+                <h3 class="mb-0">@Model.Hall.Name</h3>
+                <small>@Model.Hall.Cinema.Name (@Model.Hall.HallType)</small>
+            </div>
+            <div class="btn-group shadow-sm">
+                <a asp-action="Upsert" asp-route-hallId="@Model.Hall.Id" asp-route-weekStart="@Model.PreviousWeekStart.ToString("yyyy-MM-dd")" class="btn btn-sm btn-light">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <span class="btn btn-sm btn-dark disabled px-3">
+                    @Model.CurrentWeekStart.ToString("MMM dd") - @Model.CurrentWeekStart.AddDays(6).ToString("MMM dd, yyyy")
+                </span>
+                <a asp-action="Upsert" asp-route-hallId="@Model.Hall.Id" asp-route-weekStart="@Model.NextWeekStart.ToString("yyyy-MM-dd")" class="btn btn-sm btn-light">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @* Showtime Interaction Modal *@
+    <div class="modal fade" id="showtimeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">Schedule Showtime</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modalShowtimeId" value="0" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Movie</label>
+                        <select id="modalMovieId" asp-items="@Model.MovieList" class="form-select border-0 shadow-sm">
+                            <option disabled selected>--Select Movie--</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Start Time</label>
+                        <input type="datetime-local" id="modalStartTime" class="form-control border-0 shadow-sm" />
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Language</label>
+                            <input type="text" id="modalLanguage" class="form-control border-0 shadow-sm" placeholder="e.g. English" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Price Override</label>
+                            <input type="number" id="modalPrice" class="form-control border-0 shadow-sm" step="0.01" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between border-top-0">
+                    <button type="button" id="btnDelete" class="btn btn-outline-danger" onclick="deleteShowtime()">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary px-4" onclick="saveShowtime()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="calendar-grid">
+            @* Header Row *@
+            <div class="time-col bg-light border-bottom"></div>
+            @for (int i = 0; i < 7; i++)
+            {
+                <div class="day-header text-center py-2 border-bottom border-end bg-light">
+                    <div class="fw-bold">@Model.CurrentWeekStart.AddDays(i).ToString("ddd")</div>
+                    <small class="text-muted">@Model.CurrentWeekStart.AddDays(i).ToString("MM/dd")</small>
+                </div>
+            }
+
+            @* Time Slots Logic *@
+            @for (int hour = Model.DayStartHour; hour < Model.DayEndHour; hour++)
+            {
+                <div class="time-label text-end pe-2 small text-muted border-bottom" style="grid-row: @(hour - Model.DayStartHour + 2)">
+                    @hour:00
+                </div>
+                @for (int day = 0; day < 7; day++)
+                {
+                    <div class="calendar-slot border-bottom border-end"
+                         style="grid-column: @(day + 2); grid-row: @(hour - Model.DayStartHour + 2)"
+                         onclick="openAddModal(@day, @hour)">
+                    </div>
+                }
+            }
+
+            @* Visual Showtime Blocks *@
+            @foreach (var show in Model.WeeklyShowtimes)
+            {
+                var dayOffset = (show.StartTime.Date - Model.CurrentWeekStart.Date).Days;
+                var hourOffset = show.StartTime.Hour - Model.DayStartHour;
+                var minuteOffset = show.StartTime.Minute;
+                var durationMinutes = (show.EndTime - show.StartTime).TotalMinutes;
+
+                <div class="showtime-block bg-primary text-white rounded shadow-sm p-2"
+                     onclick="event.stopPropagation(); openEditModal(@show.Id, @show.MovieId, '@show.StartTime.ToString("yyyy-MM-ddTHH:mm")', '@show.Language', '@show.Price')"
+                     style="grid-column: @(dayOffset + 2);
+                                grid-row-start: @(hourOffset + 2);
+                                margin-top: @(minuteOffset)px;
+                                height: @(durationMinutes)px;
+                                cursor: pointer;
+                                z-index: 20;">
+                    <div class="fw-bold text-truncate" style="font-size: 0.85rem;">@show.Movie.Title</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">
+                        <i class="bi bi-clock"></i> @show.StartTime.ToString("HH:mm") - @show.EndTime.ToString("HH:mm")
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: 80px repeat(7, 1fr);
+        grid-template-rows: auto repeat( @(Model.DayEndHour - Model.DayStartHour), 60px);
+        position: relative;
+        background-color: white;
+    }
+
+    .time-label {
+        line-height: 20px;
+        padding-top: 5px;
+    }
+
+    .calendar-slot:hover {
+        background-color: #f8f9fa;
+        cursor: cell;
+    }
+
+    .showtime-block {
+        position: relative;
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: transform 0.1s ease;
+    }
+
+        .showtime-block:hover {
+            transform: scale(1.02);
+            z-index: 30 !important;
+            filter: brightness(1.1);
+        }
+</style>
+
+@section Scripts {
+    <script>
+        const hallId = @Model.Hall.Id;
+
+        function openAddModal(dayOffset, hour) {
+            let startDate = new Date("@Model.CurrentWeekStart.ToString("yyyy-MM-dd")");
+            startDate.setDate(startDate.getDate() + dayOffset);
+            startDate.setHours(hour, 0, 0, 0);
+
+            // Correcting for timezone offset to local ISO string
+            const offset = startDate.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(startDate - offset)).toISOString().slice(0, 16);
+
+            $('#modalTitle').text("Schedule Movie");
+            $('#modalShowtimeId').val(0);
+            $('#modalMovieId').val("");
+            $('#modalStartTime').val(localISOTime);
+            $('#modalLanguage').val("");
+            $('#modalPrice').val("");
+            $('#btnDelete').addClass('d-none');
+            $('#showtimeModal').modal('show');
+        }
+
+        function openEditModal(id, movieId, startTime, language, price) {
+            $('#modalTitle').text("Edit Showtime");
+            $('#modalShowtimeId').val(id);
+            $('#modalMovieId').val(movieId);
+            $('#modalStartTime').val(startTime);
+            $('#modalLanguage').val(language === "null" ? "" : language);
+            $('#modalPrice').val(price === "null" ? "" : price);
+            $('#btnDelete').removeClass('d-none');
+            $('#showtimeModal').modal('show');
+        }
+
+        function saveShowtime() {
+            const data = {
+                Id: parseInt($('#modalShowtimeId').val()),
+                MovieId: parseInt($('#modalMovieId').val()),
+                CinemaHallId: hallId,
+                StartTime: $('#modalStartTime').val(),
+                Language: $('#modalLanguage').val(),
+                Price: $('#modalPrice').val() ? parseFloat($('#modalPrice').val()) : null
+            };
+
+            if (!data.MovieId || !data.StartTime) {
+                alert("Please select a movie and start time.");
+                return;
+            }
+
+            fetch('/Showtime/UpsertAjax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(res => res.json()).then(result => {
+                if(result.success) location.reload();
+                else alert(result.message || "Error saving showtime.");
+            });
+        }
+
+        function deleteShowtime() {
+            const id = $('#modalShowtimeId').val();
+            if(confirm("Are you sure you want to remove this showtime from the schedule?")) {
+                fetch(`/Showtime/DeleteAjax/${id}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(result => {
+                    if(result.success) location.reload();
+                    else alert("Error deleting showtime.");
+                });
+            }
+        }
+    </script>
+}

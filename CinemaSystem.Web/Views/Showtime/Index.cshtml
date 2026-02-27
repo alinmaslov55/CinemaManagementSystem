@@ -1,0 +1,61 @@
+﻿@using CinemaSystem.Models.Entities;
+@model IEnumerable<CinemaHall>
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-primary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Cinema Resource Manager</h2>
+                <p class="text-white-50">Select a hall to manage its weekly schedule</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row">
+            @foreach (var hall in Model)
+            {
+                // Find the next upcoming showtime for this specific hall
+                var nextShow = hall.Showtimes?
+                .Where(s => s.StartTime > DateTime.Now)
+                .OrderBy(s => s.StartTime)
+                .FirstOrDefault();
+
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 border-top border-4 border-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="card-title mb-0 fw-bold">@hall.Name</h5>
+                                <span class="badge bg-info text-dark">@hall.HallType</span>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-geo-alt-fill"></i> @hall.Cinema.Name
+                            </p>
+
+                            <div class="bg-light p-3 rounded mb-3">
+                                <label class="text-uppercase small fw-bold text-muted d-block">Next Screening:</label>
+                                @if (nextShow != null)
+                                {
+                                    <div class="text-dark fw-bold">@nextShow.StartTime.ToString("MMM dd, HH:mm")</div>
+                                    <div class="small text-truncate">@nextShow.Movie?.Title</div>
+                                }
+                                else
+                                {
+                                    <div class="text-danger small italic">No upcoming shows scheduled</div>
+                                }
+                            </div>
+
+                            <div class="d-grid">
+                                <a asp-action="Upsert" asp-route-hallId="@hall.Id" class="btn btn-outline-primary">
+                                    <i class="bi bi-calendar3"></i> Manage Weekly Schedule
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0 text-center pb-3">
+                            <small class="text-muted">Capacity: @hall.TotalSeats Seats</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

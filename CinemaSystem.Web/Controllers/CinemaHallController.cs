@@ -203,13 +203,16 @@ namespace CinemaSystem.Web.Controllers
                 return NotFound();
             }
 
+            obj.IsDeleted = true;
+            _unitOfWork.CinemaHall.Update(obj);
+
             // Logic Check: You might want to block deletion if showtimes exist
             // if (_unitOfWork.Showtime.Any(u => u.CinemaHallId == id)) { ... }
 
-            _unitOfWork.CinemaHall.Remove(obj);
+            //_unitOfWork.CinemaHall.Remove(obj);
             _unitOfWork.Save();
 
-            TempData["success"] = "Cinema Hall and all associated seats deleted successfully.";
+            TempData["success"] = "Cinema Hall archived successfully.";
             return RedirectToAction("Index");
         }
     }

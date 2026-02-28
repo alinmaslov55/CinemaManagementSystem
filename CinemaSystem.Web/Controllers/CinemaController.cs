@@ -111,17 +111,20 @@ namespace CinemaSystem.Web.Controllers
                 return NotFound();
             }
 
-            // Physical File Cleanup
-            if (!string.IsNullOrEmpty(obj.Logo))
-            {
-                var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, obj.Logo.TrimStart('\\'));
-                if (System.IO.File.Exists(oldImagePath))
-                {
-                    System.IO.File.Delete(oldImagePath);
-                }
-            }
+            obj.IsDeleted = true;
+            _unitOfWork.Cinema.Update(obj);
 
-            _unitOfWork.Cinema.Remove(obj);
+            // Physical File Cleanup is not needed when soft delete
+            //if (!string.IsNullOrEmpty(obj.Logo))
+            //{
+            //    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, obj.Logo.TrimStart('\\'));
+            //    if (System.IO.File.Exists(oldImagePath))
+            //    {
+            //        System.IO.File.Delete(oldImagePath);
+            //    }
+            //}
+
+            //_unitOfWork.Cinema.Remove(obj);
             _unitOfWork.Save();
             TempData["success"] = "Cinema deleted successfully";
             return RedirectToAction("Index");

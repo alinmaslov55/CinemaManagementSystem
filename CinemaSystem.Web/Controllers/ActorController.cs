@@ -95,19 +95,22 @@ namespace CinemaSystem.Web.Controllers
                 return NotFound();
             }
 
-            // Physical File Cleanup
-            if (!string.IsNullOrEmpty(obj.ProfilePictureURL))
-            {
-                var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, obj.ProfilePictureURL.TrimStart('\\'));
-                if (System.IO.File.Exists(oldImagePath))
-                {
-                    System.IO.File.Delete(oldImagePath);
-                }
-            }
+            obj.IsDeleted = true;
+            _unitOfWork.Actor.Update(obj);
 
-            _unitOfWork.Actor.Remove(obj);
+            // Physical File Cleanup
+            //if (!string.IsNullOrEmpty(obj.ProfilePictureURL))
+            //{
+            //    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, obj.ProfilePictureURL.TrimStart('\\'));
+            //    if (System.IO.File.Exists(oldImagePath))
+            //    {
+            //        System.IO.File.Delete(oldImagePath);
+            //    }
+            //}
+
+            //_unitOfWork.Actor.Remove(obj);
             _unitOfWork.Save();
-            TempData["success"] = "Actor deleted successfully";
+            TempData["success"] = "Actor profile archived successfully";
             return RedirectToAction("Index");
         }
     }

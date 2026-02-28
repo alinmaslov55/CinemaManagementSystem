@@ -157,19 +157,29 @@
     <script>
         const hallId = @Model.Hall.Id;
 
-        function openAddModal(dayOffset, hour) {
-            let startDate = new Date("@Model.CurrentWeekStart.ToString("yyyy-MM-dd")");
-            startDate.setDate(startDate.getDate() + dayOffset);
-            startDate.setHours(hour, 0, 0, 0);
+                function openAddModal(dayOffset, hour) {
+            // 1. Get the pure string of the current week start (e.g., "2026-02-23")
+            let baseDateStr = "@Model.CurrentWeekStart.ToString("yyyy-MM-dd")";
 
-            // Correcting for timezone offset to local ISO string
-            const offset = startDate.getTimezoneOffset() * 60000;
-            const localISOTime = (new Date(startDate - offset)).toISOString().slice(0, 16);
+            // 2. Parse it as UTC to avoid local timezone interference
+            let startDate = new Date(baseDateStr + "T00:00:00Z");
+
+            // 3. Add the days based on the column clicked
+            startDate.setUTCDate(startDate.getUTCDate() + dayOffset);
+
+            // 4. Manually construct the exact string required by datetime-local
+            // This forces the time to be EXACTLY the row/column clicked, ignoring the admin's PC clock.
+            let year = startDate.getUTCFullYear();
+            let month = String(startDate.getUTCMonth() + 1).padStart(2, '0');
+            let day = String(startDate.getUTCDate()).padStart(2, '0');
+            let h = String(hour).padStart(2, '0');
+
+            let exactLocalTime = `${year}-${month}-${day}T${h}:00`;
 
             $('#modalTitle').text("Schedule Movie");
             $('#modalShowtimeId').val(0);
             $('#modalMovieId').val("");
-            $('#modalStartTime').val(localISOTime);
+            $('#modalStartTime').val(exactLocalTime); // Safe, exact string injection
             $('#modalLanguage').val("");
             $('#modalPrice').val("");
             $('#btnDelete').addClass('d-none');

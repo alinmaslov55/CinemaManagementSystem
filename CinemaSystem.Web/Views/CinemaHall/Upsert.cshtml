@@ -102,16 +102,17 @@
 
         let seatMap = [];
 
-        function clearLayout() {
+                function clearLayout() {
             if (confirm("Are you sure you want to reset all seats to 'Standard'? This cannot be undone.")) {
                 // Clear the hidden field so renderGrid defaults to Standard
                 layoutHidden.value = "";
                 renderGrid();
-                TempDataNotify("Layout reset locally. Save to apply changes.");
+
+                alert("Layout reset locally. Click 'Save Hall & Layout' to apply changes.");
             }
         }
 
-        function renderGrid() {
+                function renderGrid() {
             const r = parseInt(rowsInput.value) || 0;
             const c = parseInt(colsInput.value) || 0;
             hiddenTotal.value = r * c;
@@ -136,13 +137,28 @@
                 const currentRow = String.fromCharCode(65 + Math.floor(i / c));
                 const currentCol = (i % c) + 1;
 
-                const savedSeat = existingData.find(s => s.Row === currentRow && s.Col === currentCol);
+                const savedSeat = existingData.find(s =>
+                    (s.Row === currentRow || s.row === currentRow) &&
+                    (s.Col === currentCol || s.col === currentCol)
+                );
+
+                let sType = 1; // Default Standard
+                let sAcc = false; // Default Not Accessible
+
+                if (savedSeat) {
+                    let rawType = savedSeat.Type !== undefined ? savedSeat.Type : savedSeat.type;
+                    if (rawType === 2 || rawType === "Premium") sType = 2;
+                    else if (rawType === 3 || rawType === "VIP") sType = 3;
+                    else if (rawType === 4 || rawType === "Handicap") sType = 4;
+
+                    sAcc = savedSeat.IsAcc !== undefined ? savedSeat.IsAcc : (savedSeat.isAcc || false);
+                }
 
                 const seatData = {
                     Row: currentRow,
                     Col: currentCol,
-                    Type: savedSeat ? savedSeat.Type : 1,
-                    IsAcc: savedSeat ? savedSeat.IsAcc : false
+                    Type: sType,
+                    IsAcc: sAcc
                 };
                 seatMap.push(seatData);
 
@@ -155,7 +171,6 @@
                 setSeatStyle(seat, seatData);
 
                 seat.onclick = () => {
-                    // Logic: 1->2->3->4->1
                     if (seatData.Type === 1 && !seatData.IsAcc) seatData.Type = 2;
                     else if (seatData.Type === 2) seatData.Type = 3;
                     else if (seatData.Type === 3) { seatData.Type = 4; seatData.IsAcc = true; }

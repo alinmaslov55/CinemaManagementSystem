@@ -1,0 +1,93 @@
+﻿@model CinemaSystem.Models.ViewModels.MovieDetailsVM
+
+<div class="container mt-5">
+    @* --- MOVIE METADATA HEADER --- *@
+    <div class="row shadow-sm bg-white rounded p-4 mb-5">
+        <div class="col-md-4 text-center">
+            <img src="@(string.IsNullOrEmpty(Model.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : Model.Movie.ImageUrl)"
+                 class="img-fluid rounded shadow" alt="@Model.Movie.Title" style="max-height: 450px;">
+        </div>
+        <div class="col-md-8 d-flex flex-column justify-content-center">
+            <h1 class="fw-bold display-5">@Model.Movie.Title</h1>
+            <div class="mb-3">
+                <span class="badge bg-primary fs-6 me-2">@Model.Movie.MovieCategory</span>
+                <span class="text-muted"><i class="bi bi-clock"></i> @Model.Movie.DurationInMinutes minutes</span>
+                <span class="ms-3 text-warning fw-bold fs-5">
+                    <i class="bi bi-star-fill"></i> @Model.AverageRating / 5.0
+                </span>
+            </div>
+            <p class="lead">@Model.Movie.Description</p>
+
+            @if (!string.IsNullOrEmpty(Model.Movie.TrailerUrl))
+            {
+                <a href="@Model.Movie.TrailerUrl" target="_blank" class="btn btn-outline-danger w-25 mt-3">
+                    <i class="bi bi-play-circle-fill"></i> Watch Trailer
+                </a>
+            }
+        </div>
+    </div>
+
+    @* --- SHOWTIME AGGREGATOR --- *@
+    <h3 class="fw-bold border-bottom pb-2 mb-4">Select Showtime</h3>
+
+    @if (!Model.ShowtimesByCinema.Any())
+    {
+        <div class="alert alert-warning text-center">
+            <strong>No upcoming showtimes available for this movie right now.</strong> Please check back later.
+        </div>
+    }
+    else
+    {
+        <div class="accordion shadow-sm" id="cinemaAccordion">
+            @{
+                int cinemaIndex = 0;
+            }
+            @foreach (var cinemaKvp in Model.ShowtimesByCinema)
+            {
+                var cinema = cinemaKvp.Key;
+                var datesDict = cinemaKvp.Value;
+                var headingId = $"heading{cinemaIndex}";
+                var collapseId = $"collapse{cinemaIndex}";
+                var isFirst = cinemaIndex == 0;
+
+                <div class="accordion-item border-0 border-bottom">
+                    <h2 class="accordion-header" id="@headingId">
+                        <button class="accordion-button @(isFirst ? "" : "collapsed") fw-bold fs-5 bg-light" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                            <i class="bi bi-geo-alt-fill text-primary me-2"></i> @cinema.Name, @cinema
+                        </button>
+                    </h2>
+                    <div id="@collapseId" class="accordion-collapse collapse @(isFirst ? "show" : "")" data-bs-parent="#cinemaAccordion">
+                        <div class="accordion-body">
+
+                            @foreach (var dateKvp in datesDict)
+                            {
+                                var date = dateKvp.Key;
+                                var times = dateKvp.Value;
+
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2 fw-bold">@date.ToString("dddd, MMM dd, yyyy")</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var show in times)
+                                        {
+                                            // The link points to the Seat Selection engine we will build next
+                                            <a asp-controller="Booking" asp-action="SelectSeats" asp-route-showtimeId="@show.Id"
+                                               class="btn btn-outline-primary shadow-sm text-center px-4 py-2">
+                                                <span class="fw-bold d-block">@show.StartTime.ToString("HH:mm")</span>
+                                                <small class="text-muted" style="font-size: 0.75rem;">
+                                                    @show.CinemaHall.Name (@show.Language)
+                                                </small>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+                cinemaIndex++;
+            }
+        </div>
+    }
+</div>

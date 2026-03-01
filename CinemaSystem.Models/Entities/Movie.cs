@@ -12,6 +12,7 @@ namespace CinemaSystem.Models.Entities
         {
             Actors = new List<Actor>();
             Showtimes = new List<Showtime>();
+            Reviews = new List<Review>();
         }
 
         [Required]
@@ -49,5 +50,7 @@ namespace CinemaSystem.Models.Entities
 
         public virtual List<Actor> Actors { get; set; }
         public virtual List<Showtime> Showtimes { get; set; }
+        [ValidateNever]
+        public virtual List<Review> Reviews { get; set; }
     }
 }

@@ -1,8 +1,38 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model IEnumerable<CinemaSystem.Models.Entities.Movie>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-uppercase border-bottom pb-2">Now Playing</h2>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var movie in Model)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm movie-card">
+                    @* Fallback image if ImageUrl is missing *@
+                    <img src="@(string.IsNullOrEmpty(movie.ImageUrl) ? "https://via.placeholder.com/300x450?text=No+Poster" : movie.ImageUrl)"
+                         class="card-img-top" alt="@movie.Title" style="height: 400px; object-fit: cover;">
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-truncate">@movie.Title</h5>
+                        <div class="d-flex justify-content-between mb-2 small text-muted">
+                            <span>@movie.DurationInMinutes mins</span>
+                            <span class="badge bg-secondary">@movie.MovieCategory</span>
+                        </div>
+                        <a asp-action="Details" asp-route-id="@movie.Id" class="btn btn-primary mt-auto w-100 rounded-pill fw-bold">
+                            Get Tickets
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
+
+<style>
+    .movie-card { transition: transform 0.2s ease-in-out; }
+    .movie-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+</style>

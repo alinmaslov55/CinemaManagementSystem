@@ -18,6 +18,7 @@ namespace CinemaSystem.DataAccess.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<SeatHold> SeatHolds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +39,8 @@ namespace CinemaSystem.DataAccess.Data
             // Third-Level Children
             modelBuilder.Entity<Booking>().HasQueryFilter(e => !e.IsDeleted && !e.Showtime.IsDeleted);
             modelBuilder.Entity<Ticket>().HasQueryFilter(e => !e.IsDeleted && !e.Seat.IsDeleted);
+
+            modelBuilder.Entity<SeatHold>().HasQueryFilter(e => !e.IsDeleted && !e.Seat.IsDeleted && !e.Showtime.IsDeleted);
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

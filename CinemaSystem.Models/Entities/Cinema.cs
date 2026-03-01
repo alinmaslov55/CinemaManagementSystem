@@ -12,6 +12,8 @@ namespace CinemaSystem.Models.Entities
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
+        [Required]
+        public string City { get; set; }
 
         [Required]
         public string Address { get; set; }

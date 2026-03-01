@@ -1,0 +1,212 @@
+﻿@model CinemaSystem.Models.ViewModels.SeatSelectionVM
+
+<div class="container mt-4">
+    <div class="row">
+
+        @* --- LEFT COLUMN: ORDER SUMMARY --- *@
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h5 class="mb-0 fw-bold">Booking Summary</h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="text-primary fw-bold">@Model.Showtime.Movie.Title</h4>
+                    <p class="text-muted mb-1"><i class="bi bi-geo-alt-fill"></i> @Model.Showtime.CinemaHall.Cinema.Name</p>
+                    <p class="text-muted mb-1"><i class="bi bi-door-open-fill"></i> @Model.Showtime.CinemaHall.Name</p>
+                    <p class="text-muted mb-3"><i class="bi bi-calendar-event"></i> @Model.Showtime.StartTime.ToString("f")</p>
+
+                    <hr />
+
+                    <h6 class="fw-bold">Selected Seats:</h6>
+                    <ul id="selectedSeatsList" class="list-group list-group-flush mb-3 small">
+                        <li class="list-group-item text-muted text-center" id="emptyCartMsg">No seats selected yet.</li>
+                    </ul>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold fs-5">Total:</span>
+                        <span class="fw-bold fs-4 text-success" id="cartTotal">$0.00</span>
+                    </div>
+
+                    <button id="btnCheckout" class="btn btn-primary w-100 fw-bold py-2 shadow-sm" disabled>
+                        Proceed to Checkout
+                    </button>
+
+                    @* Hidden form to hold the anti-forgery token for our AJAX post *@
+                    <form id="antiForgeryForm">
+                        @Html.AntiForgeryToken()
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        @* --- RIGHT COLUMN: THE SEAT MAP --- *@
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 p-4 bg-light">
+
+                <div class="w-75 mx-auto bg-secondary text-white text-center mb-5 py-2 shadow-sm" style="border-radius: 0 0 20px 20px; letter-spacing: 5px;">
+                    SCREEN
+                </div>
+
+                <div id="seatingGrid" class="mx-auto" style="display: grid; grid-template-columns: repeat(@Model.Cols, minmax(30px, 1fr)); gap: 8px; max-width: 100%; justify-content: center;">
+                    @foreach (var seat in Model.Seats)
+                    {
+                        string seatClass = "seat-available";
+                        string cursorStyle = "cursor: pointer;";
+                        string bgColor = "#6c757d"; // Default Standard Gray
+                        string textColor = "white";
+
+                        // 1. Determine Visual State based on Type
+                        if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.Premium) bgColor = "#198754";
+                        if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.VIP) { bgColor = "#ffc107"; textColor = "black"; }
+                        if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.Handicap) { bgColor = "#0dcaf0"; textColor = "black"; }
+
+                        // 2. Override if Booked or Held (Locked out)
+                        if (seat.Status == "Booked" || seat.Status == "Held")
+                        {
+                            seatClass = "seat-locked";
+                            bgColor = "#dc3545"; // Red for unavailable
+                            cursorStyle = "cursor: not-allowed; opacity: 0.5;";
+                        }
+
+                        <div class="seat-item rounded shadow-sm text-center d-flex align-items-center justify-content-center fw-bold @seatClass"
+                             data-id="@seat.Id"
+                             data-row="@seat.Row"
+                             data-col="@seat.Column"
+                             data-price="@seat.FinalPrice"
+                             data-status="@seat.Status"
+                             style="height: 35px; width: 35px; background-color: @bgColor; color: @textColor; @cursorStyle; font-size: 0.8rem; transition: transform 0.1s;">
+                            @seat.Row@seat.Column
+                        </div>
+                    }
+                </div>
+
+                @* Interactive Legend *@
+                <div class="d-flex justify-content-center flex-wrap gap-3 mt-5 pt-3 border-top small">
+                    <div><span class="badge" style="background-color: #6c757d;">&nbsp;&nbsp;</span> Standard</div>
+                    <div><span class="badge" style="background-color: #198754;">&nbsp;&nbsp;</span> Premium</div>
+                    <div><span class="badge" style="background-color: #ffc107;">&nbsp;&nbsp;</span> VIP</div>
+                    <div><span class="badge" style="background-color: #0dcaf0;">&nbsp;&nbsp;</span> Handicap</div>
+                    <div><span class="badge" style="background-color: #dc3545;">&nbsp;&nbsp;</span> Unavailable</div>
+                    <div><span class="badge border border-primary" style="background-color: #0d6efd;">&nbsp;&nbsp;</span> Selected</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const selectedSeats = new Map(); // Key: SeatId, Value: { name, price }
+        const btnCheckout = document.getElementById('btnCheckout');
+        const showtimeId = @Model.Showtime.Id;
+
+        document.querySelectorAll('.seat-available').forEach(seat => {
+            seat.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const row = this.getAttribute('data-row');
+                const col = this.getAttribute('data-col');
+                const price = parseFloat(this.getAttribute('data-price'));
+                const originalBg = this.style.backgroundColor;
+
+                if (selectedSeats.has(id)) {
+                    // Deselect
+                    selectedSeats.delete(id);
+                    this.style.backgroundColor = this.getAttribute('data-original-bg');
+                    this.style.border = "none";
+                } else {
+                    // Limit max seats per transaction (e.g., 8)
+                    if(selectedSeats.size >= 8) {
+                        alert("You can only select up to 8 seats per transaction.");
+                        return;
+                    }
+                    // Select
+                    this.setAttribute('data-original-bg', originalBg);
+                    this.style.backgroundColor = "#0d6efd"; // Bootstrap Primary Blue
+                    this.style.border = "2px solid #0a58ca";
+                    selectedSeats.set(id, { name: `${row}${col}`, price: price });
+                }
+
+                updateCartUI();
+            });
+        });
+
+        function updateCartUI() {
+            const listContainer = document.getElementById('selectedSeatsList');
+            const totalDisplay = document.getElementById('cartTotal');
+
+            listContainer.innerHTML = '';
+            let total = 0;
+
+            if (selectedSeats.size === 0) {
+                listContainer.innerHTML = '<li class="list-group-item text-muted text-center">No seats selected yet.</li>';
+                totalDisplay.innerText = '$0.00';
+                btnCheckout.disabled = true;
+                return;
+            }
+
+            selectedSeats.forEach((value, key) => {
+                total += value.price;
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center py-1';
+                li.innerHTML = `Seat ${value.name} <span class="fw-bold">$${value.price.toFixed(2)}</span>`;
+                listContainer.appendChild(li);
+            });
+
+            totalDisplay.innerText = `$${total.toFixed(2)}`;
+            btnCheckout.disabled = false;
+        }
+
+        // AJAX POST to acquire the database lock
+        btnCheckout.addEventListener('click', function() {
+            // Disable button to prevent double-clicks
+            btnCheckout.disabled = true;
+            btnCheckout.innerText = "Locking Seats...";
+
+            const seatIds = Array.from(selectedSeats.keys()).map(id => parseInt(id));
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            const payload = {
+                ShowtimeId: showtimeId,
+                SelectedSeatIds: seatIds
+            };
+
+            fetch('/Booking/LockSeatsAjax', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to the actual payment/checkout page
+                    window.location.href = `/Booking/Checkout?showtimeId=${showtimeId}`;
+                } else {
+                    alert(data.message || "One or more seats were just taken! Please reselect.");
+                    location.reload(); // Refresh the grid to show the new locks
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("A network error occurred. Please try again.");
+                btnCheckout.disabled = false;
+                btnCheckout.innerText = "Proceed to Checkout";
+            });
+        });
+    </script>
+
+    <style>
+        .seat-item {
+            user-select: none;
+        }
+
+        .seat-available:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+}

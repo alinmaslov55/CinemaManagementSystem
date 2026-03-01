@@ -20,6 +20,7 @@ namespace CinemaSystem.DataAccess.Repository
         public IBookingRepository Booking { get; private set; }
         public ITicketRepository Ticket { get; private set; }
         public IReviewRepository Review { get; private set; }
+        public ISeatHoldRepository SeatHold { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -34,6 +35,7 @@ namespace CinemaSystem.DataAccess.Repository
             Booking = new BookingRepository(_db);
             Ticket = new TicketRepository(_db);
             Review = new ReviewRepository(_db);
+            SeatHold = new SeatHoldRepository(_db);
         }
 
         public void Save()

@@ -4,6 +4,7 @@ using CinemaSystem.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CinemaSystem.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260301115112_AddMovieReviewsNav")]
+    partial class AddMovieReviewsNav
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -427,47 +430,6 @@ namespace CinemaSystem.DataAccess.Migrations
                     b.ToTable("Seats");
                 });
 
-            modelBuilder.Entity("CinemaSystem.Models.Entities.SeatHold", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<DateTime>("HoldExpiration")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("SeatId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShowtimeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeatId");
-
-                    b.HasIndex("ShowtimeId");
-
-                    b.ToTable("SeatHolds");
-                });
-
             modelBuilder.Entity("CinemaSystem.Models.Entities.Showtime", b =>
                 {
                     b.Property<int>("Id")
@@ -750,25 +712,6 @@ namespace CinemaSystem.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("CinemaHall");
-                });
-
-            modelBuilder.Entity("CinemaSystem.Models.Entities.SeatHold", b =>
-                {
-                    b.HasOne("CinemaSystem.Models.Entities.Seat", "Seat")
-                        .WithMany()
-                        .HasForeignKey("SeatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CinemaSystem.Models.Entities.Showtime", "Showtime")
-                        .WithMany()
-                        .HasForeignKey("ShowtimeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Seat");
-
-                    b.Navigation("Showtime");
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Showtime", b =>

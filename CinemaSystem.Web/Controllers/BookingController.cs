@@ -134,5 +134,171 @@ namespace CinemaSystem.Web.Controllers
 
             return Json(new { success = true });
         }
+
+        [HttpGet]
+        // [Authorize] // Uncomment this once Identity is configured
+        public IActionResult Checkout(int showtimeId)
+        {
+            // 1. Identify User (Technical Debt: Replace with actual logged-in user ID later)
+            string userId = "TEMP_GUEST_USER";
+            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // 2. Validate Active Holds
+            // We strictly pull holds belonging to THIS user, for THIS showtime, that have NOT expired.
+            var activeHolds = _unitOfWork.SeatHold.GetAll(h =>
+                h.ShowtimeId == showtimeId &&
+                h.ApplicationUserId == userId &&
+                h.HoldExpiration > DateTime.Now,
+                includeProperties: "Seat").ToList();
+
+            // The Cart Timer check
+            if (!activeHolds.Any())
+            {
+                TempData["error"] = "Your seat reservation has expired or no seats were selected. Please try again.";
+                return RedirectToAction(nameof(SelectSeats), new { showtimeId = showtimeId });
+            }
+
+            // 3. Fetch Showtime Data for the UI
+            var showtime = _unitOfWork.Showtime.Get(
+                s => s.Id == showtimeId,
+                includeProperties: "Movie,CinemaHall,CinemaHall.Cinema"
+            );
+
+            if (showtime == null) return NotFound("Showtime details could not be loaded.");
+
+            // 4. Build the ViewModel and calculate the Absolute Server-Side Truth
+            var vm = new CheckoutVM
+            {
+                Showtime = showtime,
+                TicketItems = new List<TicketItemDto>()
+            };
+
+            decimal runningTotal = 0;
+
+            foreach (var hold in activeHolds)
+            {
+                // We recalculate the price here to prevent JavaScript tampering
+                decimal seatPrice = PricingCalculator.CalculateSeatPrice(showtime.Movie.Price, showtime.Price, hold.Seat.SeatType);
+                runningTotal += seatPrice;
+
+                vm.TicketItems.Add(new TicketItemDto
+                {
+                    SeatId = hold.Seat.Id,
+                    SeatName = $"{hold.Seat.Row}{hold.Seat.Column}",
+                    Price = seatPrice
+                });
+            }
+
+            vm.TotalAmount = runningTotal;
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken] // Protects against Cross-Site Request Forgery
+                                   // [Authorize] // Uncomment when Identity is ready
+        public IActionResult FinalizeOrder(int showtimeId)
+        {
+            string userId = "TEMP_GUEST_USER";
+            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // 1. Fetch the exact locks the user currently holds
+            // We strictly check > DateTime.Now. If they clicked "Pay" at 10 minutes and 1 second, 
+            // this returns empty and their transaction is safely rejected.
+            var activeHolds = _unitOfWork.SeatHold.GetAll(h =>
+                h.ShowtimeId == showtimeId &&
+                h.ApplicationUserId == userId &&
+                h.HoldExpiration > DateTime.Now,
+                includeProperties: "Seat").ToList();
+
+            if (!activeHolds.Any())
+            {
+                TempData["error"] = "Your session expired or your seats were released. Please try again.";
+                return RedirectToAction(nameof(SelectSeats), new { showtimeId = showtimeId });
+            }
+
+            // 2. Fetch Showtime Data for Pricing
+            var showtime = _unitOfWork.Showtime.Get(
+                s => s.Id == showtimeId,
+                includeProperties: "Movie"
+            );
+
+            if (showtime == null) return NotFound();
+
+            // 3. Recalculate Final Price (Never trust client data!)
+            decimal totalAmount = 0;
+            foreach (var hold in activeHolds)
+            {
+                totalAmount += PricingCalculator.CalculateSeatPrice(showtime.Movie.Price, showtime.Price, hold.Seat.SeatType);
+            }
+
+            // 4. Create the Parent Booking Record
+            var newBooking = new Booking
+            {
+                ApplicationUserId = userId,
+                ShowtimeId = showtimeId,
+                Status = CinemaSystem.Models.Data.Enums.BookingStatus.Confirmed,
+                PaymentStatus = CinemaSystem.Models.Data.Enums.PaymentStatus.Approved, // Simulating a successful payment
+                TotalAmount = totalAmount,
+                ConfirmationCode = "BK-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                LoyaltyPointsEarned = (int)totalAmount, // Example: 1 point per dollar spent
+                SessionId = "simulated_stripe_session_id",
+                PaymentIntentId = "simulated_stripe_intent_id"
+            };
+
+            _unitOfWork.Booking.Add(newBooking);
+
+            // We must save here to generate the newBooking.Id, which the Tickets need.
+            // In EF Core, calling SaveChanges multiple times within the same web request 
+            // is safe and handles its own local transaction.
+            _unitOfWork.Save();
+
+            // 5. Create the Line Items (Tickets)
+            foreach (var hold in activeHolds)
+            {
+                var ticket = new Ticket
+                {
+                    BookingId = newBooking.Id, // Foreign Key linking to the parent
+                    SeatId = hold.SeatId,
+                    Price = PricingCalculator.CalculateSeatPrice(showtime.Movie.Price, showtime.Price, hold.Seat.SeatType), // Historical Snapshot
+                    Barcode = Guid.NewGuid().ToString() // Unique ID for the QR code
+                };
+                _unitOfWork.Ticket.Add(ticket);
+            }
+
+            // 6. Delete the Temporary Holds
+            // This removes the red "locked" status for other users and permanently marks the seat as "Booked"
+            _unitOfWork.SeatHold.RemoveRange(activeHolds);
+
+            // 7. Commit the Final Changes
+            _unitOfWork.Save();
+
+            // 8. Redirect to the Success Page
+            return RedirectToAction(nameof(OrderConfirmation), new { bookingId = newBooking.Id });
+        }
+
+        [HttpGet]
+        // [Authorize] // Uncomment when Identity is ready
+        public IActionResult OrderConfirmation(int bookingId)
+        {
+            // 1. Identify User
+            string userId = "TEMP_GUEST_USER";
+            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // 2. Fetch the Booking, enforcing the IDOR security check
+            // We eager load the entire relational tree so the View has everything it needs to draw the tickets.
+            var booking = _unitOfWork.Booking.Get(
+                b => b.Id == bookingId && b.ApplicationUserId == userId,
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat"
+            );
+
+            // If the booking doesn't exist, OR if it belongs to someone else, reject them.
+            if (booking == null)
+            {
+                return NotFound("Order not found or access denied.");
+            }
+
+            return View(booking);
+        }
     }
 }

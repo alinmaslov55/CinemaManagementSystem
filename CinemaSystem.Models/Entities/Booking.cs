@@ -1,9 +1,6 @@
 ﻿using CinemaSystem.Models.Data.Enums;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Sockets;
-using System.Text;
 
 namespace CinemaSystem.Models.Entities
 {
@@ -16,6 +13,7 @@ namespace CinemaSystem.Models.Entities
 
         [Required]
         public string ApplicationUserId { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         [Required]
         public int ShowtimeId { get; set; }
@@ -31,12 +29,15 @@ namespace CinemaSystem.Models.Entities
         public decimal TotalAmount { get; set; }
 
         [Required]
-        public string ConfirmationCode { get; set; }
+        public string ConfirmationCode { get; set; } // "BK-8F92A"
 
         [Required]
         public int LoyaltyPointsEarned { get; set; }
 
+        // STRIPE / PAYMENT GATEWAY TRACKING
+        public string? SessionId { get; set; }
+        public string? PaymentIntentId { get; set; }
+
         public virtual List<Ticket> Tickets { get; set; }
-        public virtual ApplicationUser User { get; set; }
     }
 }

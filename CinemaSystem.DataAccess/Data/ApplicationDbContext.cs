@@ -60,6 +60,7 @@ namespace CinemaSystem.DataAccess.Data
             modelBuilder.Entity<Movie>().Property(m => m.Price).HasPrecision(18, 2);
             modelBuilder.Entity<Showtime>().Property(s => s.Price).HasPrecision(18, 2);
             modelBuilder.Entity<Booking>().Property(b => b.TotalAmount).HasPrecision(18, 2);
+            modelBuilder.Entity<Ticket>().Property(t => t.Price).HasPrecision(18, 2);
 
             modelBuilder.Entity<CinemaHall>()
                 .HasOne(ch => ch.Cinema)

@@ -1,0 +1,114 @@
+﻿@model CinemaSystem.Models.ViewModels.CheckoutVM
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow border-0 rounded-3">
+
+                @* --- HEADER & TIMER --- *@
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                    <h4 class="mb-0 fw-bold">Order Summary</h4>
+                    <div class="text-warning fw-bold d-flex align-items-center">
+                        <i class="bi bi-stopwatch fs-5 me-2"></i>
+                        <span id="countdownTimer">10:00</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+
+                    @* --- MOVIE DETAILS --- *@
+                    <div class="d-flex mb-4">
+                        <img src="@(string.IsNullOrEmpty(Model.Showtime.Movie.ImageUrl) ? "https://via.placeholder.com/100x150" : Model.Showtime.Movie.ImageUrl)"
+                             class="rounded shadow-sm me-3" style="width: 80px; height: 120px; object-fit: cover;" alt="Poster" />
+
+                        <div>
+                            <h5 class="fw-bold text-primary mb-1">@Model.Showtime.Movie.Title</h5>
+                            <p class="text-muted mb-0 small"><i class="bi bi-geo-alt-fill"></i> @Model.Showtime.CinemaHall.Cinema.Name</p>
+                            <p class="text-muted mb-0 small"><i class="bi bi-door-open-fill"></i> @Model.Showtime.CinemaHall.Name</p>
+                            <p class="fw-bold text-dark mt-2 mb-0"><i class="bi bi-calendar-event text-primary"></i> @Model.Showtime.StartTime.ToString("dddd, MMM dd, yyyy - HH:mm")</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    @* --- LINE ITEMS (SEATS) --- *@
+                    <h6 class="fw-bold text-uppercase text-muted mb-3">Selected Tickets</h6>
+                    <ul class="list-group list-group-flush mb-4">
+                        @foreach (var item in Model.TicketItems)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>Seat <strong class="fs-5">@item.SeatName</strong></span>
+                                <span class="fw-bold">$@item.Price.ToString("F2")</span>
+                            </li>
+                        }
+                    </ul>
+
+                    @* --- TOTALS --- *@
+                    <div class="bg-light p-3 rounded mb-4 border d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-muted">Total Due:</h5>
+                        <h3 class="mb-0 text-success fw-bold">$@Model.TotalAmount.ToString("F2")</h3>
+                    </div>
+
+                    @* --- PAYMENT FORM --- *@
+                    <form asp-action="FinalizeOrder" method="post" id="checkoutForm">
+                        <input type="hidden" name="showtimeId" value="@Model.Showtime.Id" />
+
+                        @* Note: When Stripe is integrated, the card element goes here. 
+                           For now, this button simulates a successful payment submission. *@
+
+                        <button type="submit" id="btnPayNow" class="btn btn-primary btn-lg w-100 fw-bold shadow">
+                            <i class="bi bi-credit-card-fill me-2"></i> Confirm & Pay
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // UX Constraint: 10 Minute Countdown Timer
+        // This mirrors the 10-minute database lock we created in the LockSeatsAjax method.
+        let timeRemaining = 600; // 10 minutes in seconds
+        const timerDisplay = document.getElementById('countdownTimer');
+        const btnPayNow = document.getElementById('btnPayNow');
+
+        const countdown = setInterval(() => {
+            timeRemaining--;
+
+            let minutes = Math.floor(timeRemaining / 60);
+            let seconds = timeRemaining % 60;
+
+            // Add leading zero
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            timerDisplay.innerText = `${minutes}:${seconds}`;
+
+            if (timeRemaining <= 60) {
+                timerDisplay.classList.remove('text-warning');
+                timerDisplay.classList.add('text-danger');
+            }
+
+            if (timeRemaining <= 0) {
+                clearInterval(countdown);
+                timerDisplay.innerText = "EXPIRED";
+                btnPayNow.disabled = true;
+                btnPayNow.innerText = "Session Expired - Please Reselect Seats";
+                btnPayNow.classList.replace('btn-primary', 'btn-secondary');
+
+                alert("Your seat reservation has expired. You will be redirected to the seat map.");
+                window.location.href = '/Booking/SelectSeats?showtimeId=@Model.Showtime.Id';
+            }
+        }, 1000);
+
+        // Prevent double submission
+        document.getElementById('checkoutForm').addEventListener('submit', function() {
+            btnPayNow.disabled = true;
+            btnPayNow.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        });
+    </script>
+}

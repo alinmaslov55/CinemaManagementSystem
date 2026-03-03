@@ -3,6 +3,8 @@ using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -69,7 +71,7 @@ namespace CinemaSystem.Web.Controllers
 
         [HttpPost]
         // [ValidateAntiForgeryToken] // Note: Requires Program.cs configuration to work with AJAX JSON headers
-        // [Authorize] // Uncomment when ASP.NET Core Identity is fully wired
+        [Authorize]
         public IActionResult LockSeatsAjax([FromBody] HoldSeatsRequestDto dto)
         {
             // 1. Basic Validation
@@ -78,11 +80,8 @@ namespace CinemaSystem.Web.Controllers
                 return Json(new { success = false, message = "No seats selected." });
             }
 
-            // 2. User Identification (Educational Concept)
-            // We cannot lock a seat to "nobody". In production, we extract the ID from the logged-in user.
-            // For testing right now, we will assign a temporary dummy string.
-            string userId = "TEMP_GUEST_USER";
-            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Use this later
+            
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // 3. Database Integrity Check 1: Are they already sold?
             var bookedSeats = _unitOfWork.Ticket?.GetAll(t =>
@@ -136,12 +135,10 @@ namespace CinemaSystem.Web.Controllers
         }
 
         [HttpGet]
-        // [Authorize] // Uncomment this once Identity is configured
+        [Authorize]
         public IActionResult Checkout(int showtimeId)
         {
-            // 1. Identify User (Technical Debt: Replace with actual logged-in user ID later)
-            string userId = "TEMP_GUEST_USER";
-            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // 2. Validate Active Holds
             // We strictly pull holds belonging to THIS user, for THIS showtime, that have NOT expired.
@@ -195,12 +192,11 @@ namespace CinemaSystem.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // Protects against Cross-Site Request Forgery
-                                   // [Authorize] // Uncomment when Identity is ready
+        [ValidateAntiForgeryToken]
+        [Authorize]
         public IActionResult FinalizeOrder(int showtimeId)
         {
-            string userId = "TEMP_GUEST_USER";
-            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // 1. Fetch the exact locks the user currently holds
             // We strictly check > DateTime.Now. If they clicked "Pay" at 10 minutes and 1 second, 
@@ -278,12 +274,11 @@ namespace CinemaSystem.Web.Controllers
         }
 
         [HttpGet]
-        // [Authorize] // Uncomment when Identity is ready
+        [Authorize]
         public IActionResult OrderConfirmation(int bookingId)
         {
-            // 1. Identify User
-            string userId = "TEMP_GUEST_USER";
-            // string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // 2. Fetch the Booking, enforcing the IDOR security check
             // We eager load the entire relational tree so the View has everything it needs to draw the tickets.

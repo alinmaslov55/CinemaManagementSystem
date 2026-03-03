@@ -19,6 +19,7 @@ namespace CinemaSystem.DataAccess.Data
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<SeatHold> SeatHolds { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

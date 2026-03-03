@@ -1,6 +1,11 @@
 ﻿@using CinemaSystem.Models.Entities;
 @model Movie
 
+@{
+    // CRITICAL: Force this Area view to use the main application layout
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <div class="card shadow border-0 my-4">
     <div class="card-header bg-danger bg-gradient ml-0 py-3">
         <div class="row">

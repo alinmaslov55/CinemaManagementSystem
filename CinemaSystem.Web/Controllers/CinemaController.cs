@@ -1,9 +1,13 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
+using CinemaSystem.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CinemaSystem.Web.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CinemaController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

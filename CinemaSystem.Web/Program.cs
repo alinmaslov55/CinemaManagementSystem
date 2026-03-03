@@ -1,4 +1,5 @@
 using CinemaSystem.DataAccess.Data;
+using CinemaSystem.DataAccess.DbInitializer;
 using CinemaSystem.DataAccess.Repository;
 using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
@@ -34,6 +35,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 var app = builder.Build();
 
@@ -52,10 +54,26 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.MapRazorPages();
 
+SeedDatabase();
+
 app.Run();
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<CinemaSystem.DataAccess.DbInitializer.IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}

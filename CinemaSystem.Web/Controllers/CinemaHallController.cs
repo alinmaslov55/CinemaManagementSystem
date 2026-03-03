@@ -2,12 +2,16 @@
 using CinemaSystem.Models.Data.Enums;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
 
 namespace CinemaSystem.Web.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CinemaHallController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

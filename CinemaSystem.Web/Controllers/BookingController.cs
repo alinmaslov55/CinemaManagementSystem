@@ -338,5 +338,19 @@ namespace CinemaSystem.Web.Controllers
 
             return File(pdfBytes, "application/pdf", $"CinemaTickets_{booking.ConfirmationCode}.pdf");
         }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult History()
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var bookings = _unitOfWork.Booking.GetAll(
+                b => b.ApplicationUserId == userId,
+                includeProperties: "Showtime,Showtime.Movie,Tickets"
+            ).OrderByDescending(b => b.Id).ToList();
+
+            return View(bookings);
+        }
     }
 }

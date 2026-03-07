@@ -25,7 +25,14 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Booking" asp-action="History">
+                                    <i class="bi bi-ticket-detailed"></i> My Tickets
+                                </a>
+                            </li>
+                        }
                         @* --- THE SECURE ADMIN DROPDOWN --- *@
                         @if (User.IsInRole(SD.Role_Admin))
                         {

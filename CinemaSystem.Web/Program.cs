@@ -4,6 +4,7 @@ using CinemaSystem.DataAccess.Repository;
 using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Utility;
+using CinemaSystem.Web.BackgroundServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,10 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+
+builder.Services.AddHostedService<SeatHoldCleanupService>();
+
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 var app = builder.Build();
 

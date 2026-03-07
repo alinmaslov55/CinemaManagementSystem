@@ -1,11 +1,6 @@
 ﻿@model CinemaSystem.Models.Entities.Movie
 @using CinemaSystem.Models.Data.Enums
 
-@{
-    // CRITICAL: Force this Area view to use the main application layout
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
 <div class="card shadow border-0 my-4">
     <div class="card-header bg-primary bg-gradient ml-0 py-3">
         <div class="row">
@@ -30,20 +25,24 @@
                     <div class="form-floating py-2 col-12">
                         <textarea asp-for="Description" class="form-control border-0 shadow" style="height:100px"></textarea>
                         <label asp-for="Description" class="ms-2"></label>
+                        <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="form-floating py-2 col-4">
                             <input asp-for="Price" class="form-control border-0 shadow" />
                             <label asp-for="Price" class="ms-2"></label>
+                            <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                         <div class="form-floating py-2 col-4">
                             <input asp-for="DurationInMinutes" class="form-control border-0 shadow" />
                             <label asp-for="DurationInMinutes" class="ms-2"></label>
+                            <span asp-validation-for="DurationInMinutes" class="text-danger"></span>
                         </div>
                         <div class="form-floating py-2 col-4">
                             <input asp-for="TrailerUrl" class="form-control border-0 shadow" />
                             <label asp-for="TrailerUrl" class="ms-2"></label>
+                            <span asp-validation-for="TrailerUrl" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -51,10 +50,12 @@
                         <div class="form-floating py-2 col-6">
                             <input asp-for="StartDate" type="date" class="form-control border-0 shadow" />
                             <label asp-for="StartDate" class="ms-2"></label>
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
                         </div>
                         <div class="form-floating py-2 col-6">
                             <input asp-for="EndDate" type="date" class="form-control border-0 shadow" />
                             <label asp-for="EndDate" class="ms-2"></label>
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -64,12 +65,14 @@
                                 <option disabled selected>--Select Category--</option>
                             </select>
                             <label asp-for="MovieCategory" class="ms-2"></label>
+                            <span asp-validation-for="MovieCategory" class="text-danger"></span>
                         </div>
                         <div class="form-floating py-2 col-5">
                             <select asp-for="AgeRating" asp-items="Html.GetEnumSelectList<AgeRating>()" class="form-select border-0 shadow">
                                 <option disabled selected>--Select Age Rating--</option>
                             </select>
                             <label asp-for="AgeRating" class="ms-2"></label>
+                            <span asp-validation-for="AgeRating" class="text-danger"></span>
                         </div>
                         <div class="col-2 d-flex align-items-center justify-content-center">
                             <div class="form-check form-switch">
@@ -80,7 +83,7 @@
                     </div>
 
                     <div class="form-floating py-2 col-12">
-                        <input type="file" name="file" class="form-control border-0 shadow" />
+                        <input type="file" name="file" class="form-control border-0 shadow" accept=".jpg,.jpeg,.png,.webp" />
                         <label class="ms-2">Movie Poster</label>
                     </div>
 
@@ -94,9 +97,25 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-2">
-                <img src="@Model.ImageUrl" width="100%" style="border-radius:10px; border:1px solid #dee2e6" />
+                @* UI FIX: Prevent broken image icon when creating a new movie *@
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" width="100%" style="border-radius:10px; border:1px solid #dee2e6" />
+                }
+                else
+                {
+                    <div class="text-center p-4" style="border: 1px dashed #bbb9b9; border-radius: 5px;">
+                        <span class="text-muted">No Poster</span>
+                    </div>
+                }
             </div>
         </form>
     </div>
 </div>
+
+@* PERFORMANCE FIX: Client-side validation *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -5,6 +5,8 @@ using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Linq;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -27,8 +29,20 @@ namespace CinemaSystem.Web.Controllers
 
         public IActionResult Upsert(int hallId, DateTime? weekStart)
         {
-            // Default to the current week's Monday if no date is provided
-            DateTime start = weekStart ?? DateTime.Now.Date.AddDays(-(int)DateTime.Now.DayOfWeek + (int)DayOfWeek.Monday);
+            DateTime start;
+            if (weekStart.HasValue)
+            {
+                start = weekStart.Value.Date;
+            }
+            else
+            {
+                // CRITICAL FIX: Handle Sunday (0) as the 7th day of the week to prevent calendar skipping
+                int currentDay = (int)DateTime.Now.DayOfWeek;
+                if (currentDay == 0) currentDay = 7;
+
+                start = DateTime.Now.Date.AddDays(-currentDay + 1);
+            }
+
             DateTime end = start.AddDays(7);
 
             ShowtimeCalendarVM vm = new()
@@ -43,7 +57,10 @@ namespace CinemaSystem.Web.Controllers
                     Text = i.Title,
                     Value = i.Id.ToString()
                 }),
-                CurrentWeekStart = start
+                CurrentWeekStart = start,
+                // CRITICAL FIX: Initializing business hours so the CSS Grid mathematically renders
+                DayStartHour = 8,
+                DayEndHour = 24
             };
 
             return View(vm);

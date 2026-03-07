@@ -1,10 +1,5 @@
 ﻿@model CinemaSystem.Models.ViewModels.ShowtimeCalendarVM
 
-@{
-    // CRITICAL: Force this Area view to use the main application layout
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
 <div class="card shadow border-0 mt-4">
     <div class="card-header bg-primary bg-gradient py-3">
         <div class="d-flex justify-content-between align-items-center">
@@ -111,11 +106,11 @@
                 <div class="showtime-block bg-primary text-white rounded shadow-sm p-2"
                      onclick="event.stopPropagation(); openEditModal(@show.Id, @show.MovieId, '@show.StartTime.ToString("yyyy-MM-ddTHH:mm")', '@show.Language', '@show.Price')"
                      style="grid-column: @(dayOffset + 2);
-                                grid-row-start: @(hourOffset + 2);
-                                margin-top: @(minuteOffset)px;
-                                height: @(durationMinutes)px;
-                                cursor: pointer;
-                                z-index: 20;">
+                                    grid-row-start: @(hourOffset + 2);
+                                    margin-top: @(minuteOffset)px;
+                                    height: @(durationMinutes)px;
+                                    cursor: pointer;
+                                    z-index: 20;">
                     <div class="fw-bold text-truncate" style="font-size: 0.85rem;">@show.Movie.Title</div>
                     <div style="font-size: 0.75rem; opacity: 0.9;">
                         <i class="bi bi-clock"></i> @show.StartTime.ToString("HH:mm") - @show.EndTime.ToString("HH:mm")
@@ -162,18 +157,11 @@
     <script>
         const hallId = @Model.Hall.Id;
 
-                function openAddModal(dayOffset, hour) {
-            // 1. Get the pure string of the current week start (e.g., "2026-02-23")
+        function openAddModal(dayOffset, hour) {
             let baseDateStr = "@Model.CurrentWeekStart.ToString("yyyy-MM-dd")";
-
-            // 2. Parse it as UTC to avoid local timezone interference
             let startDate = new Date(baseDateStr + "T00:00:00Z");
-
-            // 3. Add the days based on the column clicked
             startDate.setUTCDate(startDate.getUTCDate() + dayOffset);
 
-            // 4. Manually construct the exact string required by datetime-local
-            // This forces the time to be EXACTLY the row/column clicked, ignoring the admin's PC clock.
             let year = startDate.getUTCFullYear();
             let month = String(startDate.getUTCMonth() + 1).padStart(2, '0');
             let day = String(startDate.getUTCDate()).padStart(2, '0');
@@ -184,7 +172,7 @@
             $('#modalTitle').text("Schedule Movie");
             $('#modalShowtimeId').val(0);
             $('#modalMovieId').val("");
-            $('#modalStartTime').val(exactLocalTime); // Safe, exact string injection
+            $('#modalStartTime').val(exactLocalTime);
             $('#modalLanguage').val("");
             $('#modalPrice').val("");
             $('#btnDelete').addClass('d-none');
@@ -203,13 +191,17 @@
         }
 
         function saveShowtime() {
+            // Objective fix: Defaulting empty price to null safely, assuming your Showtime.Price is double?
+            const priceVal = $('#modalPrice').val();
+            const parsedPrice = priceVal ? parseFloat(priceVal) : null;
+
             const data = {
                 Id: parseInt($('#modalShowtimeId').val()),
                 MovieId: parseInt($('#modalMovieId').val()),
                 CinemaHallId: hallId,
                 StartTime: $('#modalStartTime').val(),
                 Language: $('#modalLanguage').val(),
-                Price: $('#modalPrice').val() ? parseFloat($('#modalPrice').val()) : null
+                Price: parsedPrice
             };
 
             if (!data.MovieId || !data.StartTime) {
@@ -217,7 +209,8 @@
                 return;
             }
 
-            fetch('/Showtime/UpsertAjax', {
+            // Objective fix: Enforcing the Admin routing area to prevent 404s
+            fetch('/Admin/Showtime/UpsertAjax', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -230,7 +223,8 @@
         function deleteShowtime() {
             const id = $('#modalShowtimeId').val();
             if(confirm("Are you sure you want to remove this showtime from the schedule?")) {
-                fetch(`/Showtime/DeleteAjax/${id}`, { method: 'DELETE' })
+                // Objective fix: Enforcing the Admin routing area for security and routing
+                fetch(`/Admin/Showtime/DeleteAjax/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
                 .then(result => {
                     if(result.success) location.reload();

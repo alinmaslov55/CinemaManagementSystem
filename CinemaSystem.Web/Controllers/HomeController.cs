@@ -3,22 +3,25 @@ using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CinemaSystem.Web.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+
         public HomeController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
+
         public IActionResult Index()
         {
             var today = DateTime.Now.Date;
 
             var activeMovies = _unitOfWork.Movie.GetAll(
-                m => m.StartDate.Date <= today && m.EndDate.Date >= today
+                m => m.StartDate.Date <= today && m.EndDate.Date >= today && m.IsReleased
             );
 
             return View(activeMovies);
@@ -26,7 +29,7 @@ namespace CinemaSystem.Web.Controllers
 
         public IActionResult Details(int id)
         {
-            var movie = _unitOfWork.Movie.Get(m => m.Id == id, includeProperties: "Actors,Reviews");
+            var movie = _unitOfWork.Movie.Get(m => m.Id == id);
 
             if (movie == null) return NotFound();
 

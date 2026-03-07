@@ -12,9 +12,7 @@
             <div class="mb-3">
                 <span class="badge bg-primary fs-6 me-2">@Model.Movie.MovieCategory</span>
                 <span class="text-muted"><i class="bi bi-clock"></i> @Model.Movie.DurationInMinutes minutes</span>
-                <span class="ms-3 text-warning fw-bold fs-5">
-                    <i class="bi bi-star-fill"></i> @Model.AverageRating / 5.0
-                </span>
+
             </div>
             <p class="lead">@Model.Movie.Description</p>
 
@@ -54,7 +52,9 @@
                     <h2 class="accordion-header" id="@headingId">
                         <button class="accordion-button @(isFirst ? "" : "collapsed") fw-bold fs-5 bg-light" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                            <i class="bi bi-geo-alt-fill text-primary me-2"></i> @cinema.Name, @cinema
+
+                            @* OBJECTIVE FIX: Corrected @cinema to @cinema.Address to stop C# namespace leaking *@
+                            <i class="bi bi-geo-alt-fill text-primary me-2"></i> @cinema.Name, @cinema.Address
                         </button>
                     </h2>
                     <div id="@collapseId" class="accordion-collapse collapse @(isFirst ? "show" : "")" data-bs-parent="#cinemaAccordion">
@@ -70,7 +70,6 @@
                                     <div class="d-flex flex-wrap gap-2">
                                         @foreach (var show in times)
                                         {
-                                            // The link points to the Seat Selection engine we will build next
                                             <a asp-controller="Booking" asp-action="SelectSeats" asp-route-showtimeId="@show.Id"
                                                class="btn btn-outline-primary shadow-sm text-center px-4 py-2">
                                                 <span class="fw-bold d-block">@show.StartTime.ToString("HH:mm")</span>

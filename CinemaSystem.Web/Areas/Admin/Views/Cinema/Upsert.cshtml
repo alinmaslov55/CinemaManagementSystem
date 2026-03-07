@@ -1,9 +1,4 @@
-﻿@model CinemaSystem.Models.Entities.Cinema
-
-@{
-    // CRITICAL: Force this Area view to use the main application layout
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
+﻿@model CinemaSystem.Models.ViewModels.CinemaVM
 
 <div class="card shadow border-0 my-4">
     <div class="card-header bg-primary bg-gradient ml-0 py-3">
@@ -25,19 +20,29 @@
                         <label asp-for="Name" class="ms-2"></label>
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
+
                     <div class="form-floating py-2 col-12">
-                        <textarea asp-for="Description" class="form-control border-0 shadow"></textarea>
+                        <textarea asp-for="Description" class="form-control border-0 shadow" style="height:100px;"></textarea>
                         <label asp-for="Description" class="ms-2"></label>
+                        <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
+
                     <div class="form-floating py-2 col-12">
                         <input asp-for="Address" class="form-control border-0 shadow" />
                         <label asp-for="Address" class="ms-2"></label>
                         <span asp-validation-for="Address" class="text-danger"></span>
                     </div>
                     <div class="form-floating py-2 col-12">
-                        <input type="file" name="file" class="form-control border-0 shadow" />
-                        <label asp-for="Logo" class="ms-2"></label>
+                        <input asp-for="City" class="form-control border-0 shadow" />
+                        <label asp-for="City" class="ms-2"></label>
+                        <span asp-validation-for="City" class="text-danger"></span>
                     </div>
+                    <div class="form-floating py-2 col-12">
+                        @* UI FIX: Added the 'accept' attribute to match the controller's security whitelist *@
+                        <input type="file" name="file" class="form-control border-0 shadow" accept=".jpg,.jpeg,.png,.webp" />
+                        <label class="ms-2">Cinema Logo (Optional)</label>
+                    </div>
+
                     <div class="row pt-2">
                         <div class="col-6 col-md-3">
                             <button type="submit" class="btn btn-primary form-control">@(Model.Id != 0 ? "Update" : "Create")</button>
@@ -48,17 +53,23 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-2">
-                <img src="@Model.Logo"
-                     width="100%"
-                     style="border-radius:5px; border:1px solid #bbb9b9" />
+                @if (!string.IsNullOrEmpty(Model.Logo))
+                {
+                    <img src="@Model.Logo" width="100%" style="border-radius:5px; border:1px solid #bbb9b9" />
+                }
+                else
+                {
+                    <div class="text-center p-4" style="border: 1px dashed #bbb9b9; border-radius: 5px;">
+                        <span class="text-muted">No Logo</span>
+                    </div>
+                }
             </div>
         </form>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        <partial name="_ValidationScriptsPartial" />
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

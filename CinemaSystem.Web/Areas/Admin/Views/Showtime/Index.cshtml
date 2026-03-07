@@ -1,11 +1,6 @@
 ﻿@using CinemaSystem.Models.Entities;
 @model IEnumerable<CinemaHall>
 
-@{
-    // CRITICAL: Force this Area view to use the main application layout
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
 <div class="card shadow border-0 my-4">
     <div class="card-header bg-primary bg-gradient ml-0 py-3">
         <div class="row">
@@ -19,7 +14,6 @@
         <div class="row">
             @foreach (var hall in Model)
             {
-                // Find the next upcoming showtime for this specific hall
                 var nextShow = hall.Showtimes?
                 .Where(s => s.StartTime > DateTime.Now)
                 .OrderBy(s => s.StartTime)

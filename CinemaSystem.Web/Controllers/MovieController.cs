@@ -23,7 +23,6 @@ namespace CinemaSystem.Web.Controllers
 
         public IActionResult Index()
         {
-            // Now we don't need to include "Cinema" since it's no longer on the Movie entity
             var movieList = _unitOfWork.Movie.GetAll();
             return View(movieList);
         }
@@ -49,8 +48,18 @@ namespace CinemaSystem.Web.Controllers
             {
                 if (file != null)
                 {
+                    // SECURITY FIX: Whitelist file extensions
+                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+                    string extension = Path.GetExtension(file.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(extension))
+                    {
+                        TempData["error"] = "Invalid file type. Only JPG, PNG, and WEBP are allowed.";
+                        return View(obj);
+                    }
+
                     string wwwRootPath = _webHostEnvironment.WebRootPath;
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string fileName = Guid.NewGuid().ToString() + extension;
                     string moviePath = Path.Combine(wwwRootPath, @"images\movie");
 
                     if (!Directory.Exists(moviePath)) Directory.CreateDirectory(moviePath);
@@ -84,7 +93,6 @@ namespace CinemaSystem.Web.Controllers
             return View(obj);
         }
 
-        // GET: Movie/Delete/5
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
@@ -101,7 +109,6 @@ namespace CinemaSystem.Web.Controllers
             return View(movieFromDb);
         }
 
-        // POST: Movie/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePOST(int? id)
@@ -112,20 +119,11 @@ namespace CinemaSystem.Web.Controllers
                 return NotFound();
             }
 
+            // Soft delete implementation
             obj.IsDeleted = true;
             _unitOfWork.Movie.Update(obj);
-            // img delete not needed for soft delete
-            //if (!string.IsNullOrEmpty(obj.ImageUrl))
-            //{
-            //    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, obj.ImageUrl.TrimStart('\\'));
-            //    if (System.IO.File.Exists(oldImagePath))
-            //    {
-            //        System.IO.File.Delete(oldImagePath);
-            //    }
-            //}
-
-            // _unitOfWork.Movie.Remove(obj);
             _unitOfWork.Save();
+
             TempData["success"] = "Movie archived successfully";
             return RedirectToAction("Index");
         }

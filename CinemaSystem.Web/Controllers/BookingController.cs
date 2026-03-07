@@ -5,6 +5,9 @@ using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -257,6 +260,83 @@ namespace CinemaSystem.Web.Controllers
             }
 
             return View(booking);
+        }
+        [HttpGet]
+        [Authorize]
+        public IActionResult DownloadTickets(int bookingId)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // 1. Fetch the exact booking with all relational data
+            var booking = _unitOfWork.Booking.Get(
+                b => b.Id == bookingId && b.ApplicationUserId == userId,
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat"
+            );
+
+            if (booking == null) return NotFound("Order not found or access denied.");
+
+            // 2. Build the PDF Document using QuestPDF Fluent API
+            var document = Document.Create(container =>
+            {
+                // Format as a standard A4 page
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.Arial));
+
+                    // Header
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Text("CINEMA SYSTEM").FontSize(24).SemiBold().FontColor(Colors.Blue.Darken2);
+                        col.Item().Text($"Official Booking Receipt: {booking.ConfirmationCode}").FontSize(14).FontColor(Colors.Grey.Darken2);
+                        col.Item().PaddingTop(5).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+                    });
+
+                    // Body: Loop through each ticket and draw a distinct block
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                    {
+                        col.Spacing(20);
+
+                        foreach (var ticket in booking.Tickets)
+                        {
+                            col.Item().Border(1).BorderColor(Colors.Grey.Lighten1).Background(Colors.Grey.Lighten4).Padding(15).Row(row =>
+                            {
+                                // Left Column: Movie Info
+                                row.RelativeItem().Column(ticketCol =>
+                                {
+                                    ticketCol.Item().Text(booking.Showtime.Movie.Title).FontSize(18).SemiBold();
+                                    ticketCol.Item().Text($"Cinema: {booking.Showtime.CinemaHall.Cinema.Name} - Hall: {booking.Showtime.CinemaHall.Name}");
+                                    ticketCol.Item().Text($"Date: {booking.Showtime.StartTime.ToString("dddd, MMM dd, yyyy - HH:mm")}");
+                                });
+
+                                // Right Column: Seat & Barcode Info
+                                row.ConstantItem(150).AlignRight().Column(ticketCol =>
+                                {
+                                    ticketCol.Item().Text($"SEAT {ticket.Seat.Row}{ticket.Seat.Column}").FontSize(20).Bold().FontColor(Colors.Red.Medium);
+                                    ticketCol.Item().Text($"Type: {ticket.Seat.SeatType}");
+                                    ticketCol.Item().Text($"Price: ${ticket.Price.ToString("F2")}");
+                                    ticketCol.Item().PaddingTop(10).Text($"ID: {ticket.Barcode.Substring(0, 8).ToUpper()}").FontSize(10).FontColor(Colors.Grey.Medium);
+                                });
+                            });
+                        }
+                    });
+
+                    // Footer
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Generated on ");
+                        x.Span(DateTime.Now.ToString("g"));
+                        x.Span($" | Total Amount Paid: ${booking.TotalAmount.ToString("F2")}").SemiBold();
+                    });
+                });
+            });
+
+            // 3. Compile to byte array and stream to the browser
+            byte[] pdfBytes = document.GeneratePdf();
+
+            return File(pdfBytes, "application/pdf", $"CinemaTickets_{booking.ConfirmationCode}.pdf");
         }
     }
 }

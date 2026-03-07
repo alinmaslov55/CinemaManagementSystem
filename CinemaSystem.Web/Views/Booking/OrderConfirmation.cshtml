@@ -68,8 +68,11 @@
 
                 <div class="card-footer bg-white text-center py-4 border-top-0">
                     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary px-4 fw-bold">Return to Home</a>
-                    @* This button will eventually link to the User Dashboard *@
-                    <button class="btn btn-primary px-4 fw-bold ms-2">View My Tickets</button>
+
+                    @* OBJECTIVE FIX: Replaced dead button with active PDF download link *@
+                    <a asp-controller="Booking" asp-action="DownloadTickets" asp-route-bookingId="@Model.Id" class="btn btn-primary px-4 fw-bold ms-2 shadow-sm">
+                        <i class="bi bi-file-earmark-pdf-fill me-2"></i> Download PDF Tickets
+                    </a>
                 </div>
             </div>
 

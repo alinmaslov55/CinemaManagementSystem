@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using CinemaSystem.Utility
+@using Microsoft.AspNetCore.Identity
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -23,12 +25,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Cinema" asp-action="Index">Manage Cinemas</a>
-                        </li>
+
+                        @* --- THE SECURE ADMIN DROPDOWN --- *@
+                        @if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Content Management
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Movie" asp-action="Index">Manage Movies</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Cinema" asp-action="Index">Manage Cinemas</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="CinemaHall" asp-action="Index">Manage Halls</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Showtime" asp-action="Index">Manage Showtimes</a></li>
+                                </ul>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

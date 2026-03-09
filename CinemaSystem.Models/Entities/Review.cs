@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CinemaSystem.Models.Entities
 {
@@ -16,6 +18,8 @@ namespace CinemaSystem.Models.Entities
 
         [Required]
         public string ApplicationUserId { get; set; }
-        // Navigation to ApplicationUser will be added after Identity setup
+        [ForeignKey("ApplicationUserId")]
+        [ValidateNever]
+        public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

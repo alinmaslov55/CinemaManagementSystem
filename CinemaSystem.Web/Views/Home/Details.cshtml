@@ -13,6 +13,11 @@
                 <span class="badge bg-primary fs-6 me-2">@Model.Movie.MovieCategory</span>
                 <span class="text-muted"><i class="bi bi-clock"></i> @Model.Movie.DurationInMinutes minutes</span>
 
+                @* OBJECTIVE FIX: Restored the dynamically calculated average rating and review count *@
+                <span class="ms-3 text-warning fw-bold fs-5">
+                    <i class="bi bi-star-fill"></i> @Model.AverageRating.ToString("0.0") / 5.0
+                </span>
+                <span class="text-muted small ms-2">(@(Model.Movie.Reviews?.Count() ?? 0) reviews)</span>
             </div>
             <p class="lead">@Model.Movie.Description</p>
 
@@ -36,7 +41,7 @@
     }
     else
     {
-        <div class="accordion shadow-sm" id="cinemaAccordion">
+        <div class="accordion shadow-sm mb-5" id="cinemaAccordion">
             @{
                 int cinemaIndex = 0;
             }
@@ -53,7 +58,6 @@
                         <button class="accordion-button @(isFirst ? "" : "collapsed") fw-bold fs-5 bg-light" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#@collapseId">
 
-                            @* OBJECTIVE FIX: Corrected @cinema to @cinema.Address to stop C# namespace leaking *@
                             <i class="bi bi-geo-alt-fill text-primary me-2"></i> @cinema.Name, @cinema.Address
                         </button>
                     </h2>
@@ -89,4 +93,87 @@
             }
         </div>
     }
+
+    @* --- MOVIE REVIEWS SECTION --- *@
+    <div class="row mt-5 mb-5">
+        <div class="col-md-8 mx-auto">
+            <h3 class="fw-bold border-bottom pb-2 mb-4">Audience Reviews</h3>
+
+            @* 1. The Review Submission Form *@
+            <div class="card shadow-sm border-0 bg-light mb-4">
+                <div class="card-body p-4">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <h5 class="fw-bold mb-3">Leave a Review</h5>
+                        <form asp-controller="Home" asp-action="AddReview" method="post">
+                            <input type="hidden" name="movieId" value="@Model.Movie.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Rating</label>
+                                <select name="rating" class="form-select w-50 border-0 shadow-sm" required>
+                                    <option value="5">⭐⭐⭐⭐⭐ (5/5) Masterpiece</option>
+                                    <option value="4">⭐⭐⭐⭐ (4/5) Great</option>
+                                    <option value="3">⭐⭐⭐ (3/5) Good</option>
+                                    <option value="2">⭐⭐ (2/5) Poor</option>
+                                    <option value="1">⭐ (1/5) Terrible</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Comment (Optional)</label>
+                                <textarea name="comment" class="form-control border-0 shadow-sm" rows="3" placeholder="What did you think of the movie?"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary fw-bold px-4">Submit Review</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 border rounded bg-white">
+                            <i class="bi bi-chat-square-text fs-1 text-muted mb-2 d-block"></i>
+                            <h6 class="text-muted mb-3">You must be logged in to leave a review.</h6>
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary fw-bold px-4">Log In to Review</a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* 2. The Review Display List *@
+            @if (Model.Movie.Reviews != null && Model.Movie.Reviews.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var review in Model.Movie.Reviews.OrderByDescending(r => r.Id))
+                    {
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="text-warning">
+                                        @for (int i = 0; i < review.Rating; i++)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        @for (int i = review.Rating; i < 5; i++)
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    </div>
+                                    <small class="text-muted fw-bold">@review.ApplicationUser?.FullName</small>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(review.Comment))
+                                {
+                                    <p class="card-text text-dark">"@review.Comment"</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted italic mb-0">No reviews yet. Be the first to share your thoughts!</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>

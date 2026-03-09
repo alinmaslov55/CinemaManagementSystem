@@ -14,8 +14,6 @@ namespace CinemaSystem.Models.ViewModels
 
         // Educational Concept: Computed Properties
         // This calculates the average on the fly, avoiding null reference crashes if there are no reviews.
-        public double AverageRating => Movie.Reviews != null && Movie.Reviews.Any()
-            ? Math.Round(Movie.Reviews.Average(r => r.Rating), 1)
-            : 0.0;
+        public double AverageRating { get; set; }
     }
 }

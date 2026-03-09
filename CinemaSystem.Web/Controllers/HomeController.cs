@@ -1,9 +1,12 @@
 using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -29,7 +32,7 @@ namespace CinemaSystem.Web.Controllers
 
         public IActionResult Details(int id)
         {
-            var movie = _unitOfWork.Movie.Get(m => m.Id == id);
+            var movie = _unitOfWork.Movie.Get(m => m.Id == id, includeProperties: "Reviews,Reviews.ApplicationUser");
 
             if (movie == null) return NotFound();
 
@@ -50,13 +53,60 @@ namespace CinemaSystem.Web.Controllers
                         )
                 );
 
+            double averageRating = 0;
+            if(movie.Reviews != null && movie.Reviews.Any())
+            {
+                averageRating = movie.Reviews.Average(r => r.Rating);
+            }
+
             var vm = new MovieDetailsVM
             {
                 Movie = movie,
-                ShowtimesByCinema = groupedShowtimes
+                ShowtimesByCinema = groupedShowtimes,
+                AverageRating = Math.Round(averageRating, 1)
             };
 
             return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddReview(int movieId, int rating, string? comment)
+        {
+            if (rating < 1 || rating > 5)
+            {
+                TempData["error"] = "Invalid rating value.";
+                return RedirectToAction(nameof(Details), new { id = movieId });
+            }
+
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var existingReview = _unitOfWork.Review.Get(r => r.MovieId == movieId && r.ApplicationUserId == userId);
+
+            if (existingReview != null)
+            {
+                existingReview.Rating = rating;
+                existingReview.Comment = comment;
+                _unitOfWork.Review.Update(existingReview);
+                TempData["success"] = "Your review has been updated.";
+            }
+            else
+            {
+                var newReview = new Review
+                {
+                    MovieId = movieId,
+                    ApplicationUserId = userId,
+                    Rating = rating,
+                    Comment = comment
+                };
+                _unitOfWork.Review.Add(newReview);
+                TempData["success"] = "Thank you for your review!";
+            }
+
+            _unitOfWork.Save();
+
+            return RedirectToAction(nameof(Details), new { id = movieId });
         }
 
         public IActionResult Privacy()

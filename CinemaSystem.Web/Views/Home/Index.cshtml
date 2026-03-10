@@ -1,31 +1,142 @@
-﻿@model IEnumerable<CinemaSystem.Models.Entities.Movie>
+﻿@model CinemaSystem.Models.ViewModels.HomeVM
+@using CinemaSystem.Models.Data.Enums
 
-<div class="container mt-5">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="fw-bold text-uppercase border-bottom pb-2">Now Playing</h2>
-        </div>
-    </div>
+@{
+    ViewData["Title"] = "Home Page";
+}
 
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-        @foreach (var movie in Model)
-        {
-            <div class="col">
-                <div class="card h-100 border-0 shadow-sm movie-card">
-                    @* Fallback image if ImageUrl is missing *@
-                    <img src="@(string.IsNullOrEmpty(movie.ImageUrl) ? "https://via.placeholder.com/300x450?text=No+Poster" : movie.ImageUrl)"
-                         class="card-img-top" alt="@movie.Title" style="height: 400px; object-fit: cover;">
+<div class="container-fluid p-0">
 
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-bold text-truncate">@movie.Title</h5>
-                        <div class="d-flex justify-content-between mb-2 small text-muted">
-                            <span>@movie.DurationInMinutes mins</span>
-                            <span class="badge bg-secondary">@movie.MovieCategory</span>
+    @* ==========================================
+       ZONE 1: THE HERO CAROUSEL
+       ========================================== *@
+    @if (Model.HeroMovies != null && Model.HeroMovies.Any())
+    {
+        <div id="heroCarousel" class="carousel slide mb-5 shadow-lg" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @{
+                    var first = true;
+                }
+                @foreach (var hero in Model.HeroMovies)
+                {
+                    <div class="carousel-item @(first ? "active" : "")">
+                        @* Dark overlay to ensure text is readable against the poster *@
+                        <div class="carousel-overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.6); z-index: 1;"></div>
+                        <img src="@(string.IsNullOrEmpty(hero.Movie.ImageUrl) ? "https://via.placeholder.com/1200x500" : hero.Movie.ImageUrl)"
+                             class="d-block w-100" style="height: 500px; object-fit: cover; object-position: center top;" alt="@hero.Movie.Title">
+
+                        <div class="carousel-caption d-none d-md-block text-start" style="z-index: 2; bottom: 20%;">
+                            <span class="badge bg-warning text-dark mb-2 fs-6">Top Rated: @hero.AverageRating.ToString("0.0") / 5.0</span>
+                            <h1 class="display-3 fw-bold text-white shadow-sm">@hero.Movie.Title</h1>
+                            <p class="lead text-light w-75 text-truncate">@hero.Movie.Description</p>
+                            <a asp-action="Details" asp-route-id="@hero.Movie.Id" class="btn btn-primary btn-lg fw-bold px-5 rounded-pill shadow">Get Tickets</a>
                         </div>
-                        <a asp-action="Details" asp-route-id="@movie.Id" class="btn btn-primary mt-auto w-100 rounded-pill fw-bold">
-                            Get Tickets
-                        </a>
                     </div>
+                    first = false;
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" style="z-index: 3;">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" style="z-index: 3;">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    }
+
+    <div class="container">
+
+        @* ==========================================
+           ZONE 2: THE UTILITY BAR (SEARCH & FILTER)
+           ========================================== *@
+        <form method="get" asp-action="Index" class="row bg-white p-4 rounded-4 shadow-sm mb-5 border" style="margin-top: -80px; position: relative; z-index: 10;">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label fw-bold text-muted small text-uppercase">Search Title</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                    <input type="text" name="searchString" class="form-control border-start-0 ps-0" placeholder="e.g. Inception..." value="@Model.CurrentSearch" />
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label fw-bold text-muted small text-uppercase">Genre</label>
+                <select name="category" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="form-select">
+                    <option value="">All Genres</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label fw-bold text-muted small text-uppercase">Date</label>
+                <input type="date" name="selectedDate" class="form-control" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Filter</button>
+                <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+            </div>
+        </form>
+
+        @* ==========================================
+           ZONE 3: PRIMARY FEED (NOW PLAYING)
+           ========================================== *@
+        <div class="mb-5">
+            <h3 class="fw-bold border-bottom pb-2 mb-4 text-uppercase">Now Playing <i class="bi bi-film text-primary"></i></h3>
+
+            @if (!Model.NowPlaying.Any())
+            {
+                <div class="alert alert-info text-center py-4">No movies found matching your current filters.</div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var item in Model.NowPlaying)
+                    {
+                        <div class="col">
+                            <div class="card h-100 border-0 shadow-sm movie-card">
+                                <div class="position-relative">
+                                    <img src="@(string.IsNullOrEmpty(item.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : item.Movie.ImageUrl)" class="card-img-top" alt="@item.Movie.Title" style="height: 400px; object-fit: cover;">
+                                    <span class="position-absolute top-0 end-0 badge bg-danger m-2 p-2 shadow">@item.Movie.AgeRating</span>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold text-truncate mb-1">@item.Movie.Title</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-3 small">
+                                        <span class="text-muted"><i class="bi bi-clock"></i> @item.Movie.DurationInMinutes mins</span>
+                                        <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> @item.AverageRating.ToString("0.0")</span>
+                                    </div>
+                                    <span class="badge bg-light text-dark border mb-3 w-50">@item.Movie.MovieCategory</span>
+
+                                    <a asp-action="Details" asp-route-id="@item.Movie.Id" class="btn btn-primary mt-auto w-100 rounded-pill fw-bold">Get Tickets</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @* ==========================================
+           ZONE 4: SECONDARY FEED (COMING SOON)
+           ========================================== *@
+        @if (Model.ComingSoon != null && Model.ComingSoon.Any() && !Model.SelectedDate.HasValue)
+        {
+            <div class="mb-5 mt-5 pt-4">
+                <h3 class="fw-bold border-bottom pb-2 mb-4 text-uppercase text-muted">Coming Soon <i class="bi bi-calendar-star text-warning"></i></h3>
+                <div class="row row-cols-1 row-cols-md-4 g-4 opacity-75">
+                    @foreach (var item in Model.ComingSoon)
+                    {
+                        <div class="col">
+                            <div class="card h-100 border-0 shadow-sm bg-light">
+                                <img src="@(string.IsNullOrEmpty(item.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : item.Movie.ImageUrl)" class="card-img-top" alt="@item.Movie.Title" style="height: 300px; object-fit: cover; filter: grayscale(40%);">
+                                <div class="card-body text-center">
+                                    <h6 class="fw-bold text-truncate">@item.Movie.Title</h6>
+                                    <p class="text-muted small mb-0 fw-bold text-primary">Releases: @item.Movie.StartDate.ToString("MMM dd, yyyy")</p>
+                                    <a asp-action="Details" asp-route-id="@item.Movie.Id" class="btn btn-sm btn-outline-secondary mt-2 w-100">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         }
@@ -33,12 +144,22 @@
 </div>
 
 <style>
+    /* Smooth hover effect for the movie cards */
     .movie-card {
-        transition: transform 0.2s ease-in-out;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
     }
 
         .movie-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
         }
 </style>
+
+@section Scripts {
+    <script>
+        // UX Enhancement: Auto-submit the form when the Genre dropdown changes
+        document.querySelector('select[name="category"]').addEventListener('change', function() {
+            this.form.submit();
+        });
+    </script>
+}

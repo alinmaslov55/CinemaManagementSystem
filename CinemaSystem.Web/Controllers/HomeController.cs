@@ -1,4 +1,5 @@
 using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Data.Enums;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Web.Models;
@@ -19,15 +20,67 @@ namespace CinemaSystem.Web.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? searchString, MovieCategory? category, DateTime? selectedDate)
         {
             var today = DateTime.Now.Date;
 
-            var activeMovies = _unitOfWork.Movie.GetAll(
-                m => m.StartDate.Date <= today && m.EndDate.Date >= today && m.IsReleased
-            );
+            // 1. Fetch EVERYTHING needed for the front page in one massive query
+            // We include Reviews for math, and Showtimes to filter by the user's selected date.
+            var allMovies = _unitOfWork.Movie.GetAll(includeProperties: "Reviews,Showtimes").ToList();
 
-            return View(activeMovies);
+            // 2. Apply Zone 2: Utility Bar Filters (Search & Genre)
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                allMovies = allMovies.Where(m => m.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (category.HasValue)
+            {
+                allMovies = allMovies.Where(m => m.MovieCategory == category.Value).ToList();
+            }
+
+            // 3. Define the Buckets
+            var nowPlayingRaw = allMovies.Where(m => m.IsReleased && m.StartDate.Date <= today && m.EndDate.Date >= today);
+            var comingSoonRaw = allMovies.Where(m => !m.IsReleased || m.StartDate.Date > today);
+
+            // 4. Apply Zone 2: Date Selection (Only affects "Now Playing")
+            if (selectedDate.HasValue)
+            {
+                // Only show movies that actually have a showtime scheduled on the exact date requested
+                nowPlayingRaw = nowPlayingRaw.Where(m => m.Showtimes.Any(s => s.StartTime.Date == selectedDate.Value.Date));
+            }
+
+            // 5. Transform into ViewModels (Calculating the Math on the Server, not the UI)
+            var nowPlayingCards = nowPlayingRaw.Select(m => new MovieCardVM
+            {
+                Movie = m,
+                ReviewCount = m.Reviews?.Count() ?? 0,
+                AverageRating = m.Reviews != null && m.Reviews.Any() ? Math.Round(m.Reviews.Average(r => r.Rating), 1) : 0
+            }).ToList();
+
+            var comingSoonCards = comingSoonRaw.Select(m => new MovieCardVM
+            {
+                Movie = m,
+                ReviewCount = m.Reviews?.Count() ?? 0,
+                AverageRating = m.Reviews != null && m.Reviews.Any() ? Math.Round(m.Reviews.Average(r => r.Rating), 1) : 0
+            }).ToList();
+
+            var vm = new HomeVM
+            {
+                // Zone 1: Grab up to 3 highly-rated or newest movies for the massive Hero banner
+                HeroMovies = nowPlayingCards.OrderByDescending(m => m.AverageRating).Take(3),
+
+                // Zone 3 & 4
+                NowPlaying = nowPlayingCards,
+                ComingSoon = comingSoonCards,
+
+                // Zone 2 State
+                CurrentSearch = searchString,
+                CurrentCategory = category,
+                SelectedDate = selectedDate
+            };
+
+            return View(vm);
         }
 
         public IActionResult Details(int id)

@@ -105,6 +105,12 @@ namespace CinemaSystem.DataAccess.Data
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.Showtime)
+                .WithMany(s => s.Bookings)
+                .HasForeignKey(b => b.ShowtimeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

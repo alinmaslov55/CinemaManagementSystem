@@ -1,0 +1,221 @@
+﻿@model CinemaSystem.Models.ViewModels.DashboardVM
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-uppercase"><i class="bi bi-speedometer2 text-danger"></i> Cinema Operations</h2>
+        <span class="text-muted">Live Data Feed</span>
+    </div>
+
+    @* ==========================================
+       ZONE 1: TOP-LEVEL KPIs
+       ========================================== *@
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-success border-5 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted fw-bold text-uppercase mb-1">Total Revenue</h6>
+                    <h3 class="fw-bold text-success mb-0">$@Model.TotalRevenue.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-primary border-5 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted fw-bold text-uppercase mb-1">Today's Revenue</h6>
+                    <h3 class="fw-bold text-primary mb-0">$@Model.TodayRevenue.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-warning border-5 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted fw-bold text-uppercase mb-1">Tickets Sold</h6>
+                    <h3 class="fw-bold text-warning mb-0">@Model.TotalTicketsSold.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-info border-5 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted fw-bold text-uppercase mb-1">30-Day Occupancy</h6>
+                    <h3 class="fw-bold text-info mb-0">@Model.OccupancyRate%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ==========================================
+       ZONE 2: BUSINESS INTELLIGENCE CHARTS
+       ========================================== *@
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3">7-Day Revenue Trend</h5>
+
+                    @* OBJECTIVE FIX: The relative wrapper strictly constrains the canvas height *@
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="revenueLineChart"></canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3">Top 5 Movies (Tickets Sold)</h5>
+
+                    @* OBJECTIVE FIX: The relative wrapper strictly constrains the canvas height *@
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="movieBarChart"></canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ==========================================
+       ZONE 3 & 4: ACTIONABLE ALERTS & LIVE FEED
+       ========================================== *@
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm border-top border-danger border-3 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-triangle-fill"></i> Actionable Alerts</h5>
+                    <h6 class="text-muted small mb-3">Empty Showtimes (Next 24 Hours)</h6>
+
+                    @if (!Model.EmptyShowtimes.Any())
+                    {
+                        <div class="alert alert-success py-2">All upcoming showtimes have at least one ticket sold.</div>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var alert in Model.EmptyShowtimes)
+                            {
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold d-block">@alert.MovieTitle</span>
+                                        <small class="text-muted">@alert.HallName</small>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill">@alert.StartTime.ToString("HH:mm")</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-activity text-primary"></i> Recent Transactions</h5>
+
+                    @if (!Model.RecentBookings.Any())
+                    {
+                        <p class="text-muted">No recent bookings found.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm align-middle">
+                                <thead>
+                                    <tr class="text-muted small text-uppercase">
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.RecentBookings)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-primary">@booking.ConfirmationCode</td>
+                                            <td>@booking.CustomerName</td>
+                                            <td class="fw-bold text-success">$@booking.Amount.ToString("F2")</td>
+                                            <td class="text-muted small">@booking.Date.ToString("MMM dd, HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @* Import Chart.js library from CDN *@
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // OBJECTIVE FIX: Serialize the C# arrays directly into JavaScript arrays
+        const dateLabels = @Html.Raw(Json.Serialize(Model.DateLabels));
+        const revenueTrendData = @Html.Raw(Json.Serialize(Model.RevenueTrendData));
+
+        const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
+        const movieSalesData = @Html.Raw(Json.Serialize(Model.MovieSalesData));
+
+        // 1. Initialize the Revenue Line Chart
+        const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: dateLabels,
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: revenueTrendData,
+                    borderColor: '#0d6efd', // Bootstrap primary color
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3 // Smooth curves
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 2. Initialize the Movie Sales Bar Chart
+        const barCtx = document.getElementById('movieBarChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: movieLabels,
+                datasets: [{
+                    label: 'Tickets Sold',
+                    data: movieSalesData,
+                    backgroundColor: [
+                        'rgba(25, 135, 84, 0.8)',  // Success
+                        'rgba(13, 110, 253, 0.8)', // Primary
+                        'rgba(255, 193, 7, 0.8)',  // Warning
+                        'rgba(13, 202, 240, 0.8)', // Info
+                        'rgba(108, 117, 125, 0.8)' // Secondary
+                    ],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } } // Prevent decimals in ticket counts
+                }
+            }
+        });
+    </script>
+}

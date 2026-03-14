@@ -24,5 +24,7 @@ namespace CinemaSystem.Models.Entities
         public string? Language { get; set; }
 
         public string? Subtitles { get; set; }
+        [ValidateNever]
+        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

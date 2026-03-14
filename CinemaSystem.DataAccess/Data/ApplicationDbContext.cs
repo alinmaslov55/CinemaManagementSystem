@@ -83,7 +83,7 @@ namespace CinemaSystem.DataAccess.Data
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.User)
-                .WithMany() // Can be WithMany(u => u.Bookings) if added to ApplicationUser
+                .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.ApplicationUserId);
 
             modelBuilder.Entity<Ticket>()
@@ -99,6 +99,12 @@ namespace CinemaSystem.DataAccess.Data
             modelBuilder.Entity<Review>()
                 .HasIndex(r => new { r.MovieId, r.ApplicationUserId })
                 .IsUnique();
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.ApplicationUser)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

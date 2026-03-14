@@ -312,12 +312,19 @@ namespace CinemaSystem.Web.Controllers
                                 });
 
                                 // Right Column: Seat & Barcode Info
-                                row.ConstantItem(150).AlignRight().Column(ticketCol =>
+                                row.ConstantItem(200).AlignRight().Column(ticketCol =>
                                 {
                                     ticketCol.Item().Text($"SEAT {ticket.Seat.Row}{ticket.Seat.Column}").FontSize(20).Bold().FontColor(Colors.Red.Medium);
                                     ticketCol.Item().Text($"Type: {ticket.Seat.SeatType}");
                                     ticketCol.Item().Text($"Price: ${ticket.Price.ToString("F2")}");
-                                    ticketCol.Item().PaddingTop(10).Text($"ID: {ticket.Barcode.Substring(0, 8).ToUpper()}").FontSize(10).FontColor(Colors.Grey.Medium);
+
+                                    byte[] qrBytes = QRCodeHelper.GenerateQRCodeBytes(ticket.Barcode);
+
+                                    ticketCol.Item().PaddingTop(10).Row(qrRow =>
+                                    {
+                                        qrRow.RelativeItem().AlignRight().PaddingRight(10).AlignMiddle().Text($"ID: {ticket.Barcode.Substring(0, 8).ToUpper()}").FontSize(10).FontColor(Colors.Grey.Medium);
+                                        qrRow.ConstantItem(60).Height(60).Image(qrBytes);
+                                    });
                                 });
                             });
                         }

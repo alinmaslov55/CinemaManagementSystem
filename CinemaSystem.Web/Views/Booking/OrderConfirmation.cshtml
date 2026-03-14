@@ -1,4 +1,5 @@
-﻿@model CinemaSystem.Models.Entities.Booking
+﻿@using CinemaSystem.Utility
+@model CinemaSystem.Models.Entities.Booking
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -50,15 +51,23 @@
                     <div class="d-flex flex-column gap-3">
                         @foreach (var ticket in Model.Tickets)
                         {
+                            // Generate the QR code on the fly based on the Ticket's unique Barcode GUID
+                            byte[] qrBytes = QRCodeHelper.GenerateQRCodeBytes(ticket.Barcode);
+                            string qrBase64 = Convert.ToBase64String(qrBytes);
+
                             <div class="bg-white border rounded p-3 shadow-sm d-flex justify-content-between align-items-center">
                                 <div>
                                     <span class="text-muted small d-block text-uppercase">Seat</span>
                                     <span class="fw-bold fs-4">@ticket.Seat.Row@ticket.Seat.Column</span>
                                     <span class="badge bg-secondary ms-2">@ticket.Seat.SeatType</span>
                                 </div>
-                                <div class="text-end">
-                                    <span class="text-muted small d-block">Ticket ID</span>
-                                    <span class="font-monospace small">@ticket.Barcode.Substring(0, 8).ToUpper()</span>
+                                <div class="text-end d-flex align-items-center gap-3">
+                                    <div class="text-end">
+                                        <span class="text-muted small d-block">Ticket ID</span>
+                                        <span class="font-monospace small">@ticket.Barcode.Substring(0, 8).ToUpper()</span>
+                                    </div>
+                                    @* OBJECTIVE FIX: Render the Base64 QR code directly into the HTML *@
+                                    <img src="data:image/png;base64,@qrBase64" alt="QR Code" class="img-thumbnail border-0 p-0" style="width: 60px; height: 60px;" />
                                 </div>
                             </div>
                         }

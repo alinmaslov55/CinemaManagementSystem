@@ -40,6 +40,13 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddHttpClient("OMDbClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["OMDbSettings:BaseUrl"] ?? "https://www.omdbapi.com/");
+});
+
+builder.Services.AddScoped<IMovieSyncService, MovieSyncService>();
+
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddHostedService<SeatHoldCleanupService>();

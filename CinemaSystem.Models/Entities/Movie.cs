@@ -47,6 +47,9 @@ namespace CinemaSystem.Models.Entities
 
         public bool IsReleased { get; set; } = false;
 
+        // External API Data
+        public string? ImdbRating { get; set; }
+        public string? RottenTomatoesScore { get; set; }
 
         public virtual List<Actor> Actors { get; set; }
         public virtual List<Showtime> Showtimes { get; set; }

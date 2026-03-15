@@ -14,11 +14,13 @@ namespace CinemaSystem.Web.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IMovieSyncService _movieSyncService;
 
-        public MovieController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public MovieController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IMovieSyncService movieSyncService)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _movieSyncService = movieSyncService;
         }
 
         public IActionResult Index()
@@ -42,13 +44,12 @@ namespace CinemaSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upsert(Movie obj, IFormFile? file)
+        public async Task<IActionResult> Upsert(Movie obj, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
                 if (file != null)
                 {
-                    // SECURITY FIX: Whitelist file extensions
                     string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
                     string extension = Path.GetExtension(file.FileName).ToLower();
 
@@ -72,9 +73,26 @@ namespace CinemaSystem.Web.Controllers
 
                     using (var fileStream = new FileStream(Path.Combine(moviePath, fileName), FileMode.Create))
                     {
-                        file.CopyTo(fileStream);
+                        await file.CopyToAsync(fileStream);
                     }
                     obj.ImageUrl = @"\images\movie\" + fileName;
+                }
+
+                // OBJECTIVE INTEGRATION: Fetch third-party ratings before saving
+                // We check if they are null so we don't overwrite manual Admin edits
+                if (string.IsNullOrEmpty(obj.ImdbRating) || string.IsNullOrEmpty(obj.RottenTomatoesScore))
+                {
+                    // Execute the network call to OMDb without freezing the application
+                    var ratings = await _movieSyncService.FetchMovieRatingsAsync(obj.Title);
+
+                    if (ratings.imdb != null && string.IsNullOrEmpty(obj.ImdbRating))
+                    {
+                        obj.ImdbRating = ratings.imdb;
+                    }
+                    if (ratings.rottenTomatoes != null && string.IsNullOrEmpty(obj.RottenTomatoesScore))
+                    {
+                        obj.RottenTomatoesScore = ratings.rottenTomatoes;
+                    }
                 }
 
                 if (obj.Id == 0)

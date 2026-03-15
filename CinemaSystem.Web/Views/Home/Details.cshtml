@@ -13,12 +13,30 @@
                 <span class="badge bg-primary fs-6 me-2">@Model.Movie.MovieCategory</span>
                 <span class="text-muted"><i class="bi bi-clock"></i> @Model.Movie.DurationInMinutes minutes</span>
 
-                @* OBJECTIVE FIX: Restored the dynamically calculated average rating and review count *@
+                @* OBJECTIVE FIX: Local Average Rating *@
                 <span class="ms-3 text-warning fw-bold fs-5">
                     <i class="bi bi-star-fill"></i> @Model.AverageRating.ToString("0.0") / 5.0
                 </span>
                 <span class="text-muted small ms-2">(@(Model.Movie.Reviews?.Count() ?? 0) reviews)</span>
             </div>
+
+            @* OBJECTIVE FIX: OMDb External Ratings Integration injected before the description *@
+            <div class="d-flex align-items-center gap-3 mb-4">
+                @if (!string.IsNullOrEmpty(Model.Movie.ImdbRating))
+                {
+                    <span class="badge bg-warning text-dark fs-6 shadow-sm py-2 px-3">
+                        <i class="bi bi-star-fill text-dark me-1"></i> IMDb: @Model.Movie.ImdbRating
+                    </span>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.Movie.RottenTomatoesScore))
+                {
+                    <span class="badge bg-danger fs-6 shadow-sm py-2 px-3">
+                        <i class="bi bi-suit-heart-fill me-1"></i> RT: @Model.Movie.RottenTomatoesScore
+                    </span>
+                }
+            </div>
+
             <p class="lead">@Model.Movie.Description</p>
 
             @if (!string.IsNullOrEmpty(Model.Movie.TrailerUrl))
@@ -75,7 +93,7 @@
                                         @foreach (var show in times)
                                         {
                                             <a asp-controller="Booking" asp-action="SelectSeats" asp-route-showtimeId="@show.Id"
-                                               class="btn btn-outline-primary shadow-sm text-center px-4 py-2">
+                                                   class="btn btn-outline-primary shadow-sm text-center px-4 py-2">
                                                 <span class="fw-bold d-block">@show.StartTime.ToString("HH:mm")</span>
                                                 <small class="text-muted" style="font-size: 0.75rem;">
                                                     @show.CinemaHall.Name (@show.Language)

@@ -11,14 +11,16 @@ using QuestPDF.Infrastructure;
 
 namespace CinemaSystem.Web.Controllers
 {
-    // OBJECTIVE FIX: Require authorization at the controller level to prevent anonymous UX crashes
     [Authorize]
     public class BookingController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public BookingController(IUnitOfWork unitOfWork)
+        private readonly IEmailService _emailService;
+
+        public BookingController(IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -71,7 +73,7 @@ namespace CinemaSystem.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // OBJECTIVE FIX: Re-enabled. See instructions below for Program.cs.
+        [ValidateAntiForgeryToken]
         public IActionResult LockSeatsAjax([FromBody] HoldSeatsRequestDto dto)
         {
             if (dto == null || dto.SelectedSeatIds == null || !dto.SelectedSeatIds.Any())
@@ -222,8 +224,6 @@ namespace CinemaSystem.Web.Controllers
 
             _unitOfWork.Booking.Add(newBooking);
 
-            // OBJECTIVE FIX: Atomic ACID Transaction. We do not save yet.
-            // By assigning the object reference (Booking = newBooking), EF Core wires the IDs automatically.
             foreach (var hold in activeHolds)
             {
                 var ticket = new Ticket
@@ -237,9 +237,22 @@ namespace CinemaSystem.Web.Controllers
             }
 
             _unitOfWork.SeatHold.RemoveRange(activeHolds);
-
-            // The database commits the parent booking, child tickets, and removes the holds in ONE atomic sweep.
             _unitOfWork.Save();
+
+            var completedBooking = _unitOfWork.Booking.Get(
+                b => b.Id == newBooking.Id,
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,User"
+            );
+
+            if (completedBooking != null && !string.IsNullOrEmpty(completedBooking.User?.Email))
+            {
+                // Generate PDF and fire the email with attachment
+                byte[] pdfAttachment = GenerateTicketPdfBytes(completedBooking);
+                string subject = $"Your Tickets for {completedBooking.Showtime.Movie.Title} - {completedBooking.ConfirmationCode}";
+                string htmlBody = $"<h3>Thank you for your purchase!</h3><p>Your tickets are attached to this email as a PDF. Please present the QR codes at the cinema doors.</p>";
+
+                _emailService.SendEmailWithAttachmentAsync(completedBooking.User.Email, subject, htmlBody, pdfAttachment, $"Tickets_{completedBooking.ConfirmationCode}.pdf").GetAwaiter().GetResult();
+            }
 
             return RedirectToAction(nameof(OrderConfirmation), new { bookingId = newBooking.Id });
         }
@@ -261,13 +274,13 @@ namespace CinemaSystem.Web.Controllers
 
             return View(booking);
         }
+
         [HttpGet]
         [Authorize]
         public IActionResult DownloadTickets(int bookingId)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // 1. Fetch the exact booking with all relational data
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
                 includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat"
@@ -275,10 +288,33 @@ namespace CinemaSystem.Web.Controllers
 
             if (booking == null) return NotFound("Order not found or access denied.");
 
-            // 2. Build the PDF Document using QuestPDF Fluent API
+            byte[] pdfBytes = GenerateTicketPdfBytes(booking);
+
+            return File(pdfBytes, "application/pdf", $"CinemaTickets_{booking.ConfirmationCode}.pdf");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult History()
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var bookings = _unitOfWork.Booking.GetAll(
+                b => b.ApplicationUserId == userId,
+                includeProperties: "Showtime,Showtime.Movie,Tickets"
+            ).OrderByDescending(b => b.Id).ToList();
+
+            return View(bookings);
+        }
+
+        // ==========================================
+        // PRIVATE HELPER METHODS
+        // ==========================================
+
+        private byte[] GenerateTicketPdfBytes(Booking booking)
+        {
             var document = Document.Create(container =>
             {
-                // Format as a standard A4 page
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4);
@@ -286,7 +322,6 @@ namespace CinemaSystem.Web.Controllers
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.Arial));
 
-                    // Header
                     page.Header().Column(col =>
                     {
                         col.Item().Text("CINEMA SYSTEM").FontSize(24).SemiBold().FontColor(Colors.Blue.Darken2);
@@ -294,7 +329,6 @@ namespace CinemaSystem.Web.Controllers
                         col.Item().PaddingTop(5).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
                     });
 
-                    // Body: Loop through each ticket and draw a distinct block
                     page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
                     {
                         col.Spacing(20);
@@ -303,7 +337,6 @@ namespace CinemaSystem.Web.Controllers
                         {
                             col.Item().Border(1).BorderColor(Colors.Grey.Lighten1).Background(Colors.Grey.Lighten4).Padding(15).Row(row =>
                             {
-                                // Left Column: Movie Info
                                 row.RelativeItem().Column(ticketCol =>
                                 {
                                     ticketCol.Item().Text(booking.Showtime.Movie.Title).FontSize(18).SemiBold();
@@ -311,7 +344,6 @@ namespace CinemaSystem.Web.Controllers
                                     ticketCol.Item().Text($"Date: {booking.Showtime.StartTime.ToString("dddd, MMM dd, yyyy - HH:mm")}");
                                 });
 
-                                // Right Column: Seat & Barcode Info
                                 row.ConstantItem(200).AlignRight().Column(ticketCol =>
                                 {
                                     ticketCol.Item().Text($"SEAT {ticket.Seat.Row}{ticket.Seat.Column}").FontSize(20).Bold().FontColor(Colors.Red.Medium);
@@ -330,7 +362,6 @@ namespace CinemaSystem.Web.Controllers
                         }
                     });
 
-                    // Footer
                     page.Footer().AlignCenter().Text(x =>
                     {
                         x.Span("Generated on ");
@@ -340,24 +371,7 @@ namespace CinemaSystem.Web.Controllers
                 });
             });
 
-            // 3. Compile to byte array and stream to the browser
-            byte[] pdfBytes = document.GeneratePdf();
-
-            return File(pdfBytes, "application/pdf", $"CinemaTickets_{booking.ConfirmationCode}.pdf");
-        }
-
-        [HttpGet]
-        [Authorize]
-        public IActionResult History()
-        {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var bookings = _unitOfWork.Booking.GetAll(
-                b => b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Tickets"
-            ).OrderByDescending(b => b.Id).ToList();
-
-            return View(bookings);
+            return document.GeneratePdf();
         }
     }
 }

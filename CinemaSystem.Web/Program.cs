@@ -38,7 +38,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddHostedService<SeatHoldCleanupService>();

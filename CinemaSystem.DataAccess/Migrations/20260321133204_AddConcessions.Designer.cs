@@ -4,6 +4,7 @@ using CinemaSystem.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CinemaSystem.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260321133204_AddConcessions")]
+    partial class AddConcessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -377,41 +380,6 @@ namespace CinemaSystem.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Concessions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Classic salted butter popcorn (150g)",
-                            ImageUrl = "https://via.placeholder.com/150/ffcc00/000000?text=Popcorn",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Large Popcorn",
-                            Price = 12.50m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Crispy tortilla chips with warm cheese dip",
-                            ImageUrl = "https://via.placeholder.com/150/ff9900/000000?text=Nachos",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Cheese Nachos",
-                            Price = 14.00m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "0.5L fountain drink",
-                            ImageUrl = "https://via.placeholder.com/150/cc0000/ffffff?text=Cola",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Coca-Cola (Large)",
-                            Price = 6.50m
-                        });
                 });
 
             modelBuilder.Entity("CinemaSystem.Models.Entities.Movie", b =>

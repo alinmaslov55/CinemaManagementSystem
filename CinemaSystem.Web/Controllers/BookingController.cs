@@ -175,12 +175,14 @@ namespace CinemaSystem.Web.Controllers
 
             vm.TotalAmount = runningTotal;
 
+            vm.AvailableConcessions = _unitOfWork.Concession.GetAll(c => c.IsActive).ToList();
+
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult FinalizeOrder(int showtimeId)
+        public IActionResult FinalizeOrder(int showtimeId, int[] concessionIds, int[] concessionQuantities)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -203,10 +205,10 @@ namespace CinemaSystem.Web.Controllers
 
             if (showtime == null) return NotFound();
 
-            decimal totalAmount = 0;
+            decimal ticketsTotal = 0;
             foreach (var hold in activeHolds)
             {
-                totalAmount += PricingCalculator.CalculateSeatPrice(showtime.Movie.Price, showtime.Price, hold.Seat.SeatType);
+                ticketsTotal += PricingCalculator.CalculateSeatPrice(showtime.Movie.Price, showtime.Price, hold.Seat.SeatType);
             }
 
             var newBooking = new Booking
@@ -215,12 +217,37 @@ namespace CinemaSystem.Web.Controllers
                 ShowtimeId = showtimeId,
                 Status = CinemaSystem.Models.Data.Enums.BookingStatus.Confirmed,
                 PaymentStatus = CinemaSystem.Models.Data.Enums.PaymentStatus.Approved,
-                TotalAmount = totalAmount,
                 ConfirmationCode = "BK-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                LoyaltyPointsEarned = (int)totalAmount,
                 SessionId = "simulated_stripe_session_id",
                 PaymentIntentId = "simulated_stripe_intent_id"
             };
+
+            decimal concessionsTotal = 0;
+
+            if (concessionIds != null && concessionQuantities != null && concessionIds.Length == concessionQuantities.Length)
+            {
+                for (int i = 0; i < concessionIds.Length; i++)
+                {
+                    if (concessionQuantities[i] > 0)
+                    {
+                        var concession = _unitOfWork.Concession.Get(c => c.Id == concessionIds[i]);
+                        if (concession != null)
+                        {
+                            concessionsTotal += (concession.Price * concessionQuantities[i]);
+
+                            newBooking.BookingConcessions.Add(new BookingConcession
+                            {
+                                ConcessionId = concession.Id,
+                                Quantity = concessionQuantities[i],
+                                PriceAtPurchase = concession.Price // Sigurăm prețul istoric
+                            });
+                        }
+                    }
+                }
+            }
+
+            newBooking.TotalAmount = ticketsTotal + concessionsTotal;
+            newBooking.LoyaltyPointsEarned = (int)newBooking.TotalAmount; // Puncte de loialitate pe suma totală
 
             _unitOfWork.Booking.Add(newBooking);
 
@@ -246,12 +273,17 @@ namespace CinemaSystem.Web.Controllers
 
             if (completedBooking != null && !string.IsNullOrEmpty(completedBooking.User?.Email))
             {
-                // Generate PDF and fire the email with attachment
                 byte[] pdfAttachment = GenerateTicketPdfBytes(completedBooking);
-                string subject = $"Your Tickets for {completedBooking.Showtime.Movie.Title} - {completedBooking.ConfirmationCode}";
-                string htmlBody = $"<h3>Thank you for your purchase!</h3><p>Your tickets are attached to this email as a PDF. Please present the QR codes at the cinema doors.</p>";
+                string subject = $"Your Tickets & Order for {completedBooking.Showtime.Movie.Title} - {completedBooking.ConfirmationCode}";
+                string htmlBody = $"<h3>Thank you for your purchase!</h3><p>Your tickets and F&B vouchers are attached as a PDF. Please present the QR codes at the cinema doors and concession stand.</p>";
 
-                _emailService.SendEmailWithAttachmentAsync(completedBooking.User.Email, subject, htmlBody, pdfAttachment, $"Tickets_{completedBooking.ConfirmationCode}.pdf").GetAwaiter().GetResult();
+                try
+                {
+                    _emailService.SendEmailWithAttachmentAsync(completedBooking.User.Email, subject, htmlBody, pdfAttachment, $"Order_{completedBooking.ConfirmationCode}.pdf").GetAwaiter().GetResult();
+                }
+                catch
+                {
+                }
             }
 
             return RedirectToAction(nameof(OrderConfirmation), new { bookingId = newBooking.Id });
@@ -264,7 +296,7 @@ namespace CinemaSystem.Web.Controllers
 
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingConcessions,BookingConcessions.Concession"
             );
 
             if (booking == null)
@@ -283,7 +315,7 @@ namespace CinemaSystem.Web.Controllers
 
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingConcessions,BookingConcessions.Concession"
             );
 
             if (booking == null) return NotFound("Order not found or access denied.");
@@ -333,6 +365,9 @@ namespace CinemaSystem.Web.Controllers
                     {
                         col.Spacing(20);
 
+                        // 1. DIGITAL TICKETS SECTION
+                        col.Item().Text("Movie Tickets").FontSize(16).SemiBold().FontColor(Colors.Grey.Darken3);
+
                         foreach (var ticket in booking.Tickets)
                         {
                             col.Item().Border(1).BorderColor(Colors.Grey.Lighten1).Background(Colors.Grey.Lighten4).Padding(15).Row(row =>
@@ -350,7 +385,7 @@ namespace CinemaSystem.Web.Controllers
                                     ticketCol.Item().Text($"Type: {ticket.Seat.SeatType}");
                                     ticketCol.Item().Text($"Price: ${ticket.Price.ToString("F2")}");
 
-                                    byte[] qrBytes = QRCodeHelper.GenerateQRCodeBytes(ticket.Barcode);
+                                    byte[] qrBytes = CinemaSystem.Utility.QRCodeHelper.GenerateQRCodeBytes(ticket.Barcode);
 
                                     ticketCol.Item().PaddingTop(10).Row(qrRow =>
                                     {
@@ -359,6 +394,28 @@ namespace CinemaSystem.Web.Controllers
                                     });
                                 });
                             });
+                        }
+
+                        // 2. FOOD & BEVERAGE VOUCHERS SECTION (OBJECTIVE FIX)
+                        if (booking.BookingConcessions != null && booking.BookingConcessions.Any())
+                        {
+                            col.Item().PaddingTop(15).Text("Food & Beverage Vouchers").FontSize(16).SemiBold().FontColor(Colors.Orange.Darken2);
+
+                            foreach (var concession in booking.BookingConcessions)
+                            {
+                                col.Item().Border(1).BorderColor(Colors.Orange.Lighten2).Background(Colors.White).Padding(15).Row(row =>
+                                {
+                                    row.ConstantItem(50).AlignMiddle().Text($"{concession.Quantity}x").FontSize(20).Bold().FontColor(Colors.Orange.Medium);
+
+                                    row.RelativeItem().AlignMiddle().Column(cCol =>
+                                    {
+                                        cCol.Item().Text(concession.Concession.Name).FontSize(16).SemiBold();
+                                        cCol.Item().Text("Present this voucher at the concession stand").FontSize(10).FontColor(Colors.Grey.Medium);
+                                    });
+
+                                    row.ConstantItem(100).AlignRight().AlignMiddle().Text($"${(concession.Quantity * concession.PriceAtPurchase).ToString("F2")}").FontSize(16).Bold().FontColor(Colors.Green.Darken2);
+                                });
+                            }
                         }
                     });
 

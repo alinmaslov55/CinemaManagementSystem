@@ -20,6 +20,8 @@ namespace CinemaSystem.DataAccess.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<SeatHold> SeatHolds { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<Concession> Concessions { get; set; }
+        public DbSet<BookingConcession> BookingConcessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +45,9 @@ namespace CinemaSystem.DataAccess.Data
 
             modelBuilder.Entity<SeatHold>().HasQueryFilter(e => !e.IsDeleted && !e.Seat.IsDeleted && !e.Showtime.IsDeleted);
 
+            modelBuilder.Entity<Concession>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<BookingConcession>().HasQueryFilter(e => !e.IsDeleted && !e.Booking.IsDeleted);
+
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
@@ -62,6 +67,9 @@ namespace CinemaSystem.DataAccess.Data
             modelBuilder.Entity<Showtime>().Property(s => s.Price).HasPrecision(18, 2);
             modelBuilder.Entity<Booking>().Property(b => b.TotalAmount).HasPrecision(18, 2);
             modelBuilder.Entity<Ticket>().Property(t => t.Price).HasPrecision(18, 2);
+
+            modelBuilder.Entity<Concession>().Property(c => c.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<BookingConcession>().Property(bc => bc.PriceAtPurchase).HasPrecision(18, 2);
 
             modelBuilder.Entity<CinemaHall>()
                 .HasOne(ch => ch.Cinema)
@@ -111,6 +119,40 @@ namespace CinemaSystem.DataAccess.Data
                 .WithMany(s => s.Bookings)
                 .HasForeignKey(b => b.ShowtimeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // OBJECTIVE FIX: Hardcode static DateTimes to override the dynamic BaseEntity constructor
+            modelBuilder.Entity<Concession>().HasData(
+                new Concession
+                {
+                    Id = 1,
+                    Name = "Large Popcorn",
+                    Description = "Classic salted butter popcorn (150g)",
+                    Price = 12.50m,
+                    IsActive = true,
+                    ImageUrl = "https://via.placeholder.com/150/ffcc00/000000?text=Popcorn",
+                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // <-- ADAUGĂ ASTA
+                },
+                new Concession
+                {
+                    Id = 2,
+                    Name = "Cheese Nachos",
+                    Description = "Crispy tortilla chips with warm cheese dip",
+                    Price = 14.00m,
+                    IsActive = true,
+                    ImageUrl = "https://via.placeholder.com/150/ff9900/000000?text=Nachos",
+                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // <-- ADAUGĂ ASTA
+                },
+                new Concession
+                {
+                    Id = 3,
+                    Name = "Coca-Cola (Large)",
+                    Description = "0.5L fountain drink",
+                    Price = 6.50m,
+                    IsActive = true,
+                    ImageUrl = "https://via.placeholder.com/150/cc0000/ffffff?text=Cola",
+                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // <-- ADAUGĂ ASTA
+                }
+            );
         }
     }
 }

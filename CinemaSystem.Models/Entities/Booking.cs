@@ -1,4 +1,5 @@
 ﻿using CinemaSystem.Models.Data.Enums;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -39,5 +40,8 @@ namespace CinemaSystem.Models.Entities
         public string? PaymentIntentId { get; set; }
 
         public virtual List<Ticket> Tickets { get; set; }
+
+        [ValidateNever]
+        public virtual ICollection<BookingConcession> BookingConcessions { get; set; } = new List<BookingConcession>();
     }
 }

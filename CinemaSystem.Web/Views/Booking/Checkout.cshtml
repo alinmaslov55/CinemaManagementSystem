@@ -1,64 +1,108 @@
 ﻿@model CinemaSystem.Models.ViewModels.CheckoutVM
+@using System.Globalization
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
 
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow border-0 rounded-3">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
 
                 @* --- HEADER & TIMER --- *@
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
-                    <h4 class="mb-0 fw-bold">Order Summary</h4>
-                    <div class="text-warning fw-bold d-flex align-items-center">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3 border-0">
+                    <h5 class="mb-0 fw-bold">Order Summary</h5>
+                    <div class="text-warning fw-bold d-flex align-items-center bg-dark rounded px-2 py-1" style="border: 1px solid #ffc107;">
                         <i class="bi bi-stopwatch fs-5 me-2"></i>
-                        <span id="countdownTimer">10:00</span>
+                        <span id="countdownTimer" class="font-monospace fs-5">10:00</span>
                     </div>
                 </div>
 
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-md-5">
 
                     @* --- MOVIE DETAILS --- *@
-                    <div class="d-flex mb-4">
+                    <div class="d-flex mb-4 pb-4 border-bottom">
                         <img src="@(string.IsNullOrEmpty(Model.Showtime.Movie.ImageUrl) ? "https://via.placeholder.com/100x150" : Model.Showtime.Movie.ImageUrl)"
-                             class="rounded shadow-sm me-3" style="width: 80px; height: 120px; object-fit: cover;" alt="Poster" />
+                             class="rounded shadow-sm me-4" style="width: 90px; height: 135px; object-fit: cover;" alt="Poster" />
 
-                        <div>
-                            <h5 class="fw-bold text-primary mb-1">@Model.Showtime.Movie.Title</h5>
-                            <p class="text-muted mb-0 small"><i class="bi bi-geo-alt-fill"></i> @Model.Showtime.CinemaHall.Cinema.Name</p>
-                            <p class="text-muted mb-0 small"><i class="bi bi-door-open-fill"></i> @Model.Showtime.CinemaHall.Name</p>
-                            <p class="fw-bold text-dark mt-2 mb-0"><i class="bi bi-calendar-event text-primary"></i> @Model.Showtime.StartTime.ToString("dddd, MMM dd, yyyy - HH:mm")</p>
+                        <div class="d-flex flex-column justify-content-center">
+                            <h4 class="fw-bold text-dark mb-1">@Model.Showtime.Movie.Title</h4>
+                            <p class="text-muted mb-1"><i class="bi bi-geo-alt-fill text-danger"></i> <strong>@Model.Showtime.CinemaHall.Cinema.Name</strong></p>
+                            <p class="text-muted mb-1"><i class="bi bi-door-open-fill text-secondary"></i> Hall: @Model.Showtime.CinemaHall.Name</p>
+                            <p class="fw-bold text-primary mt-2 mb-0"><i class="bi bi-calendar-event"></i> @Model.Showtime.StartTime.ToString("dddd, MMM dd, yyyy - HH:mm")</p>
                         </div>
                     </div>
 
-                    <hr />
-
                     @* --- LINE ITEMS (SEATS) --- *@
-                    <h6 class="fw-bold text-uppercase text-muted mb-3">Selected Tickets</h6>
-                    <ul class="list-group list-group-flush mb-4">
+                    <h6 class="fw-bold text-uppercase text-muted mb-3 tracking-wide">Selected Tickets</h6>
+                    <ul class="list-group list-group-flush mb-4 pb-2">
                         @foreach (var item in Model.TicketItems)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>Seat <strong class="fs-5">@item.SeatName</strong></span>
-                                <span class="fw-bold">$@item.Price.ToString("F2")</span>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent border-light">
+                                <span>Seat <strong class="fs-5 text-dark">@item.SeatName</strong></span>
+                                <span class="fw-bold text-dark">$@item.Price.ToString("F2")</span>
                             </li>
                         }
                     </ul>
 
-                    @* --- TOTALS --- *@
-                    <div class="bg-light p-3 rounded mb-4 border d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-muted">Total Due:</h5>
-                        <h3 class="mb-0 text-success fw-bold">$@Model.TotalAmount.ToString("F2")</h3>
-                    </div>
-
-                    @* --- PAYMENT FORM --- *@
                     <form asp-action="FinalizeOrder" method="post" id="checkoutForm">
                         <input type="hidden" name="showtimeId" value="@Model.Showtime.Id" />
 
-                        @* Note: When Stripe is integrated, the card element goes here. 
-                           For now, this button simulates a successful payment submission. *@
+                        @* --- CONCESSIONS (UPSELL FUNNEL) --- *@
+                        @if (Model.AvailableConcessions != null && Model.AvailableConcessions.Any())
+                        {
+                            <h6 class="fw-bold text-uppercase text-muted mb-3 mt-4 tracking-wide">
+                                <i class="bi bi-cup-straw text-warning fs-5 me-1"></i> Add Snacks & Drinks (Optional)
+                            </h6>
+                            
+                            <div class="list-group mb-5 shadow-sm">
+                                @foreach (var concession in Model.AvailableConcessions)
+                                {
+                                    <div class="list-group-item d-flex align-items-center p-3">
+                                        
+                                        @* Hidden inputs for backend array binding *@
+                                        <input type="hidden" name="concessionIds" value="@concession.Id" />
+                                        <input type="hidden" name="concessionQuantities" id="input-qty-@concession.Id" value="0" class="concession-qty-input" data-price="@concession.Price.ToString(CultureInfo.InvariantCulture)" />
 
-                        <button type="submit" id="btnPayNow" class="btn btn-primary btn-lg w-100 fw-bold shadow">
-                            <i class="bi bi-credit-card-fill me-2"></i> Confirm & Pay
+                                        <img src="@(string.IsNullOrEmpty(concession.ImageUrl) ? "https://via.placeholder.com/60" : concession.ImageUrl)"
+                                             class="rounded me-3 border" style="width: 65px; height: 65px; object-fit: cover;" alt="@concession.Name" />
+                                        
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0 fw-bold text-dark">@concession.Name</h6>
+                                            <small class="text-muted d-block mb-1" style="font-size: 0.8rem;">@concession.Description</small>
+                                            <div class="text-success fw-bold">$@concession.Price.ToString("F2")</div>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center bg-light rounded-pill border p-1">
+                                            <button type="button" class="btn btn-sm btn-light rounded-circle fw-bold text-danger"
+                                                    style="width: 32px; height: 32px;"
+                                                    onclick="updateQty(@concession.Id, -1)">
+                                                -
+                                            </button>
+                                            
+                                            <span class="mx-3 fw-bold fs-5 font-monospace" id="display-qty-@concession.Id" style="min-width: 20px; text-align: center;">0</span>
+                                            
+                                            <button type="button" class="btn btn-sm btn-light rounded-circle fw-bold text-success"
+                                                    style="width: 32px; height: 32px;"
+                                                    onclick="updateQty(@concession.Id, 1)">
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @* --- DYNAMIC TOTALS --- *@
+                        <div class="bg-light p-4 rounded-4 mb-4 border shadow-sm d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0 text-muted fw-bold">Total Due</h5>
+                                <small class="text-muted" id="totalBreakdown">Tickets: $@Model.TotalAmount.ToString("F2") + F&B: $0.00</small>
+                            </div>
+                            <h2 class="mb-0 text-success fw-bold" id="grandTotalDisplay">$@Model.TotalAmount.ToString("F2")</h2>
+                        </div>
+
+                        @* --- PAYMENT BUTTON --- *@
+                        <button type="submit" id="btnPayNow" class="btn btn-primary btn-lg w-100 fw-bold shadow-lg py-3 rounded-pill fs-5">
+                            <i class="bi bi-credit-card-fill me-2"></i> Confirm & Pay <span id="btnTotalText">$@Model.TotalAmount.ToString("F2")</span>
                         </button>
                     </form>
 
@@ -71,9 +115,43 @@
 
 @section Scripts {
     <script>
-        // UX Constraint: 10 Minute Countdown Timer
-        // This mirrors the 10-minute database lock we created in the LockSeatsAjax method.
-        let timeRemaining = 600; // 10 minutes in seconds
+        const baseTicketTotal = parseFloat('@Model.TotalAmount.ToString(CultureInfo.InvariantCulture)');
+        
+        function updateQty(id, change) {
+            const inputEl = document.getElementById(`input-qty-${id}`);
+            const displayEl = document.getElementById(`display-qty-${id}`);
+            
+            let currentQty = parseInt(inputEl.value);
+            let newQty = currentQty + change;
+            
+            if(newQty < 0) newQty = 0;
+            if(newQty > 10) newQty = 10;
+            
+            inputEl.value = newQty;
+            displayEl.innerText = newQty;
+            
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let concessionsTotal = 0;
+            const inputs = document.querySelectorAll('.concession-qty-input');
+            
+            inputs.forEach(input => {
+                let qty = parseInt(input.value);
+                let price = parseFloat(input.getAttribute('data-price'));
+                concessionsTotal += (qty * price);
+            });
+            
+            let grandTotal = baseTicketTotal + concessionsTotal;
+            
+            document.getElementById('grandTotalDisplay').innerText = '$' + grandTotal.toFixed(2);
+            document.getElementById('btnTotalText').innerText = '$' + grandTotal.toFixed(2);
+            document.getElementById('totalBreakdown').innerText = `Tickets: $${baseTicketTotal.toFixed(2)} + F&B: $${concessionsTotal.toFixed(2)}`;
+        }
+
+
+        let timeRemaining = 600;
         const timerDisplay = document.getElementById('countdownTimer');
         const btnPayNow = document.getElementById('btnPayNow');
 
@@ -82,33 +160,31 @@
 
             let minutes = Math.floor(timeRemaining / 60);
             let seconds = timeRemaining % 60;
-
-            // Add leading zero
             seconds = seconds < 10 ? '0' + seconds : seconds;
 
             timerDisplay.innerText = `${minutes}:${seconds}`;
 
             if (timeRemaining <= 60) {
-                timerDisplay.classList.remove('text-warning');
-                timerDisplay.classList.add('text-danger');
+                timerDisplay.parentElement.classList.replace('text-warning', 'text-danger');
+                timerDisplay.parentElement.style.borderColor = '#dc3545';
             }
 
             if (timeRemaining <= 0) {
                 clearInterval(countdown);
                 timerDisplay.innerText = "EXPIRED";
                 btnPayNow.disabled = true;
-                btnPayNow.innerText = "Session Expired - Please Reselect Seats";
+                btnPayNow.innerHTML = "Session Expired - Reselect Seats";
                 btnPayNow.classList.replace('btn-primary', 'btn-secondary');
 
-                alert("Your seat reservation has expired. You will be redirected to the seat map.");
+                alert("Your seat reservation has expired. You will be redirected.");
                 window.location.href = '/Booking/SelectSeats?showtimeId=@Model.Showtime.Id';
             }
         }, 1000);
 
-        // Prevent double submission
+
         document.getElementById('checkoutForm').addEventListener('submit', function() {
             btnPayNow.disabled = true;
-            btnPayNow.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+            btnPayNow.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing Transaction...';
         });
     </script>
 }

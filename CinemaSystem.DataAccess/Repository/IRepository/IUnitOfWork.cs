@@ -16,7 +16,7 @@ namespace CinemaSystem.DataAccess.Repository.IRepository
         ITicketRepository Ticket { get; }
         IReviewRepository Review { get; }
         ISeatHoldRepository SeatHold { get; }
-
+        IConcessionRepository Concession { get; }
         void Save();
     }
 }

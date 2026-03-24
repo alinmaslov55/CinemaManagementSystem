@@ -2,6 +2,7 @@ using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Data.Enums;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Utility;
 using CinemaSystem.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace CinemaSystem.Web.Controllers
     public class HomeController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IOllamaService _ollamaService;
 
-        public HomeController(IUnitOfWork unitOfWork)
+        public HomeController(IUnitOfWork unitOfWork, IOllamaService ollamaService)
         {
             _unitOfWork = unitOfWork;
+            _ollamaService = ollamaService;
         }
 
         public IActionResult Index(string? searchString, MovieCategory? category, DateTime? selectedDate)
@@ -160,6 +163,53 @@ namespace CinemaSystem.Web.Controllers
             _unitOfWork.Save();
 
             return RedirectToAction(nameof(Details), new { id = movieId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AskAI([FromBody] string question)
+        {
+            if (string.IsNullOrWhiteSpace(question)) return BadRequest("Empty question");
+
+            var today = DateTime.Now;
+            var nextWeek = today.AddDays(7);
+
+            // 1. Extragem difuzările (Showtimes) din următoarele 7 zile, incluzând detaliile filmului și ale sălii
+            var upcomingShowtimes = _unitOfWork.Showtime.GetAll(
+                s => s.StartTime >= today && s.StartTime <= nextWeek,
+                includeProperties: "Movie,CinemaHall,CinemaHall.Cinema"
+            ).ToList();
+
+            // 2. Extragem meniul de la bar (Concessions)
+            var concessions = _unitOfWork.Concession.GetAll(c => c.IsActive).ToList();
+
+            // 3. Construim Super-Contextul pentru Ollama
+            var contextBuilder = new System.Text.StringBuilder();
+
+            contextBuilder.AppendLine("--- CURRENT SHOWTIMES (Next 7 Days) ---");
+
+            // Grupăm difuzările pe filme pentru ca AI-ul să le înțeleagă logic
+            var groupedShowtimes = upcomingShowtimes.GroupBy(s => s.Movie.Title);
+            foreach (var group in groupedShowtimes)
+            {
+                var movie = group.First().Movie;
+                contextBuilder.AppendLine($"\nMOVIE: {movie.Title} (Genre: {movie.MovieCategory}, Rating: {movie.ImdbRating}/5)");
+
+                foreach (var show in group.OrderBy(s => s.StartTime))
+                {
+                    contextBuilder.AppendLine($"- {show.StartTime.ToString("dddd, MMM dd at HH:mm")} | Location: {show.CinemaHall.Cinema.Name} (Hall: {show.CinemaHall.Name}) | Price: ${(show.Price ?? 0).ToString("F2")}");
+                }
+            }
+
+            contextBuilder.AppendLine("\n--- AVAILABLE SNACKS & DRINKS (CONCESSIONS) ---");
+            foreach (var item in concessions)
+            {
+                contextBuilder.AppendLine($"- {item.Name}: ${item.Price.ToString("F2")} ({item.Description})");
+            }
+
+            // 4. Trimitem întrebarea și contextul bogat către Ollama
+            var answer = await _ollamaService.GetMovieRecommendationAsync(question, contextBuilder.ToString());
+
+            return Json(new { response = answer });
         }
 
         public IActionResult Privacy()

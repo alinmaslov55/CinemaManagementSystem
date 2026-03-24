@@ -8,7 +8,7 @@
 <div class="container-fluid p-0">
 
     @* ==========================================
-       ZONE 1: THE HERO CAROUSEL
+       ZONE 1: THE HERO CAROUSEL       
        ========================================== *@
     @if (Model.HeroMovies != null && Model.HeroMovies.Any())
     {
@@ -20,7 +20,6 @@
                 @foreach (var hero in Model.HeroMovies)
                 {
                     <div class="carousel-item @(first ? "active" : "")">
-                        @* Dark overlay to ensure text is readable against the poster *@
                         <div class="carousel-overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.6); z-index: 1;"></div>
                         <img src="@(string.IsNullOrEmpty(hero.Movie.ImageUrl) ? "https://via.placeholder.com/1200x500" : hero.Movie.ImageUrl)"
                              class="d-block w-100" style="height: 500px; object-fit: cover; object-position: center top;" alt="@hero.Movie.Title">
@@ -143,23 +142,193 @@
     </div>
 </div>
 
+@* ==========================================
+   OBJECTIVE FIX: AI CHAT WIDGET
+   ========================================== *@
+<button id="aiChatToggle" class="btn btn-primary rounded-circle shadow-lg d-flex justify-content-center align-items-center" style="position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; z-index: 1050;">
+    <i class="bi bi-robot fs-3"></i>
+</button>
+
+<div id="aiChatWindow" class="card shadow-lg border-0" style="position: fixed; bottom: 110px; right: 30px; width: 350px; display: none; z-index: 1050; border-radius: 15px; overflow: hidden;">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3 border-0">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-robot me-2"></i> Cinema AI Assistant</h6>
+        <button type="button" class="btn-close btn-close-white" id="aiChatClose" aria-label="Close"></button>
+    </div>
+    
+    <div class="card-body bg-light p-3" id="aiChatBody" style="height: 350px; overflow-y: auto;">
+        <div class="d-flex mb-3">
+            <div class="bg-primary text-white p-2 rounded-3" style="max-width: 85%; font-size: 0.9rem;">
+                Hi! I'm your AI assistant. Tell me what kind of movie you're looking for, and I'll give you a recommendation!
+            </div>
+        </div>
+        </div>
+    
+    <div class="card-footer bg-white p-2 border-top">
+        <div class="input-group">
+            <input type="text" id="aiChatInput" class="form-control border-0 bg-light" placeholder="Ask for a movie..." autocomplete="off" />
+            <button class="btn btn-primary rounded-circle ms-2" id="aiChatSend" style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
     /* Smooth hover effect for the movie cards */
     .movie-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s;
     }
-
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-        }
+    .movie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+    
+    /* AI Chat Scrollbar styling */
+    #aiChatBody::-webkit-scrollbar {
+        width: 6px;
+    }
+    #aiChatBody::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+    }
+    #aiChatBody::-webkit-scrollbar-thumb {
+        background: #c1c1c1; 
+        border-radius: 10px;
+    }
+    
+    /* Animation for the chat opening */
+    #aiChatWindow {
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @@keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
 </style>
 
 @section Scripts {
     <script>
-        // UX Enhancement: Auto-submit the form when the Genre dropdown changes
+        // 1. Existing form auto-submit logic
         document.querySelector('select[name="category"]').addEventListener('change', function() {
             this.form.submit();
         });
+
+        // 2. AI Chat Logic
+        const chatToggleBtn = document.getElementById('aiChatToggle');
+        const chatWindow = document.getElementById('aiChatWindow');
+        const chatCloseBtn = document.getElementById('aiChatClose');
+        const chatBody = document.getElementById('aiChatBody');
+        const chatInput = document.getElementById('aiChatInput');
+        const chatSendBtn = document.getElementById('aiChatSend');
+
+        // Toggle visibility
+        chatToggleBtn.addEventListener('click', () => {
+            chatWindow.style.display = chatWindow.style.display === 'none' || chatWindow.style.display === '' ? 'block' : 'none';
+            if(chatWindow.style.display === 'block') chatInput.focus();
+        });
+
+        chatCloseBtn.addEventListener('click', () => {
+            chatWindow.style.display = 'none';
+        });
+
+        // Send message on Enter key or Button click
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        chatSendBtn.addEventListener('click', sendMessage);
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Append User Message to UI
+            appendMessage(text, 'user');
+            chatInput.value = '';
+
+            // Show 'typing' indicator
+            const typingId = 'typing-' + Date.now();
+            appendTypingIndicator(typingId);
+
+            // AJAX call to Backend (Ollama)
+            // Notă: Folosim JSON.stringify(text) pentru a trimite un string brut acceptat de [FromBody] string în C#
+            fetch('/Home/AskAI', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(text)
+            })
+            .then(response => {
+                if(!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(data => {
+                removeElement(typingId);
+                appendMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                removeElement(typingId);
+                appendMessage("I'm having trouble connecting to my AI core right now.", 'ai');
+                console.error('Error:', error);
+            });
+        }
+
+        // Helper funcție: Adaugă mesajele vizual pe ecran
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('d-flex', 'mb-3');
+            
+            if (sender === 'user') {
+                msgDiv.classList.add('justify-content-end');
+                msgDiv.innerHTML = `
+                    <div class="bg-dark text-white p-2 rounded-3 shadow-sm" style="max-width: 85%; font-size: 0.9rem;">
+                        ${escapeHTML(text)}
+                    </div>
+                `;
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="bg-primary text-white p-2 rounded-3 shadow-sm" style="max-width: 85%; font-size: 0.9rem;">
+                        ${escapeHTML(text)}
+                    </div>
+                `;
+            }
+            
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll la final
+        }
+
+        // Helper funcție: Indicator de tastare
+        function appendTypingIndicator(id) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('d-flex', 'mb-3');
+            msgDiv.id = id;
+            msgDiv.innerHTML = `
+                <div class="bg-primary text-white p-2 rounded-3 opacity-75" style="font-size: 0.9rem;">
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Thinking...
+                </div>
+            `;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function removeElement(id) {
+            const el = document.getElementById(id);
+            if(el) el.remove();
+        }
+
+        // Evită XSS (Cross-Site Scripting)
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag])
+            );
+        }
     </script>
 }

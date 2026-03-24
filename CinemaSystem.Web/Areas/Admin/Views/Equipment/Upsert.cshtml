@@ -1,0 +1,105 @@
+﻿@model CinemaSystem.Models.ViewModels.EquipmentVM
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">@(Model.Equipment.Id != 0 ? "Update" : "Register") Equipment</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <form method="post" class="row" enctype="multipart/form-data">
+            <input asp-for="Equipment.Id" hidden />
+            
+            <div class="col-12">
+                <div class="border p-3 mt-4 row rounded">
+                    
+                    @* --- RÂNDUL 1: Date de Identificare --- *@
+                    <div class="form-floating py-2 col-md-6">
+                        <input asp-for="Equipment.Name" class="form-control border-0 shadow" placeholder="ex: Laser Projector 4K" />
+                        <label asp-for="Equipment.Name" class="ms-2">Asset Name <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Equipment.Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-md-6">
+                        <input asp-for="Equipment.SerialNumber" class="form-control border-0 shadow" placeholder="ex: SN-12345" />
+                        <label asp-for="Equipment.SerialNumber" class="ms-2">Serial Number</label>
+                        <span asp-validation-for="Equipment.SerialNumber" class="text-danger"></span>
+                    </div>
+
+                    @* --- RÂNDUL 2: Categorie și Status --- *@
+                    <div class="form-floating py-2 col-md-6">
+                        <select asp-for="Equipment.Type" asp-items="Html.GetEnumSelectList<CinemaSystem.Models.Data.Enums.EquipmentType>()" class="form-select border-0 shadow">
+                            <option disabled selected>-- Select Equipment Type --</option>
+                        </select>
+                        <label asp-for="Equipment.Type" class="ms-2">Type <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Equipment.Type" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-md-6">
+                        <select asp-for="Equipment.Status" asp-items="Html.GetEnumSelectList<CinemaSystem.Models.Data.Enums.EquipmentStatus>()" class="form-select border-0 shadow">
+                        </select>
+                        <label asp-for="Equipment.Status" class="ms-2">Operational Status <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Equipment.Status" class="text-danger"></span>
+                    </div>
+
+                    @* --- RÂNDUL 3: Locație și Achiziție --- *@
+                    <div class="form-floating py-2 col-md-6">
+                        <select asp-for="Equipment.CinemaHallId" asp-items="@Model.HallList" class="form-select border-0 shadow">
+                            <option disabled selected>-- Select Installed Location --</option>
+                        </select>
+                        <label asp-for="Equipment.CinemaHallId" class="ms-2">Location (Hall) <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Equipment.CinemaHallId" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-md-6">
+                        @* OBJECTIVE FIX: Data formatată corect pentru HTML5 *@
+                        <input asp-for="Equipment.PurchaseDate" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control border-0 shadow" />
+                        <label asp-for="Equipment.PurchaseDate" class="ms-2">Purchase Date <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Equipment.PurchaseDate" class="text-danger"></span>
+                    </div>
+
+                    @* --- RÂNDUL 4: Mentenanță --- *@
+                    <div class="form-floating py-2 col-md-6">
+                        @* OBJECTIVE FIX: Data formatată corect pentru HTML5 *@
+                        <input asp-for="Equipment.LastMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control border-0 shadow" />
+                        <label asp-for="Equipment.LastMaintenanceDate" class="ms-2">Last Maintenance</label>
+                        <span asp-validation-for="Equipment.LastMaintenanceDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-md-6">
+                        @* OBJECTIVE FIX: Data formatată corect pentru HTML5 *@
+                        <input asp-for="Equipment.NextMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control border-0 shadow" />
+                        <label asp-for="Equipment.NextMaintenanceDate" class="ms-2">Next Scheduled Maintenance</label>
+                        <span asp-validation-for="Equipment.NextMaintenanceDate" class="text-danger"></span>
+                    </div>
+
+                    @* --- RÂNDUL 5: Notițe Tehnice --- *@
+                    <div class="form-floating py-2 col-12">
+                        <textarea asp-for="Equipment.MaintenanceNotes" class="form-control border-0 shadow" style="height: 100px" placeholder="Add technical notes here..."></textarea>
+                        <label asp-for="Equipment.MaintenanceNotes" class="ms-2">Maintenance Notes (Optional)</label>
+                        <span asp-validation-for="Equipment.MaintenanceNotes" class="text-danger"></span>
+                    </div>
+
+                    @* --- BUTOANE DE ACȚIUNE --- *@
+                    <div class="row pt-4 mt-3 border-top">
+                        <div class="col-6 col-md-3">
+                            <button type="submit" class="btn btn-primary form-control fw-bold">
+                                @(Model.Equipment.Id != 0 ? "Update Asset" : "Register Asset")
+                            </button>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a asp-controller="Equipment" asp-action="Index" class="btn btn-outline-secondary form-control">
+                                Back to List
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

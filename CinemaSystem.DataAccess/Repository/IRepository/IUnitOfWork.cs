@@ -17,6 +17,7 @@ namespace CinemaSystem.DataAccess.Repository.IRepository
         IReviewRepository Review { get; }
         ISeatHoldRepository SeatHold { get; }
         IConcessionRepository Concession { get; }
+        IEquipmentRepository Equipment { get; }
         void Save();
     }
 }

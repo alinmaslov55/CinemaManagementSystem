@@ -1,0 +1,107 @@
+﻿@model List<CinemaSystem.Models.Entities.Equipment>
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Equipment Fleet Management</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-end">
+                <a asp-controller="Equipment" asp-action="Upsert" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Register New Asset
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Asset Name</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Location (Hall)</th>
+                    <th>Next Maintenance</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var obj in Model.OrderBy(u => u.CinemaHall.Name))
+                {
+                    <tr>
+                        <td class="align-middle fw-bold">
+                            @obj.Name
+                            <br /><small class="text-muted fw-normal">SN: @(obj.SerialNumber ?? "N/A")</small>
+                        </td>
+                        <td class="align-middle">@obj.Type.ToString()</td>
+                        <td class="align-middle">
+                            @if (obj.Status.ToString() == "Operational")
+                            {
+                                <span class="badge bg-success">@obj.Status</span>
+                            }
+                            else if (obj.Status.ToString() == "NeedsMaintenance")
+                            {
+                                <span class="badge bg-warning text-dark">@obj.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">@obj.Status</span>
+                            }
+                        </td>
+                        <td class="align-middle">@obj.CinemaHall.Name</td>
+                        <td class="align-middle">
+                            @(obj.NextMaintenanceDate.HasValue? obj.NextMaintenanceDate.Value.ToString("MMM dd, yyyy") : "Unscheduled")
+                        </td>
+                        <td class="align-middle text-center">
+                            <div class="w-75 btn-group" role="group">
+                                <a asp-controller="Equipment" asp-action="Upsert" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <a onClick="Delete('/admin/equipment/delete/@obj.Id')" class="btn btn-danger mx-2">
+                                    <i class="bi bi-trash-fill"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function Delete(url) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        success: function (data) {
+                            if (data.success) {
+                                location.reload();
+                                toastr.success(data.message);
+                            }
+                            else {
+                                toastr.error(data.message);
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

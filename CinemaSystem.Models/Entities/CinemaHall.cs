@@ -38,5 +38,7 @@ namespace CinemaSystem.Models.Entities
 
         [ValidateNever]
         public virtual List<Showtime> Showtimes { get; set; }
+        [ValidateNever]
+        public virtual ICollection<Equipment> Equipments { get; set; } = new List<Equipment>();
     }
 }

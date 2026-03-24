@@ -22,6 +22,7 @@ namespace CinemaSystem.DataAccess.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Concession> Concessions { get; set; }
         public DbSet<BookingConcession> BookingConcessions { get; set; }
+        public DbSet<Equipment> Equipments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +48,8 @@ namespace CinemaSystem.DataAccess.Data
 
             modelBuilder.Entity<Concession>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<BookingConcession>().HasQueryFilter(e => !e.IsDeleted && !e.Booking.IsDeleted);
+
+            modelBuilder.Entity<Equipment>().HasQueryFilter(e => !e.IsDeleted && !e.CinemaHall.IsDeleted);
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

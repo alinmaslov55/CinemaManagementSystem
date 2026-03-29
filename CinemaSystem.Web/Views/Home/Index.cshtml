@@ -3,217 +3,279 @@
 
 @{
     ViewData["Title"] = "Home Page";
+    Layout = "_Layout"; 
 }
 
-<div class="container-fluid p-0">
+<style>
+    /* Gradient personalizat folosind culorile tale din Pallete.md */
+    .cta-gradient { background: linear-gradient(135deg, #7f6fa2 0%, #976987 100%); }
+    .hero-gradient { background: linear-gradient(180deg, rgba(249,249,249,0) 0%, rgba(249,249,249,1) 95%); }
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<div class="bg-[#f9f9f9] font-['Inter'] text-[#1a1c1c] antialiased w-full">
 
     @* ==========================================
-       ZONE 1: THE HERO CAROUSEL       
+       ZONE 1: THE HERO SECTION (Din code.html)
        ========================================== *@
     @if (Model.HeroMovies != null && Model.HeroMovies.Any())
     {
-        <div id="heroCarousel" class="carousel slide mb-5 shadow-lg" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                @{
-                    var first = true;
-                }
-                @foreach (var hero in Model.HeroMovies)
-                {
-                    <div class="carousel-item @(first ? "active" : "")">
-                        <div class="carousel-overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.6); z-index: 1;"></div>
-                        <img src="@(string.IsNullOrEmpty(hero.Movie.ImageUrl) ? "https://via.placeholder.com/1200x500" : hero.Movie.ImageUrl)"
-                             class="d-block w-100" style="height: 500px; object-fit: cover; object-position: center top;" alt="@hero.Movie.Title">
-
-                        <div class="carousel-caption d-none d-md-block text-start" style="z-index: 2; bottom: 20%;">
-                            <span class="badge bg-warning text-dark mb-2 fs-6">Top Rated: @hero.AverageRating.ToString("0.0") / 5.0</span>
-                            <h1 class="display-3 fw-bold text-white shadow-sm">@hero.Movie.Title</h1>
-                            <p class="lead text-light w-75 text-truncate">@hero.Movie.Description</p>
-                            <a asp-action="Details" asp-route-id="@hero.Movie.Id" class="btn btn-primary btn-lg fw-bold px-5 rounded-pill shadow">Get Tickets</a>
-                        </div>
-                    </div>
-                    first = false;
-                }
+        var hero = Model.HeroMovies.First(); 
+        <section class="relative w-full h-[85vh] lg:h-[920px] overflow-hidden">
+            <img alt="@hero.Movie.Title" class="w-full h-full object-cover" 
+                 src="@(string.IsNullOrEmpty(hero.Movie.ImageUrl) ? "https://via.placeholder.com/1920x1080" : hero.Movie.ImageUrl)" />
+            
+            <div class="absolute inset-0 bg-black/40"></div>
+            <div class="absolute inset-0 hero-gradient"></div>
+            
+            <div class="absolute bottom-32 left-8 md:left-24 max-w-2xl z-10">
+                <span class="inline-block bg-[#ffd8e6] text-[#613b4c] px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4">
+                    Featured Premiere • Rating: @hero.AverageRating.ToString("0.0")
+                </span>
+                <h1 class="text-6xl md:text-8xl font-['Manrope'] font-extrabold text-white tracking-tighter mb-6 leading-none uppercase">
+                    @hero.Movie.Title
+                </h1>
+                <p class="text-white/80 font-['Inter'] text-lg mb-8 max-w-lg leading-relaxed line-clamp-3">
+                    @hero.Movie.Description
+                </p>
+                <div class="flex items-center gap-4">
+                    <a asp-action="Details" asp-route-id="@hero.Movie.Id" class="cta-gradient text-white px-10 py-4 rounded-xl font-['Manrope'] uppercase tracking-widest text-xs font-black shadow-2xl shadow-[#7f6fa2]/40 flex items-center gap-3 active:scale-95 transition-transform">
+                        <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+                        Secure Tickets
+                    </a>
+                    <button class="glass-panel text-[#1a1c1c] px-8 py-4 rounded-xl font-['Manrope'] uppercase tracking-widest text-xs font-black flex items-center gap-3 border border-white/30 hover:bg-white/90 transition-colors active:scale-95">
+                        <span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+                        Trailer
+                    </button>
+                </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" style="z-index: 3;">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" style="z-index: 3;">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-        </div>
+        </section>
     }
 
-    <div class="container">
+    <main class="max-w-[1440px] mx-auto">
 
         @* ==========================================
            ZONE 2: THE UTILITY BAR (SEARCH & FILTER)
            ========================================== *@
-        <form method="get" asp-action="Index" class="row bg-white p-4 rounded-4 shadow-sm mb-5 border" style="margin-top: -80px; position: relative; z-index: 10;">
-            <div class="col-md-4 mb-3 mb-md-0">
-                <label class="form-label fw-bold text-muted small text-uppercase">Search Title</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
-                    <input type="text" name="searchString" class="form-control border-start-0 ps-0" placeholder="e.g. Inception..." value="@Model.CurrentSearch" />
+        <div class="px-6 md:px-24 relative z-20" style="margin-top: -80px;">
+            <form method="get" asp-action="Index" class="glass-panel p-6 rounded-3xl shadow-lg border border-[#7a757f]/20">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <div class="md:col-span-4">
+                        <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">Search Title</label>
+                        <div class="flex items-center bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 py-2.5 focus-within:ring-2 ring-[#7f6fa2] transition-all">
+                            <span class="material-symbols-outlined text-[#7f6fa2] text-sm mr-2" data-icon="search">search</span>
+                            <input type="text" name="searchString" class="bg-transparent border-none w-full focus:outline-none text-sm font-['Inter']" placeholder="e.g. Inception..." value="@Model.CurrentSearch" />
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">Genre</label>
+                        <select name="category" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="w-full bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] cursor-pointer">
+                            <option value="">All Genres</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">Date</label>
+                        <input type="date" name="selectedDate" class="w-full bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] text-[#1a1c1c]" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <div class="md:col-span-2 flex items-end gap-2">
+                        <button type="submit" class="w-full bg-[#7f6fa2] hover:bg-[#976987] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md">Filter</button>
+                        <a asp-action="Index" class="bg-[#f3f3f3] hover:bg-[#e2e2e2] text-[#79767b] py-3 px-4 rounded-xl transition-colors flex items-center justify-center">
+                            <i class="bi bi-arrow-clockwise text-lg"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-
-            <div class="col-md-3 mb-3 mb-md-0">
-                <label class="form-label fw-bold text-muted small text-uppercase">Genre</label>
-                <select name="category" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="form-select">
-                    <option value="">All Genres</option>
-                </select>
-            </div>
-
-            <div class="col-md-3 mb-3 mb-md-0">
-                <label class="form-label fw-bold text-muted small text-uppercase">Date</label>
-                <input type="date" name="selectedDate" class="form-control" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")" />
-            </div>
-
-            <div class="col-md-2 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary w-100 fw-bold">Filter</button>
-                <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
-            </div>
-        </form>
+            </form>
+        </div>
 
         @* ==========================================
-           ZONE 3: PRIMARY FEED (NOW PLAYING)
+           ZONE 3: PRIMARY FEED (NOW SHOWING BENTO GRID)
            ========================================== *@
-        <div class="mb-5">
-            <h3 class="fw-bold border-bottom pb-2 mb-4 text-uppercase">Now Playing <i class="bi bi-film text-primary"></i></h3>
+        <section class="py-24 px-6 md:px-24">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-4xl font-['Manrope'] font-extrabold tracking-tight text-[#7f6fa2]">Now Showing</h2>
+                    <p class="text-[#79767b] mt-2 font-['Inter']">Curated selection of global cinema</p>
+                </div>
+            </div>
 
             @if (!Model.NowPlaying.Any())
             {
-                <div class="alert alert-info text-center py-4">No movies found matching your current filters.</div>
+                <div class="bg-[#f3f3f3] rounded-2xl p-12 text-center text-[#79767b] font-['Inter'] border border-[#cbc4cf]/30">No movies found matching your current filters.</div>
             }
             else
             {
-                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-                    @foreach (var item in Model.NowPlaying)
-                    {
-                        <div class="col">
-                            <div class="card h-100 border-0 shadow-sm movie-card">
-                                <div class="position-relative">
-                                    <img src="@(string.IsNullOrEmpty(item.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : item.Movie.ImageUrl)" class="card-img-top" alt="@item.Movie.Title" style="height: 400px; object-fit: cover;">
-                                    <span class="position-absolute top-0 end-0 badge bg-danger m-2 p-2 shadow">@item.Movie.AgeRating</span>
-                                </div>
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title fw-bold text-truncate mb-1">@item.Movie.Title</h5>
-                                    <div class="d-flex justify-content-between align-items-center mb-3 small">
-                                        <span class="text-muted"><i class="bi bi-clock"></i> @item.Movie.DurationInMinutes mins</span>
-                                        <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> @item.AverageRating.ToString("0.0")</span>
-                                    </div>
-                                    <span class="badge bg-light text-dark border mb-3 w-50">@item.Movie.MovieCategory</span>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    @{
+                        var firstMovie = Model.NowPlaying.First();
+                        var restMovies = Model.NowPlaying.Skip(1);
+                    }
 
-                                    <a asp-action="Details" asp-route-id="@item.Movie.Id" class="btn btn-primary mt-auto w-100 rounded-pill fw-bold">Get Tickets</a>
+                    <div class="md:col-span-2 relative group overflow-hidden rounded-2xl bg-[#f3f3f3] shadow-sm">
+                        <div class="aspect-[16/9] w-full overflow-hidden">
+                            <img alt="@firstMovie.Movie.Title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                 src="@(string.IsNullOrEmpty(firstMovie.Movie.ImageUrl) ? "https://via.placeholder.com/800x450" : firstMovie.Movie.ImageUrl)" />
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-8 w-full flex justify-between items-end">
+                            <div>
+                                <div class="flex gap-2 mb-2">
+                                    <span class="text-[10px] bg-[#7f6fa2] text-white px-2 py-0.5 rounded uppercase font-bold tracking-widest">@firstMovie.Movie.AgeRating</span>
+                                    <span class="text-[10px] bg-white/20 text-white backdrop-blur px-2 py-0.5 rounded uppercase font-bold tracking-widest">@firstMovie.Movie.MovieCategory</span>
+                                </div>
+                                <h3 class="text-3xl font-['Manrope'] font-bold text-white tracking-tight">@firstMovie.Movie.Title</h3>
+                                <p class="text-white/70 text-sm font-['Inter'] mt-1"><i class="bi bi-clock me-1"></i> @firstMovie.Movie.DurationInMinutes min</p>
+                            </div>
+                            <a asp-action="Details" asp-route-id="@firstMovie.Movie.Id" class="bg-white text-[#1a1c1c] p-4 rounded-full shadow-xl active:scale-90 transition-transform hover:bg-[#f3f3f3]">
+                                <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    @foreach (var item in restMovies)
+                    {
+                        <div class="group flex flex-col">
+                            <div class="aspect-[2/3] rounded-2xl overflow-hidden mb-4 relative shadow-sm border border-[#cbc4cf]/30">
+                                <img alt="@item.Movie.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                     src="@(string.IsNullOrEmpty(item.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : item.Movie.ImageUrl)" />
+                                <div class="absolute top-4 right-4 bg-[#ffd8e6] text-[#613b4c] font-bold text-[10px] px-2 py-1 rounded shadow-sm">
+                                    @item.AverageRating.ToString("0.0")
+                                </div>
+                                <div class="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white font-bold text-[10px] px-2 py-1 rounded">
+                                    @item.Movie.AgeRating
                                 </div>
                             </div>
+                            <h4 class="font-['Manrope'] font-bold text-lg text-[#1a1c1c] truncate">@item.Movie.Title</h4>
+                            <p class="text-[#79767b] text-xs uppercase tracking-widest font-bold mt-1">@item.Movie.MovieCategory • @item.Movie.DurationInMinutes min</p>
+                            <a asp-action="Details" asp-route-id="@item.Movie.Id" class="mt-4 w-full border border-[#7f6fa2]/30 hover:bg-[#7f6fa2] hover:text-white text-[#7f6fa2] text-center py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">
+                                Quick Book
+                            </a>
                         </div>
                     }
                 </div>
             }
-        </div>
+        </section>
 
         @* ==========================================
-           ZONE 4: SECONDARY FEED (COMING SOON)
+           ZONE 4: OFFERS / VIP SECTION (Din code.html)
+           ========================================== *@
+        <section class="py-16 bg-[#f3f3f3] px-6 md:px-24 rounded-[3rem] mx-4 md:mx-12 mb-24 shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="relative rounded-3xl overflow-hidden h-[400px] flex items-center p-12 group">
+                    <img alt="VIP Cinema" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                         src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070&auto=format&fit=crop" />
+                    <div class="absolute inset-0 bg-[#7f6fa2]/50 backdrop-blur-[2px]"></div>
+                    <div class="relative z-10 max-w-sm">
+                        <h3 class="text-4xl font-['Manrope'] font-extrabold text-white mb-4 tracking-tight">The Velvet Experience</h3>
+                        <p class="text-white/90 mb-8 font-['Inter']">Elevate your cinema journey with dine-in service and premium leather loungers.</p>
+                        <button class="bg-white text-[#7f6fa2] px-8 py-3 rounded-xl font-['Manrope'] text-xs font-bold uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-transform">Explore VIP</button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm flex flex-col justify-between border border-[#cbc4cf]/30">
+                        <div>
+                            <span class="material-symbols-outlined text-[#976987] text-4xl mb-4" data-icon="redeem">redeem</span>
+                            <h4 class="text-xl font-['Manrope'] font-bold text-[#1a1c1c] mb-2">Member Rewards</h4>
+                            <p class="text-sm text-[#79767b] leading-relaxed">Earn points for every ticket and treat yourself to complimentary perks.</p>
+                        </div>
+                        <a class="text-[#7f6fa2] font-['Manrope'] text-xs font-bold uppercase tracking-widest mt-6 inline-flex items-center gap-2 hover:opacity-70 transition-opacity" href="#">Join Now <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span></a>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm flex flex-col justify-between border border-[#cbc4cf]/30">
+                        <div>
+                            <span class="material-symbols-outlined text-[#976987] text-4xl mb-4" data-icon="local_activity">local_activity</span>
+                            <h4 class="text-xl font-['Manrope'] font-bold text-[#1a1c1c] mb-2">Student Passes</h4>
+                            <p class="text-sm text-[#79767b] leading-relaxed">Weekly discounts for valid student ID holders. Cinema for everyone.</p>
+                        </div>
+                        <a class="text-[#7f6fa2] font-['Manrope'] text-xs font-bold uppercase tracking-widest mt-6 inline-flex items-center gap-2 hover:opacity-70 transition-opacity" href="#">Learn More <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @* ==========================================
+           ZONE 5: COMING SOON (Horizontal Scroll)
            ========================================== *@
         @if (Model.ComingSoon != null && Model.ComingSoon.Any() && !Model.SelectedDate.HasValue)
         {
-            <div class="mb-5 mt-5 pt-4">
-                <h3 class="fw-bold border-bottom pb-2 mb-4 text-uppercase text-muted">Coming Soon <i class="bi bi-calendar-star text-warning"></i></h3>
-                <div class="row row-cols-1 row-cols-md-4 g-4 opacity-75">
+            <section class="py-12 px-6 md:px-24 mb-24">
+                <h2 class="text-3xl font-['Manrope'] font-extrabold tracking-tight text-[#7f6fa2] mb-12">Coming Soon</h2>
+                <div class="flex overflow-x-auto gap-8 pb-8 no-scrollbar">
                     @foreach (var item in Model.ComingSoon)
                     {
-                        <div class="col">
-                            <div class="card h-100 border-0 shadow-sm bg-light">
-                                <img src="@(string.IsNullOrEmpty(item.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : item.Movie.ImageUrl)" class="card-img-top" alt="@item.Movie.Title" style="height: 300px; object-fit: cover; filter: grayscale(40%);">
-                                <div class="card-body text-center">
-                                    <h6 class="fw-bold text-truncate">@item.Movie.Title</h6>
-                                    <p class="text-muted small mb-0 fw-bold text-primary">Releases: @item.Movie.StartDate.ToString("MMM dd, yyyy")</p>
-                                    <a asp-action="Details" asp-route-id="@item.Movie.Id" class="btn btn-sm btn-outline-secondary mt-2 w-100">View Details</a>
+                        <div class="min-w-[200px] flex-shrink-0 group cursor-pointer">
+                            <div class="aspect-[2/3] rounded-2xl overflow-hidden mb-4 relative shadow-sm border border-[#cbc4cf]/30">
+                                <img alt="@item.Movie.Title" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
+                                     src="@(string.IsNullOrEmpty(item.Movie.ImageUrl) ? "https://via.placeholder.com/300x450" : item.Movie.ImageUrl)" />
+                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur px-3 py-1 rounded text-[10px] font-bold text-[#7f6fa2] uppercase shadow-sm">
+                                    @item.Movie.StartDate.ToString("MMM dd")
                                 </div>
                             </div>
+                            <h4 class="font-['Manrope'] font-bold text-sm text-[#1a1c1c] truncate">@item.Movie.Title</h4>
+                            <p class="text-[#79767b] text-[10px] uppercase tracking-widest font-bold mt-1">@item.Movie.MovieCategory</p>
                         </div>
                     }
                 </div>
-            </div>
+            </section>
         }
-    </div>
+    </main>
 </div>
 
 @* ==========================================
-   OBJECTIVE FIX: AI CHAT WIDGET
+   ZONE 6: THE AI ASSISTANT WIDGET
    ========================================== *@
-<button id="aiChatToggle" class="btn btn-primary rounded-circle shadow-lg d-flex justify-content-center align-items-center" style="position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; z-index: 1050;">
-    <i class="bi bi-robot fs-3"></i>
+<button id="aiChatToggle" class="bg-[#7f6fa2] hover:bg-[#976987] text-white rounded-full shadow-2xl flex justify-center items-center transition-colors" 
+        style="position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; z-index: 1050;">
+    <span class="material-symbols-outlined text-3xl" data-icon="smart_toy">smart_toy</span>
 </button>
 
-<div id="aiChatWindow" class="card shadow-lg border-0" style="position: fixed; bottom: 110px; right: 30px; width: 350px; display: none; z-index: 1050; border-radius: 15px; overflow: hidden;">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3 border-0">
-        <h6 class="mb-0 fw-bold"><i class="bi bi-robot me-2"></i> Cinema AI Assistant</h6>
-        <button type="button" class="btn-close btn-close-white" id="aiChatClose" aria-label="Close"></button>
+<div id="aiChatWindow" class="bg-[#f9f9f9] shadow-2xl border border-[#cbc4cf]/50" 
+     style="position: fixed; bottom: 110px; right: 30px; width: 360px; display: none; z-index: 1050; border-radius: 24px; overflow: hidden;">
+    
+    <div class="cta-gradient text-white flex justify-between items-center p-4 border-b border-white/10">
+        <h6 class="mb-0 font-['Manrope'] font-bold text-sm flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg" data-icon="auto_awesome">auto_awesome</span> 
+            Ethereal Concierge
+        </h6>
+        <button type="button" id="aiChatClose" class="text-white/70 hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-xl" data-icon="close">close</span>
+        </button>
     </div>
     
-    <div class="card-body bg-light p-3" id="aiChatBody" style="height: 350px; overflow-y: auto;">
-        <div class="d-flex mb-3">
-            <div class="bg-primary text-white p-2 rounded-3" style="max-width: 85%; font-size: 0.9rem;">
-                Hi! I'm your AI assistant. Tell me what kind of movie you're looking for, and I'll give you a recommendation!
+    <div class="p-4" id="aiChatBody" style="height: 380px; overflow-y: auto;">
+        <div class="flex mb-4">
+            <div class="bg-[#e8e8e8] text-[#1a1c1c] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm" style="max-width: 85%; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
+                Greetings! I am the Ethereal Concierge. How may I guide your cinematic journey today?
             </div>
         </div>
-        </div>
+    </div>
     
-    <div class="card-footer bg-white p-2 border-top">
-        <div class="input-group">
-            <input type="text" id="aiChatInput" class="form-control border-0 bg-light" placeholder="Ask for a movie..." autocomplete="off" />
-            <button class="btn btn-primary rounded-circle ms-2" id="aiChatSend" style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
-                <i class="bi bi-send-fill"></i>
+    <div class="bg-white p-3 border-t border-[#cbc4cf]/30">
+        <div class="flex gap-2">
+            <input type="text" id="aiChatInput" class="w-full bg-[#f3f3f3] border-none rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#7f6fa2]/50 text-sm font-['Inter'] outline-none" placeholder="Ask for recommendations..." autocomplete="off" />
+            <button id="aiChatSend" class="bg-[#7f6fa2] hover:bg-[#976987] text-white rounded-xl w-12 h-11 flex items-center justify-center transition-colors shadow-sm">
+                <span class="material-symbols-outlined text-sm" data-icon="send">send</span>
             </button>
         </div>
     </div>
 </div>
 
-<style>
-    /* Smooth hover effect for the movie cards */
-    .movie-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
-    }
-    .movie-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-    }
-    
-    /* AI Chat Scrollbar styling */
-    #aiChatBody::-webkit-scrollbar {
-        width: 6px;
-    }
-    #aiChatBody::-webkit-scrollbar-track {
-        background: #f1f1f1; 
-    }
-    #aiChatBody::-webkit-scrollbar-thumb {
-        background: #c1c1c1; 
-        border-radius: 10px;
-    }
-    
-    /* Animation for the chat opening */
-    #aiChatWindow {
-        animation: slideUp 0.3s ease-out;
-    }
-    
-    @@keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-</style>
-
 @section Scripts {
     <script>
-        // 1. Existing form auto-submit logic
-        document.querySelector('select[name="category"]').addEventListener('change', function() {
-            this.form.submit();
-        });
+        const categorySelect = document.querySelector('select[name="category"]');
+        if(categorySelect) {
+            categorySelect.addEventListener('change', function() { this.form.submit(); });
+        }
 
-        // 2. AI Chat Logic
         const chatToggleBtn = document.getElementById('aiChatToggle');
         const chatWindow = document.getElementById('aiChatWindow');
         const chatCloseBtn = document.getElementById('aiChatClose');
@@ -221,21 +283,15 @@
         const chatInput = document.getElementById('aiChatInput');
         const chatSendBtn = document.getElementById('aiChatSend');
 
-        // Toggle visibility
         chatToggleBtn.addEventListener('click', () => {
             chatWindow.style.display = chatWindow.style.display === 'none' || chatWindow.style.display === '' ? 'block' : 'none';
             if(chatWindow.style.display === 'block') chatInput.focus();
         });
 
-        chatCloseBtn.addEventListener('click', () => {
-            chatWindow.style.display = 'none';
-        });
+        chatCloseBtn.addEventListener('click', () => { chatWindow.style.display = 'none'; });
 
-        // Send message on Enter key or Button click
         chatInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+            if (e.key === 'Enter') sendMessage();
         });
         chatSendBtn.addEventListener('click', sendMessage);
 
@@ -243,25 +299,19 @@
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // Append User Message to UI
             appendMessage(text, 'user');
             chatInput.value = '';
 
-            // Show 'typing' indicator
             const typingId = 'typing-' + Date.now();
             appendTypingIndicator(typingId);
 
-            // AJAX call to Backend (Ollama)
-            // Notă: Folosim JSON.stringify(text) pentru a trimite un string brut acceptat de [FromBody] string în C#
             fetch('/Home/AskAI', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(text)
             })
             .then(response => {
-                if(!response.ok) throw new Error("Network response was not ok");
+                if(!response.ok) throw new Error("Network error");
                 return response.json();
             })
             .then(data => {
@@ -270,43 +320,45 @@
             })
             .catch(error => {
                 removeElement(typingId);
-                appendMessage("I'm having trouble connecting to my AI core right now.", 'ai');
+                appendMessage("I'm currently disconnected from the core. Please try again later.", 'ai');
                 console.error('Error:', error);
             });
         }
 
-        // Helper funcție: Adaugă mesajele vizual pe ecran
         function appendMessage(text, sender) {
             const msgDiv = document.createElement('div');
-            msgDiv.classList.add('d-flex', 'mb-3');
+            msgDiv.classList.add('flex', 'mb-4');
             
             if (sender === 'user') {
-                msgDiv.classList.add('justify-content-end');
+                msgDiv.classList.add('justify-end');
                 msgDiv.innerHTML = `
-                    <div class="bg-dark text-white p-2 rounded-3 shadow-sm" style="max-width: 85%; font-size: 0.9rem;">
+                    <div class="bg-[#7f6fa2] text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-md" style="max-width: 85%; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
                         ${escapeHTML(text)}
                     </div>
                 `;
             } else {
                 msgDiv.innerHTML = `
-                    <div class="bg-primary text-white p-2 rounded-3 shadow-sm" style="max-width: 85%; font-size: 0.9rem;">
+                    <div class="bg-[#e8e8e8] text-[#1a1c1c] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm" style="max-width: 85%; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
                         ${escapeHTML(text)}
                     </div>
                 `;
             }
             
             chatBody.appendChild(msgDiv);
-            chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll la final
+            chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // Helper funcție: Indicator de tastare
         function appendTypingIndicator(id) {
             const msgDiv = document.createElement('div');
-            msgDiv.classList.add('d-flex', 'mb-3');
+            msgDiv.classList.add('flex', 'mb-4');
             msgDiv.id = id;
             msgDiv.innerHTML = `
-                <div class="bg-primary text-white p-2 rounded-3 opacity-75" style="font-size: 0.9rem;">
-                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Thinking...
+                <div class="bg-[#e8e8e8] text-[#79767b] px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-2" style="font-size: 0.85rem;">
+                    <span class="flex gap-1">
+                        <span class="w-1.5 h-1.5 bg-[#7c738a] rounded-full animate-bounce"></span>
+                        <span class="w-1.5 h-1.5 bg-[#7c738a] rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                        <span class="w-1.5 h-1.5 bg-[#7c738a] rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                    </span>
                 </div>
             `;
             chatBody.appendChild(msgDiv);
@@ -318,17 +370,10 @@
             if(el) el.remove();
         }
 
-        // Evită XSS (Cross-Site Scripting)
         function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    "'": '&#39;',
-                    '"': '&quot;'
-                }[tag])
-            );
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
         }
     </script>
 }

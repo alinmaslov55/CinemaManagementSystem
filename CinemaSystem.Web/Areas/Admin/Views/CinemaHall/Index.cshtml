@@ -1,46 +1,265 @@
 ﻿@using CinemaSystem.Models.Entities
 @model IEnumerable<CinemaHall>
 
-<div class="card shadow border-0 my-4">
-    <div class="card-header bg-primary bg-gradient ml-0 py-3">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h2 class="text-white py-2">Cinema Hall List</h2>
-            </div>
-        </div>
-    </div>
-    <div class="card-body p-4">
-        <div class="row pb-3">
-            <div class="col-12 text-end">
-                <a asp-action="Upsert" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create New Hall</a>
-            </div>
-        </div>
+@{
+    ViewData["Title"] = "Cinema Hall Index";
+    // OBJECTIVE FIX: Izolăm complet de layout-ul public
+    Layout = null; 
+}
 
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Hall Name</th>
-                    <th>Cinema Location</th>
-                    <th>Hall Type</th>
-                    <th>Capacity</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var obj in Model)
-                {
-                    <tr>
-                        <td>@obj.Name</td>
-                        <td>@obj.Cinema.Name</td>
-                        <td>@obj.HallType</td>
-                        <td>@obj.TotalSeats Seats</td>
-                        <td class="text-center">
-                            <a asp-action="Upsert" asp-route-id="@obj.Id" class="btn btn-primary btn-sm">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger btn-sm">Delete</a>
-                        </td>
-                    </tr>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - CineAdmin</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#665788",
+                        "primary-container": "#7d6c9f",
+                        "primary-fixed": "#eaddff",
+                        "secondary": "#645b71",
+                        "secondary-container": "#ebd4fe",
+                        "tertiary": "#7d516e",
+                        "tertiary-fixed": "#ffd8e6",
+                        "surface": "#fdf8fd",
+                        "surface-container-low": "#f7f2f9",
+                        "surface-container": "#f1ecf4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#343139",
+                        "on-surface-variant": "#615e67",
+                        "outline": "#7d7982",
+                        "outline-variant": "#cbc4cf",
+                        "error": "#a8364b"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
                 }
-            </tbody>
-        </table>
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: #f7f2f9; }
+        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body flex min-h-screen">
+
+    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-[#8675A9] font-headline text-sm w-64 border-r border-white/10 shadow-xl">
+        <div class="p-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
+                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
+            <a asp-controller="Dashboard" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            
+            <a asp-controller="Cinema" asp-action="Index" class="bg-white/20 text-white font-semibold rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">theater_comedy</span> Cinemas
+            </a>
+            
+            <a asp-controller="Movie" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">movie</span> Movies
+            </a>
+            <a href="#" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">schedule</span> Showtimes
+            </a>
+            <a asp-controller="Equipment" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">settings_input_component</span> Equipment
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/10">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">public</span> Public Site
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 ml-64 flex flex-col">
+        <header class="flex justify-between items-center px-8 h-16 w-full sticky top-0 z-40 bg-[#8675A9] text-white border-b border-white/10 shadow-sm">
+            <span class="text-xl font-bold tracking-tight font-headline">Hall Management</span>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden md:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
+                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search halls..." type="text"/>
+                </div>
+                <div class="h-6 w-px bg-white/20 mx-2"></div>
+                <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
+            </div>
+        </header>
+
+        <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <nav class="flex items-center gap-2 text-xs font-medium text-outline mb-2 uppercase tracking-wider font-label">
+                        <a asp-controller="Cinema" asp-action="Index" class="hover:text-primary">Cinema Management</a>
+                        <span class="material-symbols-outlined text-xs">chevron_right</span>
+                        <span class="text-primary font-bold">Halls Index</span>
+                    </nav>
+                    <h1 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight">Cinema Hall Index</h1>
+                    <p class="text-on-surface-variant mt-2 max-w-xl font-body">Monitor and configure theater capacities, technical statuses, and screening environments.</p>
+                </div>
+                <a asp-action="Upsert" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-transform font-label">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Add New Hall
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+                <div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 shadow-sm col-span-1 md:col-span-2 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <p class="text-sm font-medium text-outline uppercase tracking-wider font-label">Total Network Capacity</p>
+                        <span class="material-symbols-outlined text-primary">event_seat</span>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="text-3xl font-bold font-headline">@Model.Sum(h => h.TotalSeats).ToString("N0") <span class="text-sm font-normal text-outline">Seats</span></h3>
+                        <p class="text-xs text-on-surface-variant mt-1 flex items-center gap-1 font-label">
+                            <span class="material-symbols-outlined text-xs text-emerald-600">trending_up</span>
+                            Across all registered cinemas
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 shadow-sm">
+                    <p class="text-sm font-medium text-outline uppercase tracking-wider font-label">Operational</p>
+                    <h3 class="text-2xl font-bold font-headline mt-4">@Model.Count() <span class="text-sm font-normal text-outline">/ @Model.Count() Halls</span></h3>
+                    <div class="w-full bg-surface-container mt-4 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full w-full"></div>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-center">
+                    <div class="flex items-center gap-3 text-primary">
+                        <span class="material-symbols-outlined">domain_verification</span>
+                        <span class="text-sm font-semibold font-label">Locations Covered</span>
+                    </div>
+                    <p class="text-2xl font-bold font-headline mt-2 text-on-surface">@Model.Select(h => h.CinemaId).Distinct().Count() <span class="text-sm font-normal text-outline">Cinemas</span></p>
+                </div>
+            </div>
+
+            <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                <div class="px-8 py-5 flex items-center justify-between border-b border-surface-container">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold font-headline">Current Inventory</span>
+                        <div class="h-4 w-[1px] bg-outline-variant/50"></div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-fixed text-primary">All Halls</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low/50 border-b border-outline-variant/20">
+                                <th class="px-8 py-4 text-xs font-bold text-outline uppercase tracking-widest font-label">Hall Name</th>
+                                <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-widest font-label">Type</th>
+                                <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-widest font-label">Capacity</th>
+                                <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-widest font-label">Status</th>
+                                <th class="px-8 py-4 text-xs font-bold text-outline uppercase tracking-widest text-right font-label">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/10">
+                            
+                            @if(!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="px-8 py-12 text-center text-on-surface-variant">
+                                        <span class="material-symbols-outlined text-4xl mb-2 opacity-50">meeting_room</span>
+                                        <p class="font-medium">No halls have been added to the network yet.</p>
+                                    </td>
+                                </tr>
+                            }
+
+                            @foreach (var obj in Model)
+                            {
+                                <tr class="hover:bg-primary-fixed/10 transition-colors group">
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors border border-outline-variant/30 shadow-sm">
+                                                <span class="material-symbols-outlined">videocam</span>
+                                            </div>
+                                            <div>
+                                                <p class="font-headline font-bold text-on-surface">@obj.Name</p>
+                                                <p class="text-xs text-outline font-label flex items-center gap-1 mt-0.5">
+                                                    <span class="material-symbols-outlined text-[12px]">location_on</span> @obj.Cinema.Name
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="px-3 py-1.5 rounded-md text-[10px] font-extrabold bg-surface-container-high border border-outline-variant/30 text-on-surface-variant uppercase tracking-widest">
+                                            @obj.HallType
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5 font-bold text-sm font-headline">@obj.TotalSeats Seats</td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-1.5">
+                                            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
+                                            <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Active</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-5 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <a asp-action="Upsert" asp-route-id="@obj.Id" class="p-2 text-outline hover:bg-primary-fixed hover:text-primary rounded-lg transition-colors shadow-sm border border-transparent hover:border-primary/20" title="Edit">
+                                                <span class="material-symbols-outlined text-lg">edit_square</span>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@obj.Id" class="p-2 text-outline hover:bg-error/10 hover:text-error rounded-lg transition-colors shadow-sm border border-transparent hover:border-error/20" title="Delete">
+                                                <span class="material-symbols-outlined text-lg">delete</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-8 py-4 bg-surface-container-low/30 border-t border-outline-variant/20 flex items-center justify-between">
+                    <p class="text-xs text-outline font-medium font-label">Showing @Model.Count() records</p>
+                </div>
+            </div>
+
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="relative rounded-2xl overflow-hidden aspect-[16/5] group shadow-sm border border-outline-variant/30">
+                    <img class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" alt="Cinema Hall Background" src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070&auto=format&fit=crop" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-6">
+                        <h4 class="text-white font-headline font-bold text-lg">System Integration Active</h4>
+                        <p class="text-white/70 text-sm font-body">Seat maps are automatically synchronized with the public booking interface upon creation.</p>
+                    </div>
+                </div>
+                <div class="bg-primary/5 rounded-2xl p-6 flex flex-col justify-center border border-primary/20 shadow-sm">
+                    <div class="flex items-center gap-4 mb-4 text-primary">
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm border border-primary/10">
+                            <span class="material-symbols-outlined">tips_and_updates</span>
+                        </div>
+                        <h4 class="font-headline font-bold">Management Tip</h4>
+                    </div>
+                    <p class="text-on-surface-variant text-sm leading-relaxed font-body">Ensure that the "Total Seats" parameter accurately reflects the physical layout before assigning showtimes, to prevent overbooking errors in the system.</p>
+                </div>
+            </div>
+
+        </main>
     </div>
-</div>
+</body>
+</html>

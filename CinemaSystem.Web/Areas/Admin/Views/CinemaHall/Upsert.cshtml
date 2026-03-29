@@ -1,121 +1,305 @@
 ﻿@model CinemaSystem.Models.ViewModels.CinemaHallVM
 @using CinemaSystem.Models.Data.Enums
 
-<div class="card shadow border-0 my-4">
-    <div class="card-header bg-primary bg-gradient ml-0 py-3">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h2 class="text-white py-2">@(Model.CinemaHall.Id != 0 ? "Update" : "Configure") Cinema Hall</h2>
+@{
+    ViewData["Title"] = Model.CinemaHall.Id != 0 ? "Configure Hall" : "Add New Hall";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - CineAdmin</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#665788",
+                        "primary-container": "#d8c6ff",
+                        "primary-fixed": "#eaddff",
+                        "secondary": "#645b71",
+                        "tertiary": "#7d516e",
+                        "surface": "#fdf8fd",
+                        "surface-container-low": "#f7f2f9",
+                        "surface-container": "#f1ecf4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#343139",
+                        "on-surface-variant": "#615e67",
+                        "outline": "#7d7982",
+                        "outline-variant": "#b5b0ba",
+                        "error": "#a8364b"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        
+        /* Seat Styling for JS Generation */
+        .seat-standard { background-color: #6c757d; color: white; }
+        .seat-premium { background-color: #198754; color: white; }
+        .seat-vip { background-color: #ffc107; color: black; }
+        .seat-handicap { background-color: #0dcaf0; color: black; }
+        
+        .preview-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .preview-scroll::-webkit-scrollbar-track { background: transparent; }
+        .preview-scroll::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body flex min-h-screen">
+
+    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-[#8675A9] font-headline text-sm w-64 border-r border-white/10 shadow-xl">
+        <div class="p-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
+                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="card-body p-4">
-        <form method="post" class="row">
-            <input asp-for="CinemaHall.Id" hidden />
-            <input asp-for="CinemaHall.TotalSeats" id="totalSeatsHidden" hidden />
-            @* Hidden field to store the JSON string of seat configurations *@
-            <input type="hidden" asp-for="SeatLayoutData" id="layoutDataHidden" />
+        <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
+            <a asp-controller="Dashboard" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            
+            <a asp-controller="Cinema" asp-action="Index" class="bg-white/20 text-white font-semibold rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">theater_comedy</span> Cinemas
+            </a>
+            
+            <a asp-controller="Movie" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">movie</span> Movies
+            </a>
+            <a href="#" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">schedule</span> Showtimes
+            </a>
+            <a asp-controller="Equipment" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">settings_input_component</span> Equipment
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/10">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">public</span> Public Site
+            </a>
+        </div>
+    </aside>
 
-            <div class="col-md-7">
-                <div class="border p-3">
-                    @* Basic Info *@
-                    <div class="form-floating py-2 col-12">
-                        <input asp-for="CinemaHall.Name" class="form-control border-0 shadow" />
-                        <label asp-for="CinemaHall.Name" class="ms-2"></label>
-                        <span asp-validation-for="CinemaHall.Name" class="text-danger"></span>
+    <div class="flex-1 ml-64 flex flex-col">
+        <header class="flex justify-between items-center px-8 h-16 w-full sticky top-0 z-40 bg-[#8675A9] text-white border-b border-white/10 shadow-sm">
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-white tracking-widest uppercase">Live System</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="text-white/70 hover:bg-white/10 p-2 rounded-full transition-colors relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="h-6 w-px bg-white/20 mx-2"></div>
+                <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
+            </div>
+        </header>
+
+        <main class="p-8 max-w-[1600px] mx-auto w-full">
+            
+            <form method="post" id="hallForm" class="flex flex-col h-full">
+                
+                <input asp-for="CinemaHall.Id" hidden />
+                <input asp-for="CinemaHall.TotalSeats" id="totalSeatsHidden" hidden />
+                <input type="hidden" asp-for="SeatLayoutData" id="layoutDataHidden" />
+
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <nav class="flex text-xs text-on-surface-variant mb-2 gap-2 font-label items-center uppercase tracking-wider font-bold">
+                            <a asp-controller="Cinema" asp-action="Index" class="hover:text-primary transition-colors">Cinemas</a>
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                            <a asp-action="Index" class="hover:text-primary transition-colors">Halls</a>
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                            <span class="text-primary">Configure</span>
+                        </nav>
                     </div>
+                </div>
 
-                    <div class="row">
-                        <div class="form-floating py-2 col-6">
-                            <select asp-for="CinemaHall.CinemaId" asp-items="@Model.CinemaList" class="form-select border-0 shadow">
-                                <option disabled selected>--Select Cinema--</option>
-                            </select>
-                            <label asp-for="CinemaHall.CinemaId" class="ms-2"></label>
-                        </div>
-                        <div class="form-floating py-2 col-6">
-                            <select asp-for="CinemaHall.HallType" asp-items="Html.GetEnumSelectList<HallType>()" class="form-select border-0 shadow"></select>
-                            <label asp-for="CinemaHall.HallType" class="ms-2"></label>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <section class="lg:col-span-5 space-y-6">
+                        
+                        <div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/30">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="p-3 bg-primary-fixed rounded-xl text-primary">
+                                    <span class="material-symbols-outlined text-2xl">settings_overscan</span>
+                                </div>
+                                <h2 class="text-2xl font-headline font-extrabold text-on-surface">Configure Cinema Hall</h2>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <label asp-for="CinemaHall.Name" class="block text-xs font-label font-bold text-outline mb-1.5 uppercase tracking-widest">Hall Name <span class="text-error">*</span></label>
+                                    <input asp-for="CinemaHall.Name" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none text-sm font-semibold" placeholder="e.g. Hall 1, IMAX Theatre" />
+                                    <span asp-validation-for="CinemaHall.Name" class="text-error text-xs mt-1 block"></span>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label asp-for="CinemaHall.CinemaId" class="block text-xs font-label font-bold text-outline mb-1.5 uppercase tracking-widest">Cinema Location <span class="text-error">*</span></label>
+                                        <select asp-for="CinemaHall.CinemaId" asp-items="@Model.CinemaList" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
+                                            <option disabled selected>-- Select --</option>
+                                        </select>
+                                        <span asp-validation-for="CinemaHall.CinemaId" class="text-error text-xs mt-1 block"></span>
+                                    </div>
+                                    <div>
+                                        <label asp-for="CinemaHall.HallType" class="block text-xs font-label font-bold text-outline mb-1.5 uppercase tracking-widest">Hall Type <span class="text-error">*</span></label>
+                                        <select asp-for="CinemaHall.HallType" asp-items="Html.GetEnumSelectList<HallType>()" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
+                                        </select>
+                                        <span asp-validation-for="CinemaHall.HallType" class="text-error text-xs mt-1 block"></span>
+                                    </div>
+                                </div>
 
-                    @* Seating Grid Config *@
-                    <div class="row mt-3 bg-light p-3 rounded border">
-                        <h6 class="text-muted border-bottom pb-2">Grid Dimensions & Legend</h6>
-                        <div class="col-6">
-                            <label class="small text-muted">Total Rows (A-Z)</label>
-                            <input asp-for="Rows" type="number" id="rowsInput" class="form-control shadow-sm" min="1" max="26" />
+                                <div class="pt-6 border-t border-outline-variant/20 mt-6">
+                                    <h3 class="text-xs font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                        <span class="material-symbols-outlined text-sm">grid_view</span> Grid Dimensions
+                                    </h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label asp-for="Rows" class="block text-[10px] font-label font-bold text-outline mb-1.5 uppercase tracking-widest">Total Rows (A-Z)</label>
+                                            <input asp-for="Rows" type="number" id="rowsInput" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white text-center font-bold font-headline outline-none" min="1" max="26" />
+                                        </div>
+                                        <div>
+                                            <label asp-for="Cols" class="block text-[10px] font-label font-bold text-outline mb-1.5 uppercase tracking-widest">Columns per Row</label>
+                                            <input asp-for="Cols" type="number" id="colsInput" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white text-center font-bold font-headline outline-none" min="1" max="30" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-6 border-t border-outline-variant/20 mt-6">
+                                    <label class="block text-xs font-label font-bold text-outline mb-4 uppercase tracking-widest">Seating Legend</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/20">
+                                            <div class="w-4 h-4 rounded bg-[#6c757d] shadow-sm"></div>
+                                            <span class="text-xs font-bold text-on-surface">Standard</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/20">
+                                            <div class="w-4 h-4 rounded bg-[#198754] shadow-sm"></div>
+                                            <span class="text-xs font-bold text-on-surface">Premium</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/20">
+                                            <div class="w-4 h-4 rounded bg-[#ffc107] shadow-sm"></div>
+                                            <span class="text-xs font-bold text-on-surface">VIP</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/20">
+                                            <div class="w-4 h-4 rounded bg-[#0dcaf0] shadow-sm"></div>
+                                            <span class="text-xs font-bold text-on-surface">Handicap</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" onclick="clearLayout()" class="w-full mt-6 flex items-center justify-center gap-2 py-3 text-sm font-bold text-[#a8364b] hover:bg-[#f97386]/10 rounded-xl transition-colors border border-dashed border-[#a8364b]/30">
+                                        <span class="material-symbols-outlined text-lg">layers_clear</span>
+                                        Clear All Customizations
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="small text-muted">Columns per Row</label>
-                            <input asp-for="Cols" type="number" id="colsInput" class="form-control shadow-sm" min="1" max="30" />
-                        </div>
-                        <div class="col-12 mt-2">
-                            <button type="button" onclick="clearLayout()" class="btn btn-outline-danger btn-sm shadow-sm">
-                                <i class="bi bi-trash"></i> Clear All Customizations
+
+                        <div class="flex items-center gap-4">
+                            <button type="submit" class="flex-1 bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 hover:bg-[#5a4b7b] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
+                                <span class="material-symbols-outlined text-lg">save</span>
+                                Save Hall & Layout
                             </button>
-                            <p class="text-muted small mt-2 mb-0 italic">Click on seats in the preview to cycle types.</p>
+                            <a asp-action="Index" class="px-8 py-4 bg-white border border-outline-variant/30 text-on-surface font-bold rounded-xl hover:bg-surface-container transition-all uppercase tracking-widest text-xs text-center">
+                                Back
+                            </a>
                         </div>
+                    </section>
 
-                        @* Interactive Legend *@
-                        <div class="col-12 mt-3 d-flex justify-content-between border-top pt-2">
-                            <small><span class="badge bg-secondary me-1">&nbsp;</span> Standard</small>
-                            <small><span class="badge bg-success me-1">&nbsp;</span> Premium</small>
-                            <small><span class="badge bg-warning text-dark me-1">&nbsp;</span> VIP</small>
-                            <small><span class="badge bg-info text-dark me-1">&nbsp;</span> Handicap</small>
-                        </div>
-                        <div class="col-12">
-                            <p class="text-muted small mt-2 mb-0 italic">Click on seats in the preview to cycle types.</p>
-                        </div>
-                    </div>
+                    <section class="lg:col-span-7 h-full">
+                        <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col h-full min-h-[700px]">
+                            
+                            <div class="p-6 border-b border-outline-variant/20 flex justify-between items-center bg-white">
+                                <div>
+                                    <h2 class="text-xl font-headline font-bold text-on-surface">Interactive Seat Editor</h2>
+                                    <p class="text-xs text-on-surface-variant font-medium mt-1">Click individual seats to cycle through seating types</p>
+                                </div>
+                                <div class="px-4 py-2 bg-primary/10 text-primary rounded-lg text-xs font-bold flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-sm">visibility</span> Live Preview
+                                </div>
+                            </div>
+                            
+                            <div class="flex-1 p-8 bg-[#111827] relative flex flex-col items-center overflow-auto preview-scroll">
+                                <div class="w-4/5 mb-16 relative">
+                                    <div class="h-2 w-full bg-slate-700 rounded-full shadow-[0_15px_30px_rgba(255,255,255,0.1)]"></div>
+                                    <div class="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-black text-slate-500 tracking-[0.4em] uppercase">SCREEN</div>
+                                    <div class="mt-2 h-20 w-full bg-gradient-to-b from-slate-700/20 to-transparent blur-xl"></div>
+                                </div>
+                                
+                                <div class="grid gap-2 w-fit mx-auto select-none" id="seatingContainer"></div>
+                                
+                                <div class="h-10 shrink-0"></div>
+                            </div>
+                            
+                            <div class="p-5 bg-surface-container-low border-t border-outline-variant/30 flex items-center justify-between text-xs font-medium text-on-surface-variant">
+                                <div class="flex gap-6">
+                                    <span class="uppercase tracking-widest font-bold">Total Seats: <span class="text-primary text-sm" id="liveTotalSeats">0</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 opacity-70">
+                                    <span class="material-symbols-outlined text-sm">mouse</span>
+                                    <span>Left click to cycle types</span>
+                                </div>
+                            </div>
 
-                    <div class="row pt-4">
-                        <div class="col-6 col-md-4">
-                            <button type="submit" class="btn btn-primary form-control">Save Hall & Layout</button>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <a asp-action="Index" class="btn btn-outline-secondary border form-control">Back</a>
-                        </div>
-                    </div>
+                    </section>
+
                 </div>
-            </div>
-
-            @* Preview Section *@
-            <div class="col-md-5">
-                <div class="p-3 border rounded shadow-sm bg-white" style="min-height:450px;">
-                    <h6 class="text-center text-primary mb-3">Interactive Seat Editor</h6>
-                    <div class="w-75 mx-auto bg-dark text-white text-center mb-4 small py-1" style="border-radius: 0 0 15px 15px;">SCREEN</div>
-                    <div id="seatingContainer" class="p-2 border bg-light rounded" style="user-select: none;"></div>
-                </div>
-            </div>
-        </form>
+            </form>
+        </main>
     </div>
-</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
     <script>
         const rowsInput = document.getElementById('rowsInput');
         const colsInput = document.getElementById('colsInput');
         const container = document.getElementById('seatingContainer');
         const hiddenTotal = document.getElementById('totalSeatsHidden');
         const layoutHidden = document.getElementById('layoutDataHidden');
+        const liveTotalLabel = document.getElementById('liveTotalSeats');
 
         let seatMap = [];
 
-                function clearLayout() {
+        function clearLayout() {
             if (confirm("Are you sure you want to reset all seats to 'Standard'? This cannot be undone.")) {
-                // Clear the hidden field so renderGrid defaults to Standard
                 layoutHidden.value = "";
                 renderGrid();
-
-                alert("Layout reset locally. Click 'Save Hall & Layout' to apply changes.");
             }
         }
 
-                function renderGrid() {
+        function renderGrid() {
             const r = parseInt(rowsInput.value) || 0;
             const c = parseInt(colsInput.value) || 0;
-            hiddenTotal.value = r * c;
+            const total = r * c;
+            
+            hiddenTotal.value = total;
+            liveTotalLabel.innerText = total;
 
             let existingData = [];
             try {
@@ -127,13 +311,11 @@
             }
 
             container.innerHTML = '';
-            container.style.display = 'grid';
             container.style.gridTemplateColumns = `repeat(${c}, 1fr)`;
-            container.style.gap = '6px';
 
             seatMap = [];
 
-            for (let i = 0; i < r * c; i++) {
+            for (let i = 0; i < total; i++) {
                 const currentRow = String.fromCharCode(65 + Math.floor(i / c));
                 const currentCol = (i % c) + 1;
 
@@ -142,30 +324,23 @@
                     (s.Col === currentCol || s.col === currentCol)
                 );
 
-                let sType = 1; // Default Standard
-                let sAcc = false; // Default Not Accessible
+                let sType = 1; // Standard
+                let sAcc = false;
 
                 if (savedSeat) {
                     let rawType = savedSeat.Type !== undefined ? savedSeat.Type : savedSeat.type;
                     if (rawType === 2 || rawType === "Premium") sType = 2;
                     else if (rawType === 3 || rawType === "VIP") sType = 3;
                     else if (rawType === 4 || rawType === "Handicap") sType = 4;
-
                     sAcc = savedSeat.IsAcc !== undefined ? savedSeat.IsAcc : (savedSeat.isAcc || false);
                 }
 
-                const seatData = {
-                    Row: currentRow,
-                    Col: currentCol,
-                    Type: sType,
-                    IsAcc: sAcc
-                };
+                const seatData = { Row: currentRow, Col: currentCol, Type: sType, IsAcc: sAcc };
                 seatMap.push(seatData);
 
                 const seat = document.createElement('div');
-                seat.className = "rounded shadow-sm text-center d-flex align-items-center justify-content-center cursor-pointer";
-                seat.style.height = "22px";
-                seat.style.fontSize = "10px";
+                // Adăugăm clasele de Tailwind pentru a arăta ca un scaun curbat sus (rounded-t-lg)
+                seat.className = "w-8 h-8 rounded-t-lg flex items-center justify-center text-[9px] font-bold transition-all cursor-pointer hover:ring-2 hover:ring-white/50 hover:-translate-y-0.5";
                 seat.innerText = `${currentRow}${currentCol}`;
 
                 setSeatStyle(seat, seatData);
@@ -186,13 +361,12 @@
         }
 
         function setSeatStyle(element, data) {
-            element.style.color = "white";
-            element.style.cursor = "pointer";
+            element.classList.remove('seat-standard', 'seat-premium', 'seat-vip', 'seat-handicap');
             switch(data.Type) {
-                case 1: element.style.backgroundColor = "#6c757d"; break; // Standard
-                case 2: element.style.backgroundColor = "#198754"; break; // Premium
-                case 3: element.style.backgroundColor = "#ffc107"; element.style.color = "black"; break; // VIP
-                case 4: element.style.backgroundColor = "#0dcaf0"; element.style.color = "black"; break; // Handicap
+                case 1: element.classList.add('seat-standard'); break;
+                case 2: element.classList.add('seat-premium'); break;
+                case 3: element.classList.add('seat-vip'); break;
+                case 4: element.classList.add('seat-handicap'); break;
             }
         }
 
@@ -200,19 +374,10 @@
             layoutHidden.value = JSON.stringify(seatMap);
         }
 
-        // When the user manually changes Rows/Cols, we SHOULD reset the layout data
-        // to avoid mismatching positions, OR you can keep it as is (current logic keeps matches).
         rowsInput.addEventListener('input', renderGrid);
         colsInput.addEventListener('input', renderGrid);
 
         window.onload = renderGrid;
     </script>
-
-    <style>
-        .cursor-pointer:hover {
-            opacity: 0.8;
-            transform: scale(1.1);
-            transition: all 0.2s;
-        }
-    </style>
-}
+</body>
+</html>

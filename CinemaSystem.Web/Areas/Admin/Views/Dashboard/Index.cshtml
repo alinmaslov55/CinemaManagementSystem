@@ -2,171 +2,338 @@
 
 @{
     ViewData["Title"] = "Admin Dashboard";
+    // OBJECTIVE FIX: Izolăm acest Dashboard de Layout-ul public pentru a nu strica design-ul Ethereal
+    Layout = null;
 }
 
-<div class="container-fluid mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-uppercase"><i class="bi bi-speedometer2 text-danger"></i> Cinema Operations</h2>
-        <span class="text-muted">Live Data Feed</span>
-    </div>
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>@ViewData["Title"] | Cinema Director</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    @* ==========================================
-       ZONE 1: TOP-LEVEL KPIs
-       ========================================== *@
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm border-start border-success border-5 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted fw-bold text-uppercase mb-1">Total Revenue</h6>
-                    <h3 class="fw-bold text-success mb-0">$@Model.TotalRevenue.ToString("N2")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm border-start border-primary border-5 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted fw-bold text-uppercase mb-1">Today's Revenue</h6>
-                    <h3 class="fw-bold text-primary mb-0">$@Model.TodayRevenue.ToString("N2")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm border-start border-warning border-5 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted fw-bold text-uppercase mb-1">Tickets Sold</h6>
-                    <h3 class="fw-bold text-warning mb-0">@Model.TotalTicketsSold.ToString("N0")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm border-start border-info border-5 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted fw-bold text-uppercase mb-1">30-Day Occupancy</h6>
-                    <h3 class="fw-bold text-info mb-0">@Model.OccupancyRate%</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* ==========================================
-       ZONE 2: BUSINESS INTELLIGENCE CHARTS
-       ========================================== *@
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold border-bottom pb-2 mb-3">7-Day Revenue Trend</h5>
-
-                    @* OBJECTIVE FIX: The relative wrapper strictly constrains the canvas height *@
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="revenueLineChart"></canvas>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold border-bottom pb-2 mb-3">Top 5 Movies (Tickets Sold)</h5>
-
-                    @* OBJECTIVE FIX: The relative wrapper strictly constrains the canvas height *@
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="movieBarChart"></canvas>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* ==========================================
-       ZONE 3 & 4: ACTIONABLE ALERTS & LIVE FEED
-       ========================================== *@
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm border-top border-danger border-3 h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-triangle-fill"></i> Actionable Alerts</h5>
-                    <h6 class="text-muted small mb-3">Empty Showtimes (Next 24 Hours)</h6>
-
-                    @if (!Model.EmptyShowtimes.Any())
-                    {
-                        <div class="alert alert-success py-2">All upcoming showtimes have at least one ticket sold.</div>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#645485",
+                        "primary-container": "#7d6c9f",
+                        "primary-fixed": "#eaddff",
+                        "secondary": "#69577a",
+                        "secondary-container": "#ebd4fe",
+                        "tertiary": "#795061",
+                        "tertiary-fixed": "#ffd8e6",
+                        "surface": "#f9f9f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface": "#1a1c1c",
+                        "on-surface-variant": "#49454e",
+                        "outline-variant": "#cbc4cf",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
                     }
-                    else
-                    {
-                        <ul class="list-group list-group-flush">
-                            @foreach (var alert in Model.EmptyShowtimes)
-                            {
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="fw-bold d-block">@alert.MovieTitle</span>
-                                        <small class="text-muted">@alert.HallName</small>
-                                    </div>
-                                    <span class="badge bg-danger rounded-pill">@alert.StartTime.ToString("HH:mm")</span>
-                                </li>
-                            }
-                        </ul>
-                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: #f3f3f3; }
+        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body">
+
+    <aside class="h-full w-64 fixed left-0 top-0 bg-white flex flex-col p-4 z-40 border-r border-outline-variant/30 shadow-sm">
+        <div class="mb-10 px-2 flex items-center gap-3 mt-2">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center text-white shadow-md">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">movie_filter</span>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-primary font-headline leading-tight">Cinema Director</h1>
+                <p class="text-[10px] uppercase tracking-widest text-primary opacity-70 font-bold">Global Operations</p>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <a asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-primary-fixed/50 rounded-xl transition-colors font-headline tracking-tight group">
+                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-fixed/30 transition-colors font-headline tracking-tight rounded-xl">
+                <span class="material-symbols-outlined">theater_comedy</span>
+                Cinemas
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-fixed/30 transition-colors font-headline tracking-tight rounded-xl">
+                <span class="material-symbols-outlined">movie</span>
+                Movies
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-fixed/30 transition-colors font-headline tracking-tight rounded-xl">
+                <span class="material-symbols-outlined">calendar_month</span>
+                Showtimes
+            </a>
+            <a asp-controller="Equipment" asp-action="Index" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-fixed/30 transition-colors font-headline tracking-tight rounded-xl">
+                <span class="material-symbols-outlined">construction</span>
+                Equipment
+            </a>
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-fixed/30 transition-colors font-headline tracking-tight rounded-xl mt-4 border border-outline-variant/30">
+                <span class="material-symbols-outlined">public</span>
+                Public Site
+            </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-outline-variant/30">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-10 h-10 rounded-full bg-primary-fixed flex justify-center items-center text-primary font-bold">
+                    AD
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-bold text-on-surface truncate">Admin Terminal</p>
+                    <p class="text-xs text-on-surface-variant truncate">System Access</p>
                 </div>
             </div>
         </div>
+    </aside>
 
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-activity text-primary"></i> Recent Transactions</h5>
+    <main class="ml-64 min-h-screen pb-12">
+        
+        <header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-30 bg-surface/80 backdrop-blur-md flex justify-between items-center px-8 h-20 border-b border-outline-variant/20">
+            <div class="flex items-center flex-1 max-w-md">
+                <div class="relative w-full">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+                    <input class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant/30 rounded-full text-sm focus:ring-2 focus:ring-primary/50 transition-all font-body outline-none shadow-sm" placeholder="Search operations, movies, or equipment..." type="text"/>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary-fixed/50 rounded-full transition-all duration-300">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary-fixed/50 rounded-full transition-all duration-300">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+                <div class="h-6 w-px bg-outline-variant/50 mx-1"></div>
+                <div class="flex items-center gap-2 px-3 py-1.5">
+                    <span class="text-sm font-bold font-headline text-primary">Live Data Feed</span>
+                    <span class="relative flex h-3 w-3 ml-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                </div>
+            </div>
+        </header>
 
-                    @if (!Model.RecentBookings.Any())
-                    {
-                        <p class="text-muted">No recent bookings found.</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover table-sm align-middle">
-                                <thead>
-                                    <tr class="text-muted small text-uppercase">
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Amount</th>
-                                        <th>Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var booking in Model.RecentBookings)
-                                    {
-                                        <tr>
-                                            <td class="fw-bold text-primary">@booking.ConfirmationCode</td>
-                                            <td>@booking.CustomerName</td>
-                                            <td class="fw-bold text-success">$@booking.Amount.ToString("F2")</td>
-                                            <td class="text-muted small">@booking.Date.ToString("MMM dd, HH:mm")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+        <div class="pt-28 px-8 max-w-[1600px] mx-auto">
+            
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2.5 bg-secondary-container rounded-xl text-primary shadow-inner">
+                            <span class="material-symbols-outlined">payments</span>
                         </div>
-                    }
+                    </div>
+                    <div>
+                        <p class="text-on-surface-variant text-sm font-medium mb-1">Total Revenue</p>
+                        <h3 class="text-3xl font-extrabold text-on-surface font-headline">$@Model.TotalRevenue.ToString("N2")</h3>
+                    </div>
                 </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2.5 bg-primary-fixed rounded-xl text-primary shadow-inner">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-primary bg-primary-fixed/50 px-2.5 py-1 rounded-full uppercase tracking-wider">Today</span>
+                    </div>
+                    <div>
+                        <p class="text-on-surface-variant text-sm font-medium mb-1">Today's Revenue</p>
+                        <h3 class="text-3xl font-extrabold text-on-surface font-headline">$@Model.TodayRevenue.ToString("N2")</h3>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2.5 bg-tertiary-fixed rounded-xl text-tertiary shadow-inner">
+                            <span class="material-symbols-outlined">confirmation_number</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-on-surface-variant text-sm font-medium mb-1">Total Tickets Sold</p>
+                        <h3 class="text-3xl font-extrabold text-on-surface font-headline">@Model.TotalTicketsSold.ToString("N0")</h3>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-primary to-primary-container p-6 rounded-2xl shadow-lg flex flex-col justify-between text-white relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 text-white/10">
+                        <span class="material-symbols-outlined text-9xl">analytics</span>
+                    </div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm shadow-inner">
+                            <span class="material-symbols-outlined">group</span>
+                        </div>
+                        <span class="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider">30 Days</span>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-white/80 text-sm font-medium mb-1">Average Occupancy</p>
+                        <h3 class="text-4xl font-extrabold font-headline">@Model.OccupancyRate%</h3>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+                            <h2 class="text-lg font-bold font-headline mb-4">7-Day Revenue Trend</h2>
+                            <div class="relative w-full h-[250px]">
+                                <canvas id="revenueLineChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+                            <h2 class="text-lg font-bold font-headline mb-4">Top 5 Movies (Tickets)</h2>
+                            <div class="relative w-full h-[250px]">
+                                <canvas id="movieBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-lowest">
+                            <h2 class="text-lg font-bold font-headline flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">receipt_long</span> Recent Transactions
+                            </h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            @if (!Model.RecentBookings.Any())
+                            {
+                                <div class="p-8 text-center text-on-surface-variant font-medium">No recent bookings found.</div>
+                            }
+                            else
+                            {
+                                <table class="w-full text-left font-body">
+                                    <thead>
+                                        <tr class="bg-surface-container-low text-on-surface-variant text-[10px] uppercase tracking-widest font-bold">
+                                            <th class="px-6 py-4 rounded-tl-lg">Order ID</th>
+                                            <th class="px-6 py-4">Customer</th>
+                                            <th class="px-6 py-4">Amount</th>
+                                            <th class="px-6 py-4 text-right rounded-tr-lg">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-outline-variant/10">
+                                        @foreach (var booking in Model.RecentBookings)
+                                        {
+                                            <tr class="hover:bg-primary-fixed/10 transition-colors">
+                                                <td class="px-6 py-4 font-bold text-primary text-sm">@booking.ConfirmationCode</td>
+                                                <td class="px-6 py-4 text-sm font-medium">@booking.CustomerName</td>
+                                                <td class="px-6 py-4 text-sm font-bold text-emerald-600">$@booking.Amount.ToString("F2")</td>
+                                                <td class="px-6 py-4 text-right text-xs text-on-surface-variant">@booking.Date.ToString("MMM dd, HH:mm")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="space-y-8">
+                    
+                    <section class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-error text-lg">error</span> Actionable Alerts
+                        </h2>
+                        <p class="text-xs text-on-surface-variant mb-4">Empty Showtimes (Next 24 Hours)</p>
+                        
+                        <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                            @if (!Model.EmptyShowtimes.Any())
+                            {
+                                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex gap-3 text-emerald-700">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    <p class="text-sm font-bold mt-0.5">All upcoming showtimes have tickets sold.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var alert in Model.EmptyShowtimes)
+                                {
+                                    <div class="bg-error/5 p-4 rounded-xl border-l-4 border-error shadow-sm flex justify-between items-center gap-3">
+                                        <div>
+                                            <p class="text-sm font-bold text-on-surface">@alert.MovieTitle</p>
+                                            <p class="text-[11px] text-on-surface-variant mt-0.5">@alert.HallName</p>
+                                        </div>
+                                        <span class="bg-error text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm">@alert.StartTime.ToString("HH:mm")</span>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </section>
+
+                    <section class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4">Quick Actions</h2>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="flex flex-col items-center justify-center p-4 bg-surface-container-low rounded-xl hover:bg-primary hover:text-white transition-all group border border-transparent hover:border-primary/20 shadow-sm">
+                                <span class="material-symbols-outlined text-primary text-2xl mb-2 group-hover:text-white transition-colors">add_circle</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-center">New Movie</span>
+                            </button>
+                            <a asp-controller="Equipment" asp-action="Upsert" class="flex flex-col items-center justify-center p-4 bg-surface-container-low rounded-xl hover:bg-tertiary hover:text-white transition-all group border border-transparent hover:border-tertiary/20 shadow-sm">
+                                <span class="material-symbols-outlined text-tertiary text-2xl mb-2 group-hover:text-white transition-colors">construction</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-center">Add Asset</span>
+                            </a>
+                        </div>
+                    </section>
+
+                    <section class="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">System Health</h2>
+                            <span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span>Projector Status</span>
+                                    <span class="text-primary">98%</span>
+                                </div>
+                                <div class="w-full bg-outline-variant/30 h-1.5 rounded-full">
+                                    <div class="bg-primary h-full rounded-full" style="width: 98%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span>Audio Systems</span>
+                                    <span class="text-secondary">92%</span>
+                                </div>
+                                <div class="w-full bg-outline-variant/30 h-1.5 rounded-full">
+                                    <div class="bg-secondary h-full rounded-full" style="width: 92%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </aside>
             </div>
         </div>
-    </div>
-</div>
+    </main>
 
-@section Scripts {
-    @* Import Chart.js library from CDN *@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // OBJECTIVE FIX: Serialize the C# arrays directly into JavaScript arrays
+        // Data binding din C# direct in JS
         const dateLabels = @Html.Raw(Json.Serialize(Model.DateLabels));
         const revenueTrendData = @Html.Raw(Json.Serialize(Model.RevenueTrendData));
 
         const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
         const movieSalesData = @Html.Raw(Json.Serialize(Model.MovieSalesData));
 
-        // 1. Initialize the Revenue Line Chart
+        // 1. Revenue Line Chart
         const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
         new Chart(lineCtx, {
             type: 'line',
@@ -175,21 +342,29 @@
                 datasets: [{
                     label: 'Revenue ($)',
                     data: revenueTrendData,
-                    borderColor: '#0d6efd', // Bootstrap primary color
-                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderColor: '#645485', // Tailwind Primary
+                    backgroundColor: 'rgba(100, 84, 133, 0.15)',
                     borderWidth: 3,
                     fill: true,
-                    tension: 0.3 // Smooth curves
+                    tension: 0.4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#645485',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { border: { dash: [4, 4] }, grid: { color: '#e2e2e2' }, beginAtZero: true }
+                }
             }
         });
 
-        // 2. Initialize the Movie Sales Bar Chart
+        // 2. Movie Sales Bar Chart
         const barCtx = document.getElementById('movieBarChart').getContext('2d');
         new Chart(barCtx, {
             type: 'bar',
@@ -199,13 +374,14 @@
                     label: 'Tickets Sold',
                     data: movieSalesData,
                     backgroundColor: [
-                        'rgba(25, 135, 84, 0.8)',  // Success
-                        'rgba(13, 110, 253, 0.8)', // Primary
-                        'rgba(255, 193, 7, 0.8)',  // Warning
-                        'rgba(13, 202, 240, 0.8)', // Info
-                        'rgba(108, 117, 125, 0.8)' // Secondary
+                        '#645485', // primary
+                        '#795061', // tertiary
+                        '#69577a', // secondary
+                        '#7d6c9f', // primary-container
+                        '#cbc4cf'  // outline-variant
                     ],
-                    borderRadius: 4
+                    borderRadius: 6,
+                    borderSkipped: false
                 }]
             },
             options: {
@@ -213,9 +389,11 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0 } } // Prevent decimals in ticket counts
+                    x: { grid: { display: false } },
+                    y: { border: { dash: [4, 4] }, grid: { color: '#e2e2e2' }, beginAtZero: true, ticks: { precision: 0 } }
                 }
             }
         });
     </script>
-}
+</body>
+</html>

@@ -13,18 +13,15 @@ namespace CinemaSystem.Models.Entities
 
         public int LoyaltyPoints { get; set; } = 0;
 
-        // --- NEW BUSINESS LOGIC COLUMNS ---
 
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
-        // Links the user to their favorite local theater
         public int? PreferredCinemaId { get; set; }
 
         [ForeignKey("PreferredCinemaId")]
         public virtual Cinema? PreferredCinema { get; set; }
 
-        // --- CALCULATED PROPERTIES (Not saved in SQL) ---
 
         [NotMapped]
         public string MembershipTier
@@ -37,7 +34,6 @@ namespace CinemaSystem.Models.Entities
             }
         }
 
-        // --- REVERSE NAVIGATION PROPERTIES ---
         public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     }

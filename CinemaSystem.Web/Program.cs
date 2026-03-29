@@ -45,7 +45,6 @@ builder.Services.AddHttpClient("OMDbClient", client =>
     client.BaseAddress = new Uri(builder.Configuration["OMDbSettings:BaseUrl"] ?? "https://www.omdbapi.com/");
 });
 
-// OBJECTIVE FIX: Înregistrăm serviciul Ollama cu un HttpClient dedicat
 builder.Services.AddHttpClient<IOllamaService, OllamaService>();
 
 builder.Services.AddScoped<IMovieSyncService, MovieSyncService>();

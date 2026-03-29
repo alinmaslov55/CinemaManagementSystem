@@ -21,7 +21,6 @@ namespace CinemaSystem.Utility
 
             try
             {
-                // Request a managed client from the factory
                 var client = _httpClientFactory.CreateClient("OMDbClient");
                 var apiKey = _config["OMDbSettings:ApiKey"];
 
@@ -38,7 +37,7 @@ namespace CinemaSystem.Utility
 
                 var jsonString = await response.Content.ReadAsStringAsync();
 
-                // Deserialize the JSON into our strict DTO
+
                 var movieData = JsonSerializer.Deserialize<OMDbMovieResponseDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (movieData == null) return (null, null);
@@ -46,7 +45,7 @@ namespace CinemaSystem.Utility
                 // Extract IMDb
                 string? imdb = movieData.imdbRating != "N/A" ? movieData.imdbRating : null;
 
-                // Extract Rotten Tomatoes (It is buried inside a nested array in the JSON)
+                // Extract Rotten Tomatoes
                 string? rottenTomatoes = null;
                 if (movieData.Ratings != null)
                 {

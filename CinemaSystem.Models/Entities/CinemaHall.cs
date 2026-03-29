@@ -30,7 +30,7 @@ namespace CinemaSystem.Models.Entities
         public int CinemaId { get; set; }
 
         [ForeignKey("CinemaId")]
-        [ValidateNever] // CRITICAL: Prevents ModelState.IsValid from failing
+        [ValidateNever]
         public virtual Cinema Cinema { get; set; }
 
         [ValidateNever]

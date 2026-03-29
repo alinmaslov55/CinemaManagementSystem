@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using CinemaSystem.Models.Entities;
 
 namespace CinemaSystem.DataAccess.Repository.IRepository
 {

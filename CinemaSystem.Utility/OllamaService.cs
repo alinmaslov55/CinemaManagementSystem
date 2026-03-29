@@ -7,7 +7,6 @@ namespace CinemaSystem.Utility
     {
         private readonly HttpClient _httpClient;
 
-        // În producție, URL-ul ar fi în appsettings.json. Pentru Ollama local, e mereu acesta:
         private const string OllamaEndpoint = "http://localhost:11434/api/generate";
 
         public OllamaService(HttpClient httpClient)
@@ -17,7 +16,6 @@ namespace CinemaSystem.Utility
 
         public async Task<string> GetMovieRecommendationAsync(string userPrompt, string cinemaContext)
         {
-            // Construim contextul strict pentru AI
             string systemContext = $@"You are the official AI Concierge for our cinema network. 
 Your job is to assist customers using ONLY the provided real-time database context below.
 

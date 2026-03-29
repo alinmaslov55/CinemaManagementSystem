@@ -78,11 +78,8 @@ namespace CinemaSystem.Web.Controllers
                     obj.ImageUrl = @"\images\movie\" + fileName;
                 }
 
-                // OBJECTIVE INTEGRATION: Fetch third-party ratings before saving
-                // We check if they are null so we don't overwrite manual Admin edits
                 if (string.IsNullOrEmpty(obj.ImdbRating) || string.IsNullOrEmpty(obj.RottenTomatoesScore))
                 {
-                    // Execute the network call to OMDb without freezing the application
                     var ratings = await _movieSyncService.FetchMovieRatingsAsync(obj.Title);
 
                     if (ratings.imdb != null && string.IsNullOrEmpty(obj.ImdbRating))
@@ -137,7 +134,6 @@ namespace CinemaSystem.Web.Controllers
                 return NotFound();
             }
 
-            // Soft delete implementation
             obj.IsDeleted = true;
             _unitOfWork.Movie.Update(obj);
             _unitOfWork.Save();

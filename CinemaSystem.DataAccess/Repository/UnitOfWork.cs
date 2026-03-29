@@ -1,8 +1,5 @@
 ﻿using CinemaSystem.DataAccess.Data;
 using CinemaSystem.DataAccess.Repository.IRepository;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CinemaSystem.DataAccess.Repository
 {
@@ -10,7 +7,6 @@ namespace CinemaSystem.DataAccess.Repository
     {
         private readonly ApplicationDbContext _db;
 
-        // Repositories are public so they can be accessed via UnitOfWork.Entity
         public ICinemaRepository Cinema { get; private set; }
         public ICinemaHallRepository CinemaHall { get; private set; }
         public ISeatRepository Seat { get; private set; }

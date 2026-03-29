@@ -123,7 +123,6 @@ namespace CinemaSystem.DataAccess.Data
                 .HasForeignKey(b => b.ShowtimeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // OBJECTIVE FIX: Hardcode static DateTimes to override the dynamic BaseEntity constructor
             modelBuilder.Entity<Concession>().HasData(
                 new Concession
                 {
@@ -133,7 +132,7 @@ namespace CinemaSystem.DataAccess.Data
                     Price = 12.50m,
                     IsActive = true,
                     ImageUrl = "https://via.placeholder.com/150/ffcc00/000000?text=Popcorn",
-                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // <-- ADAUGĂ ASTA
+                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Concession
                 {
@@ -143,7 +142,7 @@ namespace CinemaSystem.DataAccess.Data
                     Price = 14.00m,
                     IsActive = true,
                     ImageUrl = "https://via.placeholder.com/150/ff9900/000000?text=Nachos",
-                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // <-- ADAUGĂ ASTA
+                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Concession
                 {
@@ -153,7 +152,7 @@ namespace CinemaSystem.DataAccess.Data
                     Price = 6.50m,
                     IsActive = true,
                     ImageUrl = "https://via.placeholder.com/150/cc0000/ffffff?text=Cola",
-                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // <-- ADAUGĂ ASTA
+                    CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

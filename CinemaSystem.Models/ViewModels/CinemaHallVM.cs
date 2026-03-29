@@ -12,7 +12,6 @@ namespace CinemaSystem.Models.ViewModels
         [ValidateNever]
         public IEnumerable<SelectListItem> CinemaList { get; set; }
 
-        // Helper properties for the Grid Customization
         [Required]
         [Range(1, 30, ErrorMessage = "Rows must be between 1 and 30")]
         public int Rows { get; set; } = 5;

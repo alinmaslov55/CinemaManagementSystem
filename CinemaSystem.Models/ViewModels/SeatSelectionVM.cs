@@ -22,15 +22,11 @@ namespace CinemaSystem.Models.ViewModels
         public int Column { get; set; }
         public SeatType SeatType { get; set; }
         public bool IsAccessible { get; set; }
-
-        // Calculated securely on the server
         public decimal FinalPrice { get; set; }
 
-        // "Available", "Booked", or "Held"
         public string Status { get; set; }
     }
 
-    // We will use this DTO when the user clicks "Proceed to Checkout"
     public class HoldSeatsRequestDto
     {
         public int ShowtimeId { get; set; }

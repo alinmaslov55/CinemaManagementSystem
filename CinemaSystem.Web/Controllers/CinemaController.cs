@@ -40,7 +40,6 @@ namespace CinemaSystem.Web.Controllers
                 var cinemaFromDb = _unitOfWork.Cinema.Get(u => u.Id == id);
                 if (cinemaFromDb == null) return NotFound();
 
-                // Map Entity to ViewModel
                 vm.Id = cinemaFromDb.Id;
                 vm.Name = cinemaFromDb.Name;
                 vm.Description = cinemaFromDb.Description;
@@ -59,7 +58,6 @@ namespace CinemaSystem.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Map ViewModel back to Entity
                 Cinema cinema = new Cinema
                 {
                     Id = vm.Id,
@@ -73,7 +71,6 @@ namespace CinemaSystem.Web.Controllers
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
                 if (file != null)
                 {
-                    // SECURITY FIX: Whitelist file extensions
                     string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
                     string extension = Path.GetExtension(file.FileName).ToLower();
 
@@ -115,7 +112,6 @@ namespace CinemaSystem.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            // If validation fails, return the VM so the user can see error messages
             return View(vm);
         }
 

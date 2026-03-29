@@ -1,6 +1,5 @@
 ﻿using CinemaSystem.Models.Data.Enums;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace CinemaSystem.Models.Entities
@@ -35,7 +34,6 @@ namespace CinemaSystem.Models.Entities
         [Required]
         public int LoyaltyPointsEarned { get; set; }
 
-        // STRIPE / PAYMENT GATEWAY TRACKING
         public string? SessionId { get; set; }
         public string? PaymentIntentId { get; set; }
 

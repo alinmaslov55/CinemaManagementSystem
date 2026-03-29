@@ -41,17 +41,15 @@ namespace CinemaSystem.Web.Controllers
 
             if (id == null || id == 0) return View(vm);
 
-            // Eager load Seats to get their current types and positions
             vm.CinemaHall = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Seats");
 
-            // Map existing seats to the DTO and serialize to JSON
             if(vm.CinemaHall.Seats != null && vm.CinemaHall.Seats.Any())
 {
                 var existingLayout = vm.CinemaHall.Seats.Select(s => new SeatLayoutDto
                 {
                     Row = s.Row,
                     Col = s.Column,
-                    Type = (int)s.SeatType, // Explicit cast to integer
+                    Type = (int)s.SeatType,
                     IsAcc = s.IsAccessible
                 }).ToList();
 
@@ -67,7 +65,6 @@ namespace CinemaSystem.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Upsert(CinemaHallVM vm)
         {
-            // 1. Validation and Fallbacks
             if (!ModelState.IsValid)
             {
                 vm.CinemaList = _unitOfWork.Cinema.GetAll().Select(u => new SelectListItem
@@ -89,15 +86,13 @@ namespace CinemaSystem.Web.Controllers
                 return View(vm);
             }
 
-            // 2. Prepare Data
             vm.CinemaHall.TotalSeats = vm.Rows * vm.Cols;
             var incomingSeats = JsonSerializer.Deserialize<List<SeatLayoutDto>>(vm.SeatLayoutData);
 
-            // 3. CREATE Logic
             if (vm.CinemaHall.Id == 0)
             {
                 _unitOfWork.CinemaHall.Add(vm.CinemaHall);
-                _unitOfWork.Save(); // Save to generate the new Hall ID so seats can map to it
+                _unitOfWork.Save();
 
                 foreach (var item in incomingSeats)
                 {
@@ -111,12 +106,10 @@ namespace CinemaSystem.Web.Controllers
                     });
                 }
             }
-            // 4. UPDATE Logic
             else
             {
                 var hallFromDb = _unitOfWork.CinemaHall.Get(u => u.Id == vm.CinemaHall.Id, includeProperties: "Seats");
 
-                // Safety Check: Prevent dimensions change if hall has scheduled movies
                 bool hasActiveShows = _unitOfWork.Showtime.GetAll(s => s.CinemaHallId == hallFromDb.Id).Any();
                 bool dimensionsChanged = hallFromDb.TotalSeats != vm.CinemaHall.TotalSeats;
 
@@ -126,20 +119,17 @@ namespace CinemaSystem.Web.Controllers
                     return RedirectToAction(nameof(Upsert), new { id = vm.CinemaHall.Id });
                 }
 
-                // Smart Sync: Map incoming layout to existing tracked database seats
                 foreach (var inc in incomingSeats)
                 {
                     var existingSeat = hallFromDb.Seats.FirstOrDefault(s => s.Row == inc.Row && s.Column == inc.Col);
 
                     if (existingSeat != null)
                     {
-                        // Modify properties
                         existingSeat.SeatType = (SeatType)inc.Type;
                         existingSeat.IsAccessible = inc.IsAcc;
                     }
                     else
                     {
-                        // Brand new seat
                         _unitOfWork.Seat.Add(new Seat
                         {
                             Row = inc.Row,
@@ -151,26 +141,19 @@ namespace CinemaSystem.Web.Controllers
                     }
                 }
 
-                // Clean up deleted seats if the grid was shrunk
                 var incomingCoords = incomingSeats.Select(s => $"{s.Row}-{s.Col}").ToList();
                 var seatsToRemove = hallFromDb.Seats.Where(s => !incomingCoords.Contains($"{s.Row}-{s.Column}")).ToList();
 
                 if (seatsToRemove.Any())
                 {
-                    // Just remove them. Do not mess with hallFromDb.Seats.Remove()
                     _unitOfWork.Seat.RemoveRange(seatsToRemove);
                 }
 
-                // Update parent Hall properties
                 hallFromDb.Name = vm.CinemaHall.Name;
                 hallFromDb.HallType = vm.CinemaHall.HallType;
                 hallFromDb.TotalSeats = vm.CinemaHall.TotalSeats;
-
-                // CRITICAL FIX: DO NOT call _unitOfWork.CinemaHall.Update(hallFromDb);
-                // Entity Framework is already tracking it and knows it changed.
             }
 
-            // 5. Finalize Transaction
             _unitOfWork.Save();
             TempData["success"] = "Hall configured safely.";
             return RedirectToAction("Index");
@@ -184,7 +167,6 @@ namespace CinemaSystem.Web.Controllers
                 return NotFound();
             }
 
-            // Include Cinema to show the location in the confirmation view
             var hallFromDb = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Cinema");
 
             if (hallFromDb == null)
@@ -210,10 +192,6 @@ namespace CinemaSystem.Web.Controllers
             obj.IsDeleted = true;
             _unitOfWork.CinemaHall.Update(obj);
 
-            // Logic Check: You might want to block deletion if showtimes exist
-            // if (_unitOfWork.Showtime.Any(u => u.CinemaHallId == id)) { ... }
-
-            //_unitOfWork.CinemaHall.Remove(obj);
             _unitOfWork.Save();
 
             TempData["success"] = "Cinema Hall archived successfully.";

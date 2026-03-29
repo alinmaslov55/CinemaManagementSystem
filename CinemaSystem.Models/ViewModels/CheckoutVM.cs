@@ -1,7 +1,4 @@
 ﻿using CinemaSystem.Models.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CinemaSystem.Models.ViewModels
 {

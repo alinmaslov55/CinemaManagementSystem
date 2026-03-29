@@ -42,7 +42,6 @@ namespace CinemaSystem.Web.Controllers
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                     string actorPath = Path.Combine(wwwRootPath, @"images\actor");
 
-                    // Ensure directory exists
                     if (!Directory.Exists(actorPath)) Directory.CreateDirectory(actorPath);
 
                     if (!string.IsNullOrEmpty(obj.ProfilePictureURL))

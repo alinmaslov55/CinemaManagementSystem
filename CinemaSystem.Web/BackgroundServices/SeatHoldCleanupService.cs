@@ -13,7 +13,6 @@ namespace CinemaSystem.Web.BackgroundServices
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<SeatHoldCleanupService> _logger;
 
-        // Notice we DO NOT inject IUnitOfWork here. We inject the Service Provider.
         public SeatHoldCleanupService(IServiceProvider serviceProvider, ILogger<SeatHoldCleanupService> logger)
         {
             _serviceProvider = serviceProvider;
@@ -24,12 +23,10 @@ namespace CinemaSystem.Web.BackgroundServices
         {
             _logger.LogInformation("Seat Hold Cleanup Service is starting.");
 
-            // Modern .NET implementation for periodic background tasks (e.g., tick every 5 minutes)
             using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
 
             try
             {
-                // This loop runs indefinitely until the application shuts down
                 while (await timer.WaitForNextTickAsync(stoppingToken))
                 {
                     CleanUpExpiredHolds();
@@ -43,13 +40,10 @@ namespace CinemaSystem.Web.BackgroundServices
 
         private void CleanUpExpiredHolds()
         {
-            // CRITICAL ARCHITECTURE: Manually creating a scope to access Scoped database services
             using (var scope = _serviceProvider.CreateScope())
             {
-                // Resolve the UnitOfWork from this temporary scope
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                // Query the database for any holds where the expiration has passed
                 var expiredHolds = unitOfWork.SeatHold.GetAll(h => h.HoldExpiration <= DateTime.Now).ToList();
 
                 if (expiredHolds.Any())

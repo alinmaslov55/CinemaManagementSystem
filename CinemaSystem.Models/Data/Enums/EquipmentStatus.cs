@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CinemaSystem.Models.Data.Enums
+﻿namespace CinemaSystem.Models.Data.Enums
 {
     public enum EquipmentStatus
     {

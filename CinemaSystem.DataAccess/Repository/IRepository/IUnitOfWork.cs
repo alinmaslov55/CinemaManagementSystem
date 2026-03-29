@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CinemaSystem.DataAccess.Repository.IRepository
+﻿namespace CinemaSystem.DataAccess.Repository.IRepository
 {
     public interface IUnitOfWork : IDisposable
     {

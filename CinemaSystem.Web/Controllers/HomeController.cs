@@ -27,11 +27,8 @@ namespace CinemaSystem.Web.Controllers
         {
             var today = DateTime.Now.Date;
 
-            // 1. Fetch EVERYTHING needed for the front page in one massive query
-            // We include Reviews for math, and Showtimes to filter by the user's selected date.
             var allMovies = _unitOfWork.Movie.GetAll(includeProperties: "Reviews,Showtimes").ToList();
 
-            // 2. Apply Zone 2: Utility Bar Filters (Search & Genre)
             if (!string.IsNullOrEmpty(searchString))
             {
                 allMovies = allMovies.Where(m => m.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -42,18 +39,14 @@ namespace CinemaSystem.Web.Controllers
                 allMovies = allMovies.Where(m => m.MovieCategory == category.Value).ToList();
             }
 
-            // 3. Define the Buckets
             var nowPlayingRaw = allMovies.Where(m => m.IsReleased && m.StartDate.Date <= today && m.EndDate.Date >= today);
             var comingSoonRaw = allMovies.Where(m => !m.IsReleased || m.StartDate.Date > today);
 
-            // 4. Apply Zone 2: Date Selection (Only affects "Now Playing")
             if (selectedDate.HasValue)
             {
-                // Only show movies that actually have a showtime scheduled on the exact date requested
                 nowPlayingRaw = nowPlayingRaw.Where(m => m.Showtimes.Any(s => s.StartTime.Date == selectedDate.Value.Date));
             }
 
-            // 5. Transform into ViewModels (Calculating the Math on the Server, not the UI)
             var nowPlayingCards = nowPlayingRaw.Select(m => new MovieCardVM
             {
                 Movie = m,
@@ -173,21 +166,17 @@ namespace CinemaSystem.Web.Controllers
             var today = DateTime.Now;
             var nextWeek = today.AddDays(7);
 
-            // 1. Extragem difuzările (Showtimes) din următoarele 7 zile, incluzând detaliile filmului și ale sălii
             var upcomingShowtimes = _unitOfWork.Showtime.GetAll(
                 s => s.StartTime >= today && s.StartTime <= nextWeek,
                 includeProperties: "Movie,CinemaHall,CinemaHall.Cinema"
             ).ToList();
 
-            // 2. Extragem meniul de la bar (Concessions)
             var concessions = _unitOfWork.Concession.GetAll(c => c.IsActive).ToList();
 
-            // 3. Construim Super-Contextul pentru Ollama
             var contextBuilder = new System.Text.StringBuilder();
 
             contextBuilder.AppendLine("--- CURRENT SHOWTIMES (Next 7 Days) ---");
 
-            // Grupăm difuzările pe filme pentru ca AI-ul să le înțeleagă logic
             var groupedShowtimes = upcomingShowtimes.GroupBy(s => s.Movie.Title);
             foreach (var group in groupedShowtimes)
             {
@@ -206,7 +195,6 @@ namespace CinemaSystem.Web.Controllers
                 contextBuilder.AppendLine($"- {item.Name}: ${item.Price.ToString("F2")} ({item.Description})");
             }
 
-            // 4. Trimitem întrebarea și contextul bogat către Ollama
             var answer = await _ollamaService.GetMovieRecommendationAsync(question, contextBuilder.ToString());
 
             return Json(new { response = answer });

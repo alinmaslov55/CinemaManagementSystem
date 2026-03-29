@@ -36,23 +36,18 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
                 }),
                 Equipment = new Equipment()
                 {
-                    PurchaseDate = DateTime.Now // Default logic for Create
+                    PurchaseDate = DateTime.Now
                 }
             };
 
             if (id == null || id == 0)
             {
-                // Ramura: CREATE
                 return View(equipmentVM);
             }
             else
             {
-                // Ramura: UPDATE
-
-                // OBJECTIVE FIX 1: Trebuie să extragi efectiv echipamentul din baza de date!
                 equipmentVM.Equipment = _unitOfWork.Equipment.Get(u => u.Id == id, includeProperties: "CinemaHall");
 
-                // OBJECTIVE FIX 2: Defensive Programming
                 if (equipmentVM.Equipment == null)
                 {
                     TempData["error"] = "Error: Asset could not be found.";

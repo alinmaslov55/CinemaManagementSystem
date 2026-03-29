@@ -36,7 +36,6 @@ namespace CinemaSystem.Web.Controllers
             }
             else
             {
-                // CRITICAL FIX: Handle Sunday (0) as the 7th day of the week to prevent calendar skipping
                 int currentDay = (int)DateTime.Now.DayOfWeek;
                 if (currentDay == 0) currentDay = 7;
 
@@ -58,7 +57,6 @@ namespace CinemaSystem.Web.Controllers
                     Value = i.Id.ToString()
                 }),
                 CurrentWeekStart = start,
-                // CRITICAL FIX: Initializing business hours so the CSS Grid mathematically renders
                 DayStartHour = 8,
                 DayEndHour = 24
             };

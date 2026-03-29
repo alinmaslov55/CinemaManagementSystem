@@ -239,7 +239,7 @@ namespace CinemaSystem.Web.Controllers
                             {
                                 ConcessionId = concession.Id,
                                 Quantity = concessionQuantities[i],
-                                PriceAtPurchase = concession.Price // Sigurăm prețul istoric
+                                PriceAtPurchase = concession.Price
                             });
                         }
                     }
@@ -247,7 +247,7 @@ namespace CinemaSystem.Web.Controllers
             }
 
             newBooking.TotalAmount = ticketsTotal + concessionsTotal;
-            newBooking.LoyaltyPointsEarned = (int)newBooking.TotalAmount; // Puncte de loialitate pe suma totală
+            newBooking.LoyaltyPointsEarned = (int)newBooking.TotalAmount;
 
             _unitOfWork.Booking.Add(newBooking);
 
@@ -339,10 +339,6 @@ namespace CinemaSystem.Web.Controllers
             return View(bookings);
         }
 
-        // ==========================================
-        // PRIVATE HELPER METHODS
-        // ==========================================
-
         private byte[] GenerateTicketPdfBytes(Booking booking)
         {
             var document = Document.Create(container =>
@@ -365,7 +361,6 @@ namespace CinemaSystem.Web.Controllers
                     {
                         col.Spacing(20);
 
-                        // 1. DIGITAL TICKETS SECTION
                         col.Item().Text("Movie Tickets").FontSize(16).SemiBold().FontColor(Colors.Grey.Darken3);
 
                         foreach (var ticket in booking.Tickets)
@@ -396,7 +391,6 @@ namespace CinemaSystem.Web.Controllers
                             });
                         }
 
-                        // 2. FOOD & BEVERAGE VOUCHERS SECTION (OBJECTIVE FIX)
                         if (booking.BookingConcessions != null && booking.BookingConcessions.Any())
                         {
                             col.Item().PaddingTop(15).Text("Food & Beverage Vouchers").FontSize(16).SemiBold().FontColor(Colors.Orange.Darken2);

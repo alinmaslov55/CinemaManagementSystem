@@ -1,8 +1,6 @@
 ﻿using CinemaSystem.Models.Data.Enums;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Numerics;
 
 namespace CinemaSystem.Models.Entities
 {

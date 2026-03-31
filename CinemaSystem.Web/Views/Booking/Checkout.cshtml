@@ -1,120 +1,260 @@
 ﻿@model CinemaSystem.Models.ViewModels.CheckoutVM
 @using System.Globalization
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "_Layout";
+}
 
-        <div class="col-md-8 col-lg-7">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    /* Ascundere temporară a scrollbar-ului pentru lista de tickete */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 
-                @* --- HEADER & TIMER --- *@
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3 border-0">
-                    <h5 class="mb-0 fw-bold">Order Summary</h5>
-                    <div class="text-warning fw-bold d-flex align-items-center bg-dark rounded px-2 py-1" style="border: 1px solid #ffc107;">
-                        <i class="bi bi-stopwatch fs-5 me-2"></i>
-                        <span id="countdownTimer" class="font-monospace fs-5">10:00</span>
-                    </div>
+<div class="bg-[#f9f9f9] font-['Inter'] text-[#1a1c1c] antialiased min-h-screen pt-12 pb-32">
+    <main class="max-w-[1440px] mx-auto px-6 md:px-12">
+        
+        <div class="flex flex-col items-center mb-12">
+            <div class="flex items-center gap-2 md:gap-4 mb-4 overflow-x-auto hide-scrollbar w-full justify-center">
+                <div class="flex items-center gap-2 opacity-50 shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-[#645485]/20 text-[#645485] flex items-center justify-center text-xs font-bold">1</div>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">Details</span>
                 </div>
-
-                <div class="card-body p-4 p-md-5">
-
-                    @* --- MOVIE DETAILS --- *@
-                    <div class="d-flex mb-4 pb-4 border-bottom">
-                        <img src="@(string.IsNullOrEmpty(Model.Showtime.Movie.ImageUrl) ? "https://via.placeholder.com/100x150" : Model.Showtime.Movie.ImageUrl)"
-                             class="rounded shadow-sm me-4" style="width: 90px; height: 135px; object-fit: cover;" alt="Poster" />
-
-                        <div class="d-flex flex-column justify-content-center">
-                            <h4 class="fw-bold text-dark mb-1">@Model.Showtime.Movie.Title</h4>
-                            <p class="text-muted mb-1"><i class="bi bi-geo-alt-fill text-danger"></i> <strong>@Model.Showtime.CinemaHall.Cinema.Name</strong></p>
-                            <p class="text-muted mb-1"><i class="bi bi-door-open-fill text-secondary"></i> Hall: @Model.Showtime.CinemaHall.Name</p>
-                            <p class="fw-bold text-primary mt-2 mb-0"><i class="bi bi-calendar-event"></i> @Model.Showtime.StartTime.ToString("dddd, MMM dd, yyyy - HH:mm")</p>
-                        </div>
-                    </div>
-
-                    @* --- LINE ITEMS (SEATS) --- *@
-                    <h6 class="fw-bold text-uppercase text-muted mb-3 tracking-wide">Selected Tickets</h6>
-                    <ul class="list-group list-group-flush mb-4 pb-2">
-                        @foreach (var item in Model.TicketItems)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent border-light">
-                                <span>Seat <strong class="fs-5 text-dark">@item.SeatName</strong></span>
-                                <span class="fw-bold text-dark">$@item.Price.ToString("F2")</span>
-                            </li>
-                        }
-                    </ul>
-
-                    <form asp-action="FinalizeOrder" method="post" id="checkoutForm">
-                        <input type="hidden" name="showtimeId" value="@Model.Showtime.Id" />
-
-                        @* --- CONCESSIONS (UPSELL FUNNEL) --- *@
-                        @if (Model.AvailableConcessions != null && Model.AvailableConcessions.Any())
-                        {
-                            <h6 class="fw-bold text-uppercase text-muted mb-3 mt-4 tracking-wide">
-                                <i class="bi bi-cup-straw text-warning fs-5 me-1"></i> Add Snacks & Drinks (Optional)
-                            </h6>
-                            
-                            <div class="list-group mb-5 shadow-sm">
-                                @foreach (var concession in Model.AvailableConcessions)
-                                {
-                                    <div class="list-group-item d-flex align-items-center p-3">
-                                        
-                                        @* Hidden inputs for backend array binding *@
-                                        <input type="hidden" name="concessionIds" value="@concession.Id" />
-                                        <input type="hidden" name="concessionQuantities" id="input-qty-@concession.Id" value="0" class="concession-qty-input" data-price="@concession.Price.ToString(CultureInfo.InvariantCulture)" />
-
-                                        <img src="@(string.IsNullOrEmpty(concession.ImageUrl) ? "https://via.placeholder.com/60" : concession.ImageUrl)"
-                                             class="rounded me-3 border" style="width: 65px; height: 65px; object-fit: cover;" alt="@concession.Name" />
-                                        
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-0 fw-bold text-dark">@concession.Name</h6>
-                                            <small class="text-muted d-block mb-1" style="font-size: 0.8rem;">@concession.Description</small>
-                                            <div class="text-success fw-bold">$@concession.Price.ToString("F2")</div>
-                                        </div>
-                                        
-                                        <div class="d-flex align-items-center bg-light rounded-pill border p-1">
-                                            <button type="button" class="btn btn-sm btn-light rounded-circle fw-bold text-danger"
-                                                    style="width: 32px; height: 32px;"
-                                                    onclick="updateQty(@concession.Id, -1)">
-                                                -
-                                            </button>
-                                            
-                                            <span class="mx-3 fw-bold fs-5 font-monospace" id="display-qty-@concession.Id" style="min-width: 20px; text-align: center;">0</span>
-                                            
-                                            <button type="button" class="btn btn-sm btn-light rounded-circle fw-bold text-success"
-                                                    style="width: 32px; height: 32px;"
-                                                    onclick="updateQty(@concession.Id, 1)">
-                                                +
-                                            </button>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-
-                        @* --- DYNAMIC TOTALS --- *@
-                        <div class="bg-light p-4 rounded-4 mb-4 border shadow-sm d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="mb-0 text-muted fw-bold">Total Due</h5>
-                                <small class="text-muted" id="totalBreakdown">Tickets: $@Model.TotalAmount.ToString("F2") + F&B: $0.00</small>
-                            </div>
-                            <h2 class="mb-0 text-success fw-bold" id="grandTotalDisplay">$@Model.TotalAmount.ToString("F2")</h2>
-                        </div>
-
-                        @* --- PAYMENT BUTTON --- *@
-                        <button type="submit" id="btnPayNow" class="btn btn-primary btn-lg w-100 fw-bold shadow-lg py-3 rounded-pill fs-5">
-                            <i class="bi bi-credit-card-fill me-2"></i> Confirm & Pay <span id="btnTotalText">$@Model.TotalAmount.ToString("F2")</span>
-                        </button>
-                    </form>
-
+                <div class="w-8 md:w-12 h-[1px] bg-[#cbc4cf]/50 shrink-0"></div>
+                <div class="flex items-center gap-2 opacity-50 shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-[#645485]/20 text-[#645485] flex items-center justify-center text-xs font-bold">2</div>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">Seats</span>
+                </div>
+                <div class="w-8 md:w-12 h-[1px] bg-[#cbc4cf]/50 shrink-0"></div>
+                <div class="flex items-center gap-2 opacity-50 shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-[#645485]/20 text-[#645485] flex items-center justify-center text-xs font-bold">3</div>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">Food</span>
+                </div>
+                <div class="w-8 md:w-12 h-[1px] bg-[#cbc4cf]/50 shrink-0"></div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-[#645485] text-white flex items-center justify-center text-xs font-bold shadow-md">4</div>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#1a1c1c]">Checkout</span>
                 </div>
             </div>
         </div>
 
-    </div>
+        <div class="mb-12">
+            <h1 class="font-['Manrope'] text-4xl md:text-5xl font-extrabold tracking-tight text-[#1a1c1c] mb-2">Secure Checkout</h1>
+            <p class="text-[#49454e] font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-emerald-600">lock</span> 
+                Encrypted transaction via Ethereal Pay.
+            </p>
+        </div>
+
+        <div class="mb-8 flex items-center justify-center bg-[#ffd8e6] text-[#613b4c] py-3 rounded-xl border border-[#ecb8cc] max-w-md mx-auto shadow-sm transition-colors duration-500" id="timerContainer">
+            <span class="material-symbols-outlined mr-2">timer</span>
+            <span class="font-bold text-sm tracking-wide">Seats reserved for: <span id="countdownTimer" class="font-mono text-base ml-1">10:00</span></span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <div class="lg:col-span-8 space-y-12">
+                
+                <form asp-action="FinalizeOrder" method="post" id="checkoutForm">
+                    <input type="hidden" name="showtimeId" value="@Model.Showtime.Id" />
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-[#cbc4cf]/20 flex gap-6 items-center">
+                            <div class="w-20 h-28 flex-shrink-0 rounded-xl overflow-hidden shadow-sm border border-[#cbc4cf]/30">
+                                <img alt="@Model.Showtime.Movie.Title" class="w-full h-full object-cover" 
+                                     src="@(string.IsNullOrEmpty(Model.Showtime.Movie.ImageUrl) ? "https://via.placeholder.com/150x225" : Model.Showtime.Movie.ImageUrl)"/>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <span class="text-[10px] font-bold tracking-widest text-[#645485] uppercase mb-1">Now Showing</span>
+                                <h2 class="text-xl font-['Manrope'] font-bold text-[#1a1c1c] leading-tight mb-2 line-clamp-2">@Model.Showtime.Movie.Title</h2>
+                                <div class="space-y-1 mt-1">
+                                    <div class="flex items-center gap-1.5 text-xs text-[#49454e] font-medium">
+                                        <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                        <span>@Model.Showtime.StartTime.ToString("MMM dd • HH:mm")</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-xs text-[#49454e] font-medium">
+                                        <span class="material-symbols-outlined text-[14px]">meeting_room</span>
+                                        <span>@Model.Showtime.CinemaHall.Name</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-[#cbc4cf]/20 flex flex-col justify-center h-full">
+                            <div class="flex items-center gap-3 mb-4 border-b border-[#f3f3f3] pb-3">
+                                <div class="w-10 h-10 rounded-full bg-[#eaddff] flex items-center justify-center text-[#645485]">
+                                    <span class="material-symbols-outlined text-sm">event_seat</span>
+                                </div>
+                                <h3 class="font-bold text-[#1a1c1c]">Selected Admissions</h3>
+                            </div>
+                            
+                            <ul class="space-y-2 mb-2 max-h-[100px] overflow-y-auto hide-scrollbar">
+                                @foreach (var item in Model.TicketItems)
+                                {
+                                    <li class="flex justify-between items-center text-sm">
+                                        <span class="text-[#49454e]">Seat <strong class="text-[#1a1c1c]">@item.SeatName</strong></span>
+                                        <span class="font-bold text-[#1a1c1c]">$@item.Price.ToString("F2")</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </section>
+
+                    @if (Model.AvailableConcessions != null && Model.AvailableConcessions.Any())
+                    {
+                        <section class="mt-12">
+                            <h3 class="text-xl font-['Manrope'] font-bold mb-6 flex items-center gap-2 text-[#1a1c1c]">
+                                <span class="material-symbols-outlined text-[#645485]">fastfood</span>
+                                Add Treats (Optional)
+                            </h3>
+                            
+                            <div class="bg-[#f3f3f3] rounded-3xl p-6 md:p-8 border border-[#cbc4cf]/30">
+                                <div class="space-y-4">
+                                    @foreach (var concession in Model.AvailableConcessions)
+                                    {
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-[#cbc4cf]/20 shadow-sm transition-all hover:shadow-md">
+                                            
+                                            <input type="hidden" name="concessionIds" value="@concession.Id" />
+                                            <input type="hidden" name="concessionQuantities" id="input-qty-@concession.Id" value="0" class="concession-qty-input" data-price="@concession.Price.ToString(CultureInfo.InvariantCulture)" />
+
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-16 h-16 rounded-xl bg-surface-container overflow-hidden border border-[#cbc4cf]/30 shrink-0">
+                                                    <img class="w-full h-full object-cover" alt="@concession.Name" src="@(string.IsNullOrEmpty(concession.ImageUrl) ? "https://via.placeholder.com/100" : concession.ImageUrl)"/>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-[#1a1c1c] text-sm">@concession.Name</p>
+                                                    <p class="text-[10px] text-[#7a757f] uppercase tracking-widest font-bold mb-1">@concession.Description</p>
+                                                    <span class="font-bold text-[#645485] text-sm">$@concession.Price.ToString("F2")</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30 w-32 sm:w-auto shrink-0 self-end sm:self-auto">
+                                                <button type="button" onclick="updateQty(@concession.Id, -1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
+                                                    <span class="material-symbols-outlined text-sm">remove</span>
+                                                </button>
+                                                <span class="px-4 text-sm font-bold text-[#1a1c1c] font-mono" id="display-qty-@concession.Id">0</span>
+                                                <button type="button" onclick="updateQty(@concession.Id, 1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
+                                                    <span class="material-symbols-outlined text-sm">add</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </section>
+                    }
+
+                    <section class="mt-12">
+                        <h3 class="text-xl font-['Manrope'] font-bold mb-6 flex items-center gap-2 text-[#1a1c1c]">
+                            <span class="material-symbols-outlined text-[#645485]">payments</span>
+                            Payment Information
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <label class="relative cursor-pointer group">
+                                <input checked class="peer sr-only" name="paymentType" type="radio"/>
+                                <div class="p-5 rounded-2xl bg-white border-2 border-[#cbc4cf]/30 peer-checked:border-[#645485] peer-checked:bg-[#eaddff]/30 shadow-sm transition-all flex flex-col items-center gap-2">
+                                    <span class="material-symbols-outlined text-3xl text-[#645485]">credit_card</span>
+                                    <span class="font-bold text-sm text-[#1a1c1c]">Credit Card</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer group">
+                                <input class="peer sr-only" name="paymentType" type="radio"/>
+                                <div class="p-5 rounded-2xl bg-white border-2 border-[#cbc4cf]/30 peer-checked:border-[#645485] peer-checked:bg-[#eaddff]/30 shadow-sm transition-all flex flex-col items-center gap-2 opacity-60 hover:opacity-100">
+                                    <span class="material-symbols-outlined text-3xl text-[#645485]">account_balance_wallet</span>
+                                    <span class="font-bold text-sm text-[#1a1c1c]">PayPal</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer group">
+                                <input class="peer sr-only" name="paymentType" type="radio"/>
+                                <div class="p-5 rounded-2xl bg-white border-2 border-[#cbc4cf]/30 peer-checked:border-[#645485] peer-checked:bg-[#eaddff]/30 shadow-sm transition-all flex flex-col items-center gap-2 opacity-60 hover:opacity-100">
+                                    <span class="material-symbols-outlined text-3xl text-[#645485]">contactless</span>
+                                    <span class="font-bold text-sm text-[#1a1c1c]">Digital Wallet</span>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div class="bg-[#f3f3f3] p-6 md:p-8 rounded-3xl space-y-5 border border-[#cbc4cf]/30">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">Cardholder Name</label>
+                                    <input class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all shadow-sm" placeholder="e.g. ALEX MERCER" type="text" required/>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">Card Number</label>
+                                    <input class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all shadow-sm" placeholder="•••• •••• •••• 4412" type="text" required/>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                                <div class="flex flex-col gap-1.5 md:col-span-1">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">Expiry Date</label>
+                                    <input class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all text-center shadow-sm" placeholder="MM/YY" type="text" required/>
+                                </div>
+                                <div class="flex flex-col gap-1.5 md:col-span-1">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">CVV</label>
+                                    <input class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all text-center shadow-sm" placeholder="•••" type="text" required/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <button type="submit" id="hiddenSubmitBtn" class="hidden">Submit</button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-4">
+                <div class="sticky top-28 bg-white p-8 rounded-[2.5rem] shadow-xl border border-[#cbc4cf]/20 flex flex-col">
+                    
+                    <h3 class="text-2xl font-['Manrope'] font-bold mb-8 text-[#1a1c1c] border-b border-[#f3f3f3] pb-4">Order Summary</h3>
+                    
+                    <div class="space-y-4 mb-6 flex-1">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-[#49454e] font-medium">Tickets (@Model.TicketItems.Count)</span>
+                            <span class="font-bold text-[#1a1c1c]">$@Model.TotalAmount.ToString("F2")</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm" id="concessionsSummaryRow" style="display: none;">
+                            <span class="text-[#49454e] font-medium">Snacks & Drinks</span>
+                            <span class="font-bold text-[#1a1c1c]" id="concessionsTotalText">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm opacity-60">
+                            <span class="text-[#49454e] font-medium">Taxes & Fees</span>
+                            <span class="font-bold text-[#1a1c1c]">Included</span>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-[#cbc4cf]/30 mb-8">
+                        <div class="flex justify-between items-end mb-2">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">Total Payable</p>
+                            <div class="bg-[#eaddff] px-2 py-0.5 rounded text-[8px] font-bold text-[#4e3e6e] uppercase tracking-widest">
+                                Secure
+                            </div>
+                        </div>
+                        <p class="text-4xl font-['Manrope'] font-extrabold tracking-tighter text-[#645485]" id="grandTotalDisplay">
+                            $@Model.TotalAmount.ToString("F2")
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 mt-auto">
+                        <button type="button" id="btnPayNow" onclick="document.getElementById('hiddenSubmitBtn').click();" class="w-full bg-[#645485] hover:bg-[#7d6c9f] text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-widest shadow-lg shadow-[#645485]/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">lock_check</span> Confirm & Pay
+                        </button>
+                        <p class="text-center text-[10px] text-[#7a757f] px-4 leading-relaxed font-medium">
+                            By clicking 'Confirm', you agree to our <a class="underline hover:text-[#645485]" href="#">Terms</a> and <a class="underline hover:text-[#645485]" href="#">Refund Policy</a>.
+                        </p>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+    </main>
 </div>
 
 @section Scripts {
     <script>
+        // === Concessions Logic (Legat la C# via Data Attributes) ===
         const baseTicketTotal = parseFloat('@Model.TotalAmount.ToString(CultureInfo.InvariantCulture)');
         
         function updateQty(id, change) {
@@ -145,14 +285,24 @@
             
             let grandTotal = baseTicketTotal + concessionsTotal;
             
+            // UI Update
             document.getElementById('grandTotalDisplay').innerText = '$' + grandTotal.toFixed(2);
-            document.getElementById('btnTotalText').innerText = '$' + grandTotal.toFixed(2);
-            document.getElementById('totalBreakdown').innerText = `Tickets: $${baseTicketTotal.toFixed(2)} + F&B: $${concessionsTotal.toFixed(2)}`;
+            
+            const summaryRow = document.getElementById('concessionsSummaryRow');
+            const summaryText = document.getElementById('concessionsTotalText');
+            
+            if (concessionsTotal > 0) {
+                summaryRow.style.display = 'flex';
+                summaryText.innerText = '$' + concessionsTotal.toFixed(2);
+            } else {
+                summaryRow.style.display = 'none';
+            }
         }
 
-
-        let timeRemaining = 600;
+        // === Timer Logic ===
+        let timeRemaining = 600; // 10 minute
         const timerDisplay = document.getElementById('countdownTimer');
+        const timerContainer = document.getElementById('timerContainer');
         const btnPayNow = document.getElementById('btnPayNow');
 
         const countdown = setInterval(() => {
@@ -164,27 +314,37 @@
 
             timerDisplay.innerText = `${minutes}:${seconds}`;
 
-            if (timeRemaining <= 60) {
-                timerDisplay.parentElement.classList.replace('text-warning', 'text-danger');
-                timerDisplay.parentElement.style.borderColor = '#dc3545';
+            // Schimbare vizuală când scade sub 1 minut
+            if (timeRemaining <= 60 && timeRemaining > 0) {
+                timerContainer.classList.replace('bg-[#ffd8e6]', 'bg-[#ba1a1a]');
+                timerContainer.classList.replace('text-[#613b4c]', 'text-white');
+                timerContainer.classList.replace('border-[#ecb8cc]', 'border-[#ba1a1a]');
             }
 
+            // Expirare sesiune
             if (timeRemaining <= 0) {
                 clearInterval(countdown);
-                timerDisplay.innerText = "EXPIRED";
+                timerDisplay.innerText = "00:00";
+                
                 btnPayNow.disabled = true;
-                btnPayNow.innerHTML = "Session Expired - Reselect Seats";
-                btnPayNow.classList.replace('btn-primary', 'btn-secondary');
+                btnPayNow.innerHTML = "Session Expired";
+                btnPayNow.classList.replace('bg-[#645485]', 'bg-[#b5b0ba]');
+                btnPayNow.classList.replace('hover:bg-[#7d6c9f]', 'hover:bg-[#b5b0ba]');
+                btnPayNow.classList.remove('shadow-lg', 'active:scale-95');
 
-                alert("Your seat reservation has expired. You will be redirected.");
+                alert("Your seat reservation has expired. You will be redirected to re-select seats.");
                 window.location.href = '/Booking/SelectSeats?showtimeId=@Model.Showtime.Id';
             }
         }, 1000);
 
-
+        // === Form Submission UX ===
         document.getElementById('checkoutForm').addEventListener('submit', function() {
             btnPayNow.disabled = true;
-            btnPayNow.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing Transaction...';
+            btnPayNow.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span> Processing...';
+            btnPayNow.classList.add('opacity-70', 'cursor-not-allowed');
         });
+        
+        // Asigurăm calculul corect la încărcarea paginii dacă există vreun refresh
+        calculateGrandTotal();
     </script>
 }

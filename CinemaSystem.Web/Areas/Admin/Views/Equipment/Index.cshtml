@@ -1,107 +1,349 @@
 ﻿@model List<CinemaSystem.Models.Entities.Equipment>
 
-<div class="card shadow border-0 mt-4">
-    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h2 class="text-white py-2">Equipment Fleet Management</h2>
-            </div>
-        </div>
-    </div>
-    <div class="card-body p-4">
-        <div class="row pb-3">
-            <div class="col-6">
-            </div>
-            <div class="col-6 text-end">
-                <a asp-controller="Equipment" asp-action="Upsert" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Register New Asset
-                </a>
-            </div>
-        </div>
+@{
+    ViewData["Title"] = "Equipment Inventory";
+    // OBJECTIVE FIX: Izolăm complet de layout-ul public
+    Layout = null; 
 
-        <table class="table table-bordered table-striped" style="width:100%">
-            <thead>
-                <tr>
-                    <th>Asset Name</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Location (Hall)</th>
-                    <th>Next Maintenance</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var obj in Model.OrderBy(u => u.CinemaHall.Name))
-                {
-                    <tr>
-                        <td class="align-middle fw-bold">
-                            @obj.Name
-                            <br /><small class="text-muted fw-normal">SN: @(obj.SerialNumber ?? "N/A")</small>
-                        </td>
-                        <td class="align-middle">@obj.Type.ToString()</td>
-                        <td class="align-middle">
-                            @if (obj.Status.ToString() == "Operational")
-                            {
-                                <span class="badge bg-success">@obj.Status</span>
-                            }
-                            else if (obj.Status.ToString() == "NeedsMaintenance")
-                            {
-                                <span class="badge bg-warning text-dark">@obj.Status</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">@obj.Status</span>
-                            }
-                        </td>
-                        <td class="align-middle">@obj.CinemaHall.Name</td>
-                        <td class="align-middle">
-                            @(obj.NextMaintenanceDate.HasValue? obj.NextMaintenanceDate.Value.ToString("MMM dd, yyyy") : "Unscheduled")
-                        </td>
-                        <td class="align-middle text-center">
-                            <div class="w-75 btn-group" role="group">
-                                <a asp-controller="Equipment" asp-action="Upsert" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
-                                    <i class="bi bi-pencil-square"></i> Edit
-                                </a>
-                                <a onClick="Delete('/admin/equipment/delete/@obj.Id')" class="btn btn-danger mx-2">
-                                    <i class="bi bi-trash-fill"></i> Delete
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+    // Calculăm KPI-urile în baza datelor reale
+    var totalAssets = Model.Count;
+    var operationalAssets = Model.Count(e => e.Status.ToString() == "Operational");
+    var maintenanceAssets = totalAssets - operationalAssets;
+    var operationalPercentage = totalAssets > 0 ? (operationalAssets * 100.0 / totalAssets) : 0;
+}
 
-@section Scripts {
-    <script>
-        function Delete(url) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: url,
-                        type: 'DELETE',
-                        success: function (data) {
-                            if (data.success) {
-                                location.reload();
-                                toastr.success(data.message);
-                            }
-                            else {
-                                toastr.error(data.message);
-                            }
-                        }
-                    })
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - CineAdmin</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#665788",
+                        "primary-container": "#d8c6ff",
+                        "primary-fixed": "#eaddff",
+                        "secondary": "#645b71",
+                        "tertiary": "#7d516e",
+                        "surface": "#fdf8fd",
+                        "surface-container-low": "#f7f2f9",
+                        "surface-container": "#f1ecf4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#343139",
+                        "on-surface-variant": "#615e67",
+                        "outline": "#7d7982",
+                        "outline-variant": "#cbc4cf",
+                        "error": "#a8364b"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
                 }
-            })
+            }
         }
     </script>
-}
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: #f7f2f9; }
+        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body flex min-h-screen">
+
+    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-[#8675A9] font-headline text-sm w-64 border-r border-white/10 shadow-xl">
+        <div class="p-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
+                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
+            <a asp-controller="Dashboard" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            <a asp-controller="Cinema" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">theater_comedy</span> Cinemas
+            </a>
+            <a asp-controller="Movie" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">movie</span> Movies
+            </a>
+            <a asp-controller="Showtime" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">schedule</span> Showtimes
+            </a>
+            
+            <a asp-controller="Equipment" asp-action="Index" class="bg-white/20 text-white font-semibold rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all shadow-md">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings_input_component</span> Equipment
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/10">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">public</span> Public Site
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 ml-64 flex flex-col">
+        <header class="flex justify-between items-center px-8 h-16 w-full sticky top-0 z-40 bg-[#8675A9] text-white border-b border-white/10 shadow-sm">
+            <span class="text-xl font-bold tracking-tight font-headline">Tech Operations</span>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden md:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
+                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search assets or SN..." type="text"/>
+                </div>
+                <div class="h-6 w-px bg-white/20 mx-2"></div>
+                <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
+            </div>
+        </header>
+
+        <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
+            
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h1 class="text-4xl font-extrabold text-primary font-headline tracking-tight">Equipment Inventory</h1>
+                    <p class="text-on-surface-variant font-body mt-1">Monitor and manage the technological fleet across all cinema halls.</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button class="hidden md:flex items-center space-x-2 px-5 py-2.5 bg-white text-primary border border-outline-variant/30 rounded-xl font-headline font-bold text-sm hover:bg-surface-container transition-all shadow-sm">
+                        <span class="material-symbols-outlined text-sm">file_download</span>
+                        <span>Export Report</span>
+                    </button>
+                    <a asp-controller="Equipment" asp-action="Upsert" class="flex items-center space-x-2 px-5 py-2.5 bg-primary text-white rounded-xl font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] hover:-translate-y-0.5 transition-all">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                        <span>Register Asset</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-primary-fixed text-primary rounded-lg">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Global Assets</span>
+                    </div>
+                    <div>
+                        <span class="text-3xl font-black font-headline text-on-surface">@totalAssets</span>
+                        <div class="flex items-center mt-1 text-on-surface-variant text-xs font-medium">
+                            <span>Registered in fleet</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Operational</span>
+                    </div>
+                    <div>
+                        <span class="text-3xl font-black font-headline text-on-surface">@operationalPercentage.ToString("0.0")%</span>
+                        <p class="text-on-surface-variant text-xs mt-1 font-medium">@operationalAssets active units</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
+                            <span class="material-symbols-outlined">build</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Maintenance</span>
+                    </div>
+                    <div>
+                        <span class="text-3xl font-black font-headline text-on-surface">@maintenanceAssets</span>
+                        <div class="flex items-center mt-1 text-amber-600 text-xs font-bold">
+                            <span class="material-symbols-outlined text-xs mr-1">warning</span>
+                            <span>Require attention</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-t-3xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                <div class="p-6 bg-surface-container-lowest border-b border-outline-variant/20 flex flex-wrap items-center gap-4">
+                    <div class="flex items-center space-x-2 bg-surface-container-low px-4 py-2 rounded-xl border border-outline-variant/20">
+                        <span class="material-symbols-outlined text-outline text-lg">category</span>
+                        <span class="text-sm font-headline font-semibold text-on-surface">All Types</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-surface-container-low px-4 py-2 rounded-xl border border-outline-variant/20">
+                        <span class="material-symbols-outlined text-outline text-lg">verified</span>
+                        <span class="text-sm font-headline font-semibold text-on-surface">All Statuses</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low/30">
+                                <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">Asset Name & SN</th>
+                                <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">Category</th>
+                                <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">Location</th>
+                                <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">Status</th>
+                                <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">Next Maintenance</th>
+                                <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/10">
+                            
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-on-surface-variant">
+                                        <span class="material-symbols-outlined text-4xl mb-2 opacity-50">inventory_2</span>
+                                        <p class="font-medium">No equipment assets registered in the fleet yet.</p>
+                                    </td>
+                                </tr>
+                            }
+
+                            @foreach (var obj in Model.OrderBy(u => u.CinemaHall.Name))
+                            {
+                                // Determinare pictograma in functie de cuvinte cheie din Tip
+                                string typeStr = obj.Type.ToString().ToLower();
+                                string icon = "developer_board";
+                                if (typeStr.Contains("visual") || typeStr.Contains("projector") || typeStr.Contains("screen")) icon = "videocam";
+                                else if (typeStr.Contains("audio") || typeStr.Contains("sound") || typeStr.Contains("speaker")) icon = "volume_up";
+                                else if (typeStr.Contains("seat") || typeStr.Contains("chair")) icon = "chair";
+                                else if (typeStr.Contains("hvac") || typeStr.Contains("ac")) icon = "ac_unit";
+
+                                <tr class="group hover:bg-primary-fixed/5 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary shadow-sm border border-outline-variant/20 group-hover:scale-105 transition-transform">
+                                                <span class="material-symbols-outlined">@icon</span>
+                                            </div>
+                                            <div>
+                                                <p class="font-headline font-bold text-on-surface text-sm">@obj.Name</p>
+                                                <p class="text-[11px] text-outline font-mono mt-0.5">SN: @(obj.SerialNumber ?? "N/A")</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="px-6 py-5">
+                                        <span class="px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant text-[10px] font-extrabold rounded-md uppercase tracking-widest">
+                                            @obj.Type.ToString()
+                                        </span>
+                                    </td>
+                                    
+                                    <td class="px-6 py-5">
+                                        <p class="text-sm font-bold font-headline text-on-surface">@obj.CinemaHall.Name</p>
+                                        <p class="text-[10px] text-outline font-bold uppercase tracking-widest mt-0.5">Installed</p>
+                                    </td>
+                                    
+                                    <td class="px-6 py-5">
+                                        @if (obj.Status.ToString() == "Operational")
+                                        {
+                                            <div class="flex items-center space-x-2 text-emerald-600">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                                <span class="text-xs font-bold uppercase tracking-wider">Operational</span>
+                                            </div>
+                                        }
+                                        else if (obj.Status.ToString() == "NeedsMaintenance")
+                                        {
+                                            <div class="flex items-center space-x-2 text-amber-600">
+                                                <span class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse"></span>
+                                                <span class="text-xs font-bold uppercase tracking-wider">Maintenance</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="flex items-center space-x-2 text-error">
+                                                <span class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(186,26,26,0.5)]"></span>
+                                                <span class="text-xs font-bold uppercase tracking-wider">@obj.Status.ToString()</span>
+                                            </div>
+                                        }
+                                    </td>
+                                    
+                                    <td class="px-6 py-5 text-sm text-on-surface-variant font-medium">
+                                        @(obj.NextMaintenanceDate.HasValue ? obj.NextMaintenanceDate.Value.ToString("MMM dd, yyyy") : "Unscheduled")
+                                    </td>
+                                    
+                                    <td class="px-6 py-5 text-right">
+                                        <div class="flex items-center justify-end space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                                            <a asp-controller="Equipment" asp-action="Upsert" asp-route-id="@obj.Id" class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-colors border border-transparent hover:border-primary/20" title="Edit">
+                                                <span class="material-symbols-outlined text-lg">edit_square</span>
+                                            </a>
+                                            <button onClick="Delete('/Admin/Equipment/Delete/@obj.Id')" class="p-2 text-outline hover:text-error hover:bg-error/10 rounded-lg transition-colors border border-transparent hover:border-error/20" title="Delete">
+                                                <span class="material-symbols-outlined text-lg">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 bg-surface-container-low/30 border-t border-outline-variant/20 rounded-b-3xl">
+                    <p class="text-xs text-outline font-medium">Showing fleet of <span class="font-bold text-on-surface">@totalAssets</span> assets</p>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    @section Scripts {
+        <script>
+            // Logica ta existentă de ștergere, adaptată modern (Vanilla JS Fetch) pentru a nu depinde de jQuery
+            function Delete(url) {
+                Swal.fire({
+                    title: 'Confirm Asset Removal',
+                    text: "Are you sure you want to permanently delete this equipment record from the inventory? This cannot be reversed.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#a8364b', // Tailwind Error color
+                    cancelButtonColor: '#615e67',  // Tailwind On-Surface-Variant
+                    confirmButtonText: 'Yes, remove it',
+                    background: '#ffffff',
+                    customClass: {
+                        title: 'font-headline font-bold text-[#1a1c1c]',
+                        popup: 'rounded-2xl shadow-2xl border border-[#cbc4cf]/30'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(url, {
+                            method: 'DELETE'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // O reincarcare scurta pentru a vedea datele noi
+                                location.reload();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message,
+                                    confirmButtonColor: '#665788'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire('Network Error', 'Could not process the deletion request.', 'error');
+                        });
+                    }
+                });
+            }
+        </script>
+    }
+</body>
+</html>

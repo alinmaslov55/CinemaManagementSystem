@@ -1,98 +1,198 @@
 ﻿@model CinemaSystem.Models.ViewModels.SeatSelectionVM
 
-<div class="container mt-4">
-    <div class="row">
+@{
+    ViewData["Title"] = "Select Your Seats";
+    Layout = "_Layout";
+}
 
-        @* --- LEFT COLUMN: ORDER SUMMARY --- *@
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-dark text-white text-center py-3">
-                    <h5 class="mb-0 fw-bold">Booking Summary</h5>
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); }
+    .seat-arc { mask-image: linear-gradient(to bottom, black 50%, transparent 100%); }
+    
+    /* Ascundem scrollbar-ul orizontal pe grid-ul de scaune dacă e prea lat */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Animații personalizate pentru scaune */
+    .seat-item { transition: all 0.2s ease-in-out; }
+    .seat-available:hover { transform: scale(1.15); filter: brightness(1.1); }
+    .seat-selected { transform: scale(1.1); box-shadow: 0 4px 12px rgba(100, 84, 133, 0.4); }
+</style>
+
+<div class="bg-surface font-body text-on-background min-h-screen pt-12 pb-40">
+    <main class="max-w-[1440px] mx-auto px-6 lg:px-12">
+        
+        <div class="flex flex-col items-center mb-16">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="flex items-center gap-2 opacity-50">
+                    <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</div>
+                    <span class="text-xs font-headline uppercase tracking-widest font-bold text-primary">Details</span>
                 </div>
-                <div class="card-body">
-                    <h4 class="text-primary fw-bold">@Model.Showtime.Movie.Title</h4>
-                    <p class="text-muted mb-1"><i class="bi bi-geo-alt-fill"></i> @Model.Showtime.CinemaHall.Cinema.Name</p>
-                    <p class="text-muted mb-1"><i class="bi bi-door-open-fill"></i> @Model.Showtime.CinemaHall.Name</p>
-                    <p class="text-muted mb-3"><i class="bi bi-calendar-event"></i> @Model.Showtime.StartTime.ToString("f")</p>
-
-                    <hr />
-
-                    <h6 class="fw-bold">Selected Seats:</h6>
-                    <ul id="selectedSeatsList" class="list-group list-group-flush mb-3 small">
-                        <li class="list-group-item text-muted text-center" id="emptyCartMsg">No seats selected yet.</li>
-                    </ul>
-
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold fs-5">Total:</span>
-                        <span class="fw-bold fs-4 text-success" id="cartTotal">$0.00</span>
-                    </div>
-
-                    <button id="btnCheckout" class="btn btn-primary w-100 fw-bold py-2 shadow-sm" disabled>
-                        Proceed to Checkout
-                    </button>
-
-                    @* Hidden form to hold the anti-forgery token for our AJAX post *@
-                    <form id="antiForgeryForm">
-                        @Html.AntiForgeryToken()
-                    </form>
+                <div class="w-12 h-[1px] bg-outline/30"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold shadow-md">2</div>
+                    <span class="text-xs font-headline uppercase tracking-widest font-bold text-on-background">Seats</span>
+                </div>
+                <div class="w-12 h-[1px] bg-outline/30"></div>
+                <div class="flex items-center gap-2 opacity-50">
+                    <div class="w-8 h-8 rounded-full bg-surface-container-high text-outline flex items-center justify-center text-xs font-bold">3</div>
+                    <span class="text-xs font-headline uppercase tracking-widest font-bold text-outline">Checkout</span>
                 </div>
             </div>
+            <h1 class="text-4xl md:text-5xl font-headline font-extralight tracking-tight text-on-background">Select Your <span class="font-bold text-primary">Experience</span></h1>
         </div>
 
-        @* --- RIGHT COLUMN: THE SEAT MAP --- *@
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 p-4 bg-light">
-
-                <div class="w-75 mx-auto bg-secondary text-white text-center mb-5 py-2 shadow-sm" style="border-radius: 0 0 20px 20px; letter-spacing: 5px;">
-                    SCREEN
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            
+            <div class="lg:col-span-8 flex flex-col items-center w-full overflow-hidden">
+                
+                <div class="w-full max-w-3xl mb-24 relative select-none">
+                    <div class="h-2 w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent rounded-full blur-sm"></div>
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-[10px] font-headline uppercase tracking-[0.4em] text-outline font-bold">Screen</div>
+                    <div class="mt-4 flex justify-center">
+                        <div class="w-4/5 h-24 bg-gradient-to-b from-primary/10 to-transparent rounded-[100%] blur-xl opacity-50"></div>
+                    </div>
                 </div>
 
-                <div id="seatingGrid" class="mx-auto" style="display: grid; grid-template-columns: repeat(@Model.Cols, minmax(30px, 1fr)); gap: 8px; max-width: 100%; justify-content: center;">
-                    @foreach (var seat in Model.Seats)
-                    {
-                        string seatClass = "seat-available";
-                        string cursorStyle = "cursor: pointer;";
-                        string bgColor = "#6c757d"; // Default Standard Gray
-                        string textColor = "white";
-
-                        // 1. Determine Visual State based on Type
-                        if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.Premium) bgColor = "#198754";
-                        if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.VIP) { bgColor = "#ffc107"; textColor = "black"; }
-                        if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.Handicap) { bgColor = "#0dcaf0"; textColor = "black"; }
-
-                        // 2. Override if Booked or Held (Locked out)
-                        if (seat.Status == "Booked" || seat.Status == "Held")
+                <div class="w-full overflow-x-auto pb-12 no-scrollbar flex justify-center">
+                    <div id="seatingGrid" style="display: grid; grid-template-columns: repeat(@Model.Cols, minmax(36px, 1fr)); gap: 10px; width: max-content; padding: 10px;">
+                        
+                        @foreach (var seat in Model.Seats)
                         {
-                            seatClass = "seat-locked";
-                            bgColor = "#dc3545"; // Red for unavailable
-                            cursorStyle = "cursor: not-allowed; opacity: 0.5;";
+                            // Status CSS classes & styling
+                            string seatStateClass = "seat-available cursor-pointer";
+                            string bgClass = "bg-surface-container border border-outline/20 text-on-surface-variant"; // Standard
+                            string iconHtml = "";
+
+                            if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.Premium) 
+                            { 
+                                bgClass = "bg-[#ebd4fe] border border-[#d8c6ff] text-[#4e3e6e]"; 
+                            }
+                            else if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.VIP) 
+                            { 
+                                bgClass = "bg-[#ffd8e6] border border-[#ecb8cc] text-[#613b4c]"; 
+                                iconHtml = "<span class='material-symbols-outlined text-[14px]'>workspace_premium</span>";
+                            }
+                            else if (seat.SeatType == CinemaSystem.Models.Data.Enums.SeatType.Handicap) 
+                            { 
+                                bgClass = "bg-[#e2e2e2] border border-[#cbc4cf] text-[#1a1c1c]"; 
+                                iconHtml = "<span class='material-symbols-outlined text-[14px]'>accessible</span>";
+                            }
+
+                            // If Booked or Held -> Locked out
+                            if (seat.Status == "Booked" || seat.Status == "Held")
+                            {
+                                seatStateClass = "seat-locked cursor-not-allowed opacity-50";
+                                bgClass = "bg-surface-container-high border-none text-outline";
+                                iconHtml = "<span class='material-symbols-outlined text-[14px]'>close</span>";
+                            }
+
+                            <div class="seat-item rounded-lg flex items-center justify-center shadow-sm select-none @seatStateClass @bgClass"
+                                 data-id="@seat.Id"
+                                 data-name="@seat.Row@seat.Column"
+                                 data-price="@seat.FinalPrice"
+                                 data-original-bg="@bgClass"
+                                 style="height: 36px; width: 36px; font-size: 11px; font-weight: 700;">
+                                @if(string.IsNullOrEmpty(iconHtml)) {
+                                    @Html.Raw($"{seat.Row}{seat.Column}")
+                                } else {
+                                    @Html.Raw(iconHtml)
+                                }
+                            </div>
                         }
 
-                        <div class="seat-item rounded shadow-sm text-center d-flex align-items-center justify-content-center fw-bold @seatClass"
-                             data-id="@seat.Id"
-                             data-row="@seat.Row"
-                             data-col="@seat.Column"
-                             data-price="@seat.FinalPrice"
-                             data-status="@seat.Status"
-                             style="height: 35px; width: 35px; background-color: @bgColor; color: @textColor; @cursorStyle; font-size: 0.8rem; transition: transform 0.1s;">
-                            @seat.Row@seat.Column
-                        </div>
-                    }
+                    </div>
                 </div>
 
-                @* Interactive Legend *@
-                <div class="d-flex justify-content-center flex-wrap gap-3 mt-5 pt-3 border-top small">
-                    <div><span class="badge" style="background-color: #6c757d;">&nbsp;&nbsp;</span> Standard</div>
-                    <div><span class="badge" style="background-color: #198754;">&nbsp;&nbsp;</span> Premium</div>
-                    <div><span class="badge" style="background-color: #ffc107;">&nbsp;&nbsp;</span> VIP</div>
-                    <div><span class="badge" style="background-color: #0dcaf0;">&nbsp;&nbsp;</span> Handicap</div>
-                    <div><span class="badge" style="background-color: #dc3545;">&nbsp;&nbsp;</span> Unavailable</div>
-                    <div><span class="badge border border-primary" style="background-color: #0d6efd;">&nbsp;&nbsp;</span> Selected</div>
+                <div class="mt-8 flex flex-wrap justify-center gap-6 px-6 py-6 border-t border-outline/10 w-full">
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-surface-container border border-outline/20"></div>
+                        <span class="text-xs font-label text-on-surface-variant font-medium">Standard</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-[#ebd4fe] border border-[#d8c6ff]"></div>
+                        <span class="text-xs font-label text-on-surface-variant font-medium">Premium</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-[#ffd8e6] border border-[#ecb8cc]"></div>
+                        <span class="text-xs font-label text-on-surface-variant font-medium">VIP Lounge</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-primary shadow-md"></div>
+                        <span class="text-xs font-label text-on-surface-variant font-medium">Selected</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-surface-container-high flex items-center justify-center text-outline"><span class="material-symbols-outlined text-[12px]">close</span></div>
+                        <span class="text-xs font-label text-on-surface-variant font-medium">Occupied</span>
+                    </div>
                 </div>
 
             </div>
-        </div>
 
+            <div class="lg:col-span-4 sticky top-28 z-20">
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-outline/10">
+                    
+                    <div class="flex items-center gap-5 mb-8">
+                        <img alt="@Model.Showtime.Movie.Title" class="w-20 h-28 rounded-xl object-cover shadow-md border border-outline/10" src="@(string.IsNullOrEmpty(Model.Showtime.Movie.ImageUrl) ? "https://via.placeholder.com/150x225" : Model.Showtime.Movie.ImageUrl)"/>
+                        <div>
+                            <h3 class="font-headline font-extrabold text-xl leading-tight mb-1 text-on-background line-clamp-2">@Model.Showtime.Movie.Title</h3>
+                            <p class="text-[10px] font-label text-outline uppercase tracking-widest font-bold">@Model.Showtime.CinemaHall.HallType Experience</p>
+                            <div class="mt-2 flex items-center gap-1.5 text-primary font-bold text-xs bg-primary/5 px-2 py-1 rounded-md w-fit">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span>
+                                @Model.Showtime.CinemaHall.Cinema.Name, @Model.Showtime.CinemaHall.Name
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between items-center text-sm pb-4 border-b border-outline/10">
+                            <span class="text-on-surface-variant font-medium">Date & Time</span>
+                            <span class="font-bold text-on-background bg-surface px-3 py-1 rounded-md border border-outline/10">@Model.Showtime.StartTime.ToString("MMM dd, yyyy • HH:mm")</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-start text-sm pt-2">
+                            <span class="text-on-surface-variant font-medium">Selected Seats</span>
+                            <div class="text-right flex-1 ml-4">
+                                <ul id="selectedSeatsList" class="flex flex-col gap-1 items-end">
+                                    <li class="text-outline text-xs italic" id="emptyCartMsg">No seats selected yet.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-low rounded-2xl p-5 mb-8 border border-outline/10">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-label text-on-surface-variant uppercase tracking-widest font-bold">Total Estimate</span>
+                            <span class="text-3xl font-headline font-extrabold text-primary" id="cartTotal">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button id="btnCheckout" disabled class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-4 rounded-xl font-headline font-bold uppercase tracking-[0.1em] text-xs shadow-lg shadow-primary/30 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0 transition-all active:scale-95 flex justify-center items-center gap-2">
+                        Proceed to Checkout <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </button>
+                    
+                    <p class="mt-4 text-center text-[10px] text-outline px-4 font-medium leading-relaxed">
+                        <span class="material-symbols-outlined text-[10px] mr-1">lock</span> Secure transaction via Ethereal Pay. Seats are locked for 10 minutes upon proceeding.
+                    </p>
+
+                    <form id="antiForgeryForm" class="hidden">@Html.AntiForgeryToken()</form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="lg:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-outline/10 p-4 z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <div class="flex justify-between items-center gap-4 max-w-md mx-auto">
+            <div>
+                <p class="text-[10px] font-bold text-outline uppercase tracking-widest" id="mobileCartCount">0 Seats Selected</p>
+                <p class="text-xl font-headline font-extrabold text-primary" id="mobileCartTotal">$0.00</p>
+            </div>
+            <button id="btnMobileCheckout" disabled class="bg-primary text-white px-8 py-3 rounded-xl font-headline font-bold uppercase tracking-widest text-xs shadow-md disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 duration-200">
+                Checkout
+            </button>
+        </div>
     </div>
 </div>
 
@@ -100,32 +200,38 @@
     <script>
         const selectedSeats = new Map(); // Key: SeatId, Value: { name, price }
         const btnCheckout = document.getElementById('btnCheckout');
+        const btnMobileCheckout = document.getElementById('btnMobileCheckout');
         const showtimeId = @Model.Showtime.Id;
+
+        // Selected Seat Tailind Classes
+        const selectedClasses = ['bg-primary', 'text-white', 'seat-selected'];
 
         document.querySelectorAll('.seat-available').forEach(seat => {
             seat.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
-                const row = this.getAttribute('data-row');
-                const col = this.getAttribute('data-col');
+                const name = this.getAttribute('data-name');
                 const price = parseFloat(this.getAttribute('data-price'));
-                const originalBg = this.style.backgroundColor;
+                const originalBg = this.getAttribute('data-original-bg');
 
                 if (selectedSeats.has(id)) {
-                    // Deselect
+                    // Deselect - return to original styling
                     selectedSeats.delete(id);
-                    this.style.backgroundColor = this.getAttribute('data-original-bg');
-                    this.style.border = "none";
+                    this.classList.remove(...selectedClasses);
+                    originalBg.split(' ').forEach(cls => {
+                        if(cls) this.classList.add(cls);
+                    });
                 } else {
-                    // Limit max seats per transaction (e.g., 8)
+                    // Limit max seats
                     if(selectedSeats.size >= 8) {
                         alert("You can only select up to 8 seats per transaction.");
                         return;
                     }
-                    // Select
-                    this.setAttribute('data-original-bg', originalBg);
-                    this.style.backgroundColor = "#0d6efd"; // Bootstrap Primary Blue
-                    this.style.border = "2px solid #0a58ca";
-                    selectedSeats.set(id, { name: `${row}${col}`, price: price });
+                    // Select - apply primary styling
+                    originalBg.split(' ').forEach(cls => {
+                        if(cls) this.classList.remove(cls);
+                    });
+                    this.classList.add(...selectedClasses);
+                    selectedSeats.set(id, { name: name, price: price });
                 }
 
                 updateCartUI();
@@ -135,34 +241,45 @@
         function updateCartUI() {
             const listContainer = document.getElementById('selectedSeatsList');
             const totalDisplay = document.getElementById('cartTotal');
+            const mobileTotalDisplay = document.getElementById('mobileCartTotal');
+            const mobileCountDisplay = document.getElementById('mobileCartCount');
 
             listContainer.innerHTML = '';
             let total = 0;
 
             if (selectedSeats.size === 0) {
-                listContainer.innerHTML = '<li class="list-group-item text-muted text-center">No seats selected yet.</li>';
+                listContainer.innerHTML = '<li class="text-outline text-xs italic">No seats selected yet.</li>';
                 totalDisplay.innerText = '$0.00';
+                mobileTotalDisplay.innerText = '$0.00';
+                mobileCountDisplay.innerText = '0 Seats Selected';
                 btnCheckout.disabled = true;
+                btnMobileCheckout.disabled = true;
                 return;
             }
 
             selectedSeats.forEach((value, key) => {
                 total += value.price;
                 const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center py-1';
-                li.innerHTML = `Seat ${value.name} <span class="fw-bold">$${value.price.toFixed(2)}</span>`;
+                li.className = 'w-full flex justify-between items-center text-sm py-1 border-b border-outline/5 last:border-0';
+                li.innerHTML = `<span class="font-bold text-on-background bg-surface-container px-2 py-0.5 rounded text-xs">${value.name}</span> <span class="font-bold text-primary">$${value.price.toFixed(2)}</span>`;
                 listContainer.appendChild(li);
             });
 
-            totalDisplay.innerText = `$${total.toFixed(2)}`;
+            const formattedTotal = `$${total.toFixed(2)}`;
+            totalDisplay.innerText = formattedTotal;
+            mobileTotalDisplay.innerText = formattedTotal;
+            mobileCountDisplay.innerText = `${selectedSeats.size} Seats Selected`;
+            
             btnCheckout.disabled = false;
+            btnMobileCheckout.disabled = false;
         }
 
-        // AJAX POST to acquire the database lock
-        btnCheckout.addEventListener('click', function() {
-            // Disable button to prevent double-clicks
+        // Logic to trigger the same AJAX POST for both desktop and mobile buttons
+        function initiateCheckout() {
             btnCheckout.disabled = true;
-            btnCheckout.innerText = "Locking Seats...";
+            btnMobileCheckout.disabled = true;
+            const originalText = btnCheckout.innerHTML;
+            btnCheckout.innerHTML = '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Locking...';
 
             const seatIds = Array.from(selectedSeats.keys()).map(id => parseInt(id));
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
@@ -183,30 +300,22 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Redirect to the actual payment/checkout page
                     window.location.href = `/Booking/Checkout?showtimeId=${showtimeId}`;
                 } else {
                     alert(data.message || "One or more seats were just taken! Please reselect.");
-                    location.reload(); // Refresh the grid to show the new locks
+                    location.reload(); 
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert("A network error occurred. Please try again.");
                 btnCheckout.disabled = false;
-                btnCheckout.innerText = "Proceed to Checkout";
+                btnMobileCheckout.disabled = false;
+                btnCheckout.innerHTML = originalText;
             });
-        });
+        }
+
+        btnCheckout.addEventListener('click', initiateCheckout);
+        btnMobileCheckout.addEventListener('click', initiateCheckout);
     </script>
-
-    <style>
-        .seat-item {
-            user-select: none;
-        }
-
-        .seat-available:hover {
-            transform: scale(1.15);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-    </style>
 }

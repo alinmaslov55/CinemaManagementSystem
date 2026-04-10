@@ -3,297 +3,191 @@
 
 @{
     ViewData["Title"] = Model.Equipment.Id != 0 ? "Update Asset" : "Register Asset";
-    // OBJECTIVE FIX: Izolăm complet de layout-ul public
-    Layout = null; 
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; 
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>@ViewData["Title"] - CineAdmin</title>
-    
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#665788",
-                        "primary-container": "#d8c6ff",
-                        "primary-fixed": "#eaddff",
-                        "secondary": "#645b71",
-                        "secondary-container": "#eadef8",
-                        "tertiary": "#7d516e",
-                        "surface": "#fdf8fd",
-                        "surface-container-low": "#f7f2f9",
-                        "surface-container": "#f1ecf4",
-                        "surface-container-lowest": "#ffffff",
-                        "on-surface": "#343139",
-                        "on-surface-variant": "#615e67",
-                        "outline": "#7d7982",
-                        "outline-variant": "#cbc4cf",
-                        "error": "#a8364b",
-                        "error-container": "#f97386"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                        "label": ["Inter", "sans-serif"]
+<style>
+    .status-radio:checked + div {
+        border-color: #665788;
+        background-color: #eaddff40;
+    }
+    .status-radio:checked + div .radio-icon {
+        opacity: 1;
+        transform: scale(1);
+    }
+    .radio-icon {
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.2s ease-in-out;
+    }
+</style>
+
+<main class="p-8 max-w-[1600px] mx-auto w-full pb-20">
+            
+    <nav class="flex text-sm text-on-surface-variant mb-8 gap-2 font-label items-center font-semibold">
+        <a asp-action="Index" class="hover:text-primary transition-colors">Equipment Inventory</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-primary font-bold">@(Model.Equipment.Id != 0 ? "Update Asset" : "Register New Asset")</span>
+    </nav>
+
+    <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <input asp-for="Equipment.Id" hidden />
+
+        <div class="lg:col-span-8 space-y-6">
+            
+            <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 rounded-lg bg-primary-fixed text-primary">
+                        <span class="material-symbols-outlined">info</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">General Information</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label asp-for="Equipment.Name" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Asset Name <span class="text-error">*</span></label>
+                        <input asp-for="Equipment.Name" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" placeholder="e.g., Sony 4K Laser Projector" />
+                        <span asp-validation-for="Equipment.Name" class="text-error text-xs mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Equipment.Type" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Category <span class="text-error">*</span></label>
+                        <select asp-for="Equipment.Type" asp-items="Html.GetEnumSelectList<EquipmentType>()" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
+                            <option disabled selected>-- Select Type --</option>
+                        </select>
+                        <span asp-validation-for="Equipment.Type" class="text-error text-xs mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Equipment.SerialNumber" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Serial Number</label>
+                        <input asp-for="Equipment.SerialNumber" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" placeholder="e.g., SN-8829-XJ-001" />
+                        <span asp-validation-for="Equipment.SerialNumber" class="text-error text-xs mt-1 block"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 rounded-lg bg-secondary-container text-secondary">
+                        <span class="material-symbols-outlined">location_on</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">Assignment</h3>
+                </div>
+                <div>
+                    <label asp-for="Equipment.CinemaHallId" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Installed Location (Hall) <span class="text-error">*</span></label>
+                    <select asp-for="Equipment.CinemaHallId" asp-items="@Model.HallList" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
+                        <option disabled selected>-- Select Hall / Room --</option>
+                    </select>
+                    <span asp-validation-for="Equipment.CinemaHallId" class="text-error text-xs mt-1 block"></span>
+                </div>
+            </section>
+
+            <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 rounded-lg bg-[#ffd8e6] text-[#7d516e]">
+                        <span class="material-symbols-outlined">vibration</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">Current Status</h3>
+                </div>
+                
+                <div class="space-y-3">
+                    @foreach (var item in Html.GetEnumSelectList<EquipmentStatus>())
+                    {
+                        string iconName = "check_circle";
+                        string iconColor = "text-emerald-500";
+                        string desc = "Asset is functioning normally.";
+
+                        if (item.Text.Contains("Maintenance"))
+                        {
+                            iconName = "warning";
+                            iconColor = "text-amber-500";
+                            desc = "Asset requires scheduled technical review.";
+                        }
+                        else if (item.Text.Contains("Out") || item.Text.Contains("Faulty"))
+                        {
+                            iconName = "error";
+                            iconColor = "text-error";
+                            desc = "Asset is currently offline or broken.";
+                        }
+
+                        <label class="relative block cursor-pointer group">
+                            <input type="radio" asp-for="Equipment.Status" value="@item.Value" class="status-radio sr-only" />
+                            <div class="flex items-center p-4 border border-outline-variant/50 rounded-xl hover:bg-surface transition-colors">
+                                <div class="flex-1">
+                                    <span class="block text-sm font-bold text-on-surface font-headline">@item.Text</span>
+                                    <span class="block text-xs text-on-surface-variant mt-0.5">@desc</span>
+                                </div>
+                                <span class="material-symbols-outlined radio-icon @iconColor text-2xl">@iconName</span>
+                            </div>
+                        </label>
                     }
-                }
-            }
-        }
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        
-        /* Custom Styling for Radio Buttons */
-        .status-radio:checked + div {
-            border-color: #665788;
-            background-color: #eaddff40;
-        }
-        .status-radio:checked + div .radio-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .radio-icon {
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 0.2s ease-in-out;
-        }
-    </style>
-</head>
-<body class="bg-surface-container-low text-on-surface antialiased font-body flex min-h-screen">
+                    <span asp-validation-for="Equipment.Status" class="text-error text-xs mt-1 block"></span>
+                </div>
+            </section>
 
-    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-surface-container-lowest font-headline text-sm w-64 border-r border-outline-variant/30 shadow-xl rounded-r-2xl">
-        <div class="p-6 mb-4 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings_input_component</span>
-            </div>
-            <div>
-                <h2 class="text-lg font-black text-primary leading-tight">CineAdmin</h2>
-                <p class="text-[10px] uppercase tracking-widest text-outline font-bold mt-0.5">Management Portal</p>
-            </div>
+            <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 rounded-lg bg-[#433c50] text-white">
+                        <span class="material-symbols-outlined">engineering</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">Technical Timeline</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label asp-for="Equipment.PurchaseDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Purchase Date <span class="text-error">*</span></label>
+                        <input asp-for="Equipment.PurchaseDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
+                        <span asp-validation-for="Equipment.PurchaseDate" class="text-error text-xs mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Equipment.LastMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Last Service</label>
+                        <input asp-for="Equipment.LastMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
+                        <span asp-validation-for="Equipment.LastMaintenanceDate" class="text-error text-xs mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Equipment.NextMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Next Service</label>
+                        <input asp-for="Equipment.NextMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
+                        <span asp-validation-for="Equipment.NextMaintenanceDate" class="text-error text-xs mt-1 block"></span>
+                    </div>
+                </div>
+            </section>
+
         </div>
-        <nav class="flex-1 space-y-1 overflow-y-auto px-2">
-            <a asp-controller="Dashboard" asp-action="Index" class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-all font-semibold">
-                <span class="material-symbols-outlined mr-3">dashboard</span> Dashboard
-            </a>
-            <a asp-controller="Cinema" asp-action="Index" class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-all font-semibold">
-                <span class="material-symbols-outlined mr-3">theater_comedy</span> Cinemas
-            </a>
-            <a asp-controller="Movie" asp-action="Index" class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-all font-semibold">
-                <span class="material-symbols-outlined mr-3">movie</span> Movies
-            </a>
-            <a asp-controller="Showtime" asp-action="Index" class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-xl transition-all font-semibold">
-                <span class="material-symbols-outlined mr-3">schedule</span> Showtimes
-            </a>
+
+        <div class="lg:col-span-4 flex flex-col gap-6">
             
-            <a asp-controller="Equipment" asp-action="Index" class="flex items-center px-4 py-3 bg-primary text-white rounded-xl shadow-md font-semibold mt-2 transition-all">
-                <span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">settings_input_component</span> Equipment
-            </a>
-        </nav>
-        <div class="p-6 border-t border-outline-variant/20 flex items-center gap-3 mt-auto">
-            <div class="w-10 h-10 rounded-full bg-primary-container text-primary flex items-center justify-center font-bold font-headline">
-                AD
+            <div class="bg-surface-container-lowest rounded-2xl flex flex-col shadow-sm border border-outline-variant/30 flex-1">
+                <div class="p-6 border-b border-outline-variant/20 flex items-center justify-between">
+                    <h3 class="text-lg font-bold font-headline text-on-surface">Servicing Log</h3>
+                    <span class="material-symbols-outlined text-outline">history_edu</span>
+                </div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <label asp-for="Equipment.MaintenanceNotes" class="block text-xs font-bold text-outline mb-2 uppercase tracking-widest font-label">Technical Notes & History</label>
+                    <textarea asp-for="Equipment.MaintenanceNotes" class="w-full flex-1 min-h-[300px] bg-[#fdf8fd] border border-outline-variant/50 rounded-xl p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-medium leading-relaxed resize-none placeholder-outline/50" placeholder="Document installation details, firmware updates, or repair logs here..."></textarea>
+                    <span asp-validation-for="Equipment.MaintenanceNotes" class="text-error text-xs mt-1 block"></span>
+                </div>
             </div>
-            <div class="overflow-hidden">
-                <p class="text-sm font-bold text-on-surface truncate">Admin User</p>
-                <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Tech Director</p>
-            </div>
-        </div>
-    </aside>
 
-    <div class="flex-1 ml-64 flex flex-col">
-        <header class="flex justify-between items-center px-8 h-20 w-full sticky top-0 z-40 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20 shadow-sm">
-            <div class="flex items-center gap-4">
-                <h1 class="text-xl font-bold text-primary tracking-tight font-headline">Tech Operations</h1>
-                <div class="h-6 w-px bg-outline-variant/30 mx-2 hidden md:block"></div>
-                <span class="text-xs font-bold text-outline uppercase tracking-widest hidden md:block">Asset Configuration</span>
-            </div>
-            <div class="flex items-center gap-6">
-                <button class="text-on-surface-variant hover:text-primary transition-colors relative">
-                    <span class="material-symbols-outlined">notifications</span>
+            <div class="space-y-3">
+                <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold font-headline shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">save</span>
+                    @(Model.Equipment.Id != 0 ? "Save Equipment Data" : "Register New Equipment")
                 </button>
-            </div>
-        </header>
-
-        <main class="flex-1 p-8 max-w-[1600px] mx-auto w-full">
-            
-            <nav class="flex text-sm text-on-surface-variant mb-8 gap-2 font-label items-center font-semibold">
-                <a asp-action="Index" class="hover:text-primary transition-colors">Equipment Inventory</a>
-                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                <span class="text-primary font-bold">@(Model.Equipment.Id != 0 ? "Update Asset" : "Register New Asset")</span>
-            </nav>
-
-            <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <input asp-for="Equipment.Id" hidden />
-
-                <div class="lg:col-span-8 space-y-6">
-                    
-                    <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 rounded-lg bg-primary-fixed text-primary">
-                                <span class="material-symbols-outlined">info</span>
-                            </div>
-                            <h3 class="text-lg font-bold font-headline text-on-surface">General Information</h3>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="md:col-span-2">
-                                <label asp-for="Equipment.Name" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Asset Name <span class="text-error">*</span></label>
-                                <input asp-for="Equipment.Name" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" placeholder="e.g., Sony 4K Laser Projector" />
-                                <span asp-validation-for="Equipment.Name" class="text-error text-xs mt-1 block"></span>
-                            </div>
-                            <div>
-                                <label asp-for="Equipment.Type" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Category <span class="text-error">*</span></label>
-                                <select asp-for="Equipment.Type" asp-items="Html.GetEnumSelectList<EquipmentType>()" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
-                                    <option disabled selected>-- Select Type --</option>
-                                </select>
-                                <span asp-validation-for="Equipment.Type" class="text-error text-xs mt-1 block"></span>
-                            </div>
-                            <div>
-                                <label asp-for="Equipment.SerialNumber" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Serial Number</label>
-                                <input asp-for="Equipment.SerialNumber" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" placeholder="e.g., SN-8829-XJ-001" />
-                                <span asp-validation-for="Equipment.SerialNumber" class="text-error text-xs mt-1 block"></span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 rounded-lg bg-secondary-container text-secondary">
-                                <span class="material-symbols-outlined">location_on</span>
-                            </div>
-                            <h3 class="text-lg font-bold font-headline text-on-surface">Assignment</h3>
-                        </div>
-                        <div>
-                            <label asp-for="Equipment.CinemaHallId" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Installed Location (Hall) <span class="text-error">*</span></label>
-                            <select asp-for="Equipment.CinemaHallId" asp-items="@Model.HallList" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
-                                <option disabled selected>-- Select Hall / Room --</option>
-                            </select>
-                            <span asp-validation-for="Equipment.CinemaHallId" class="text-error text-xs mt-1 block"></span>
-                        </div>
-                    </section>
-
-                    <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 rounded-lg bg-[#ffd8e6] text-[#7d516e]">
-                                <span class="material-symbols-outlined">vibration</span>
-                            </div>
-                            <h3 class="text-lg font-bold font-headline text-on-surface">Current Status</h3>
-                        </div>
-                        
-                        <div class="space-y-3">
-                            @foreach (var item in Html.GetEnumSelectList<EquipmentStatus>())
-                            {
-                                string iconName = "check_circle";
-                                string iconColor = "text-emerald-500";
-                                string desc = "Asset is functioning normally.";
-
-                                if (item.Text.Contains("Maintenance"))
-                                {
-                                    iconName = "warning";
-                                    iconColor = "text-amber-500";
-                                    desc = "Asset requires scheduled technical review.";
-                                }
-                                else if (item.Text.Contains("Out") || item.Text.Contains("Faulty"))
-                                {
-                                    iconName = "error";
-                                    iconColor = "text-error";
-                                    desc = "Asset is currently offline or broken.";
-                                }
-
-                                <label class="relative block cursor-pointer group">
-                                    <input type="radio" asp-for="Equipment.Status" value="@item.Value" class="status-radio sr-only" />
-                                    <div class="flex items-center p-4 border border-outline-variant/50 rounded-xl hover:bg-surface transition-colors">
-                                        <div class="flex-1">
-                                            <span class="block text-sm font-bold text-on-surface font-headline">@item.Text</span>
-                                            <span class="block text-xs text-on-surface-variant mt-0.5">@desc</span>
-                                        </div>
-                                        <span class="material-symbols-outlined radio-icon @iconColor text-2xl">@iconName</span>
-                                    </div>
-                                </label>
-                            }
-                            <span asp-validation-for="Equipment.Status" class="text-error text-xs mt-1 block"></span>
-                        </div>
-                    </section>
-
-                    <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 rounded-lg bg-[#433c50] text-white">
-                                <span class="material-symbols-outlined">engineering</span>
-                            </div>
-                            <h3 class="text-lg font-bold font-headline text-on-surface">Technical Timeline</h3>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label asp-for="Equipment.PurchaseDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Purchase Date <span class="text-error">*</span></label>
-                                <input asp-for="Equipment.PurchaseDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
-                                <span asp-validation-for="Equipment.PurchaseDate" class="text-error text-xs mt-1 block"></span>
-                            </div>
-                            <div>
-                                <label asp-for="Equipment.LastMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Last Service</label>
-                                <input asp-for="Equipment.LastMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
-                                <span asp-validation-for="Equipment.LastMaintenanceDate" class="text-error text-xs mt-1 block"></span>
-                            </div>
-                            <div>
-                                <label asp-for="Equipment.NextMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Next Service</label>
-                                <input asp-for="Equipment.NextMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
-                                <span asp-validation-for="Equipment.NextMaintenanceDate" class="text-error text-xs mt-1 block"></span>
-                            </div>
-                        </div>
-                    </section>
-
-                </div>
-
-                <div class="lg:col-span-4 flex flex-col gap-6">
-                    
-                    <div class="bg-surface-container-lowest rounded-2xl flex flex-col shadow-sm border border-outline-variant/30 flex-1">
-                        <div class="p-6 border-b border-outline-variant/20 flex items-center justify-between">
-                            <h3 class="text-lg font-bold font-headline text-on-surface">Servicing Log</h3>
-                            <span class="material-symbols-outlined text-outline">history_edu</span>
-                        </div>
-                        <div class="p-6 flex-1 flex flex-col">
-                            <label asp-for="Equipment.MaintenanceNotes" class="block text-xs font-bold text-outline mb-2 uppercase tracking-widest font-label">Technical Notes & History</label>
-                            <textarea asp-for="Equipment.MaintenanceNotes" class="w-full flex-1 min-h-[300px] bg-[#fdf8fd] border border-outline-variant/50 rounded-xl p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-medium leading-relaxed resize-none placeholder-outline/50" placeholder="Document installation details, firmware updates, or repair logs here..."></textarea>
-                            <span asp-validation-for="Equipment.MaintenanceNotes" class="text-error text-xs mt-1 block"></span>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold font-headline shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">save</span>
-                            @(Model.Equipment.Id != 0 ? "Save Equipment Data" : "Register New Equipment")
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <a asp-action="Index" class="py-3 bg-white border border-outline-variant/50 text-on-surface text-center rounded-xl font-bold font-label text-sm hover:bg-surface-container-low transition-colors">
+                        Cancel
+                    </a>
+                    @if(Model.Equipment.Id != 0)
+                    {
+                        <button type="button" onClick="confirmDelete()" class="py-3 bg-[#f97386]/10 border border-[#a8364b]/30 text-[#a8364b] rounded-xl font-bold font-label text-sm hover:bg-[#f97386]/20 transition-colors">
+                            Delete Asset
                         </button>
-                        
-                        <div class="grid grid-cols-2 gap-3">
-                            <a asp-action="Index" class="py-3 bg-white border border-outline-variant/50 text-on-surface text-center rounded-xl font-bold font-label text-sm hover:bg-surface-container-low transition-colors">
-                                Cancel
-                            </a>
-                            @if(Model.Equipment.Id != 0)
-                            {
-                                <button type="button" onClick="confirmDelete()" class="py-3 bg-[#f97386]/10 border border-[#a8364b]/30 text-[#a8364b] rounded-xl font-bold font-label text-sm hover:bg-[#f97386]/20 transition-colors">
-                                    Delete Asset
-                                </button>
-                            }
-                        </div>
-                    </div>
+                    }
                 </div>
-            </form>
-        </main>
-    </div>
+            </div>
+        </div>
+    </form>
+</main>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
         function confirmDelete() {
             Swal.fire({
@@ -310,7 +204,6 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Când apasă Delete în panoul de Editare, facem POST către metoda de Delete existentă
                     fetch('/Admin/Equipment/Delete/@Model.Equipment.Id', {
                         method: 'DELETE'
                     }).then(res => res.json()).then(data => {
@@ -324,5 +217,4 @@
             });
         }
     </script>
-</body>
-</html>
+}

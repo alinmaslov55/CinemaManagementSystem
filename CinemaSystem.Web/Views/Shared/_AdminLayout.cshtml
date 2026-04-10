@@ -1,7 +1,6 @@
 ﻿@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,15 +70,23 @@
             <a asp-controller="Dashboard" asp-action="Index" class="@(currentController == "Dashboard" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">dashboard</span> Dashboard
             </a>
-            <a asp-controller="Cinema" asp-action="Index" class="@(currentController == "Cinema" || currentController == "CinemaHall" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+            
+            <a asp-controller="Cinema" asp-action="Index" class="@(currentController == "Cinema" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">theater_comedy</span> Cinemas
             </a>
+            
+            <a asp-controller="CinemaHall" asp-action="Index" class="@(currentController == "CinemaHall" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">meeting_room</span> Halls
+            </a>
+            
             <a asp-controller="Movie" asp-action="Index" class="@(currentController == "Movie" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">movie</span> Movies
             </a>
+            
             <a asp-controller="Showtime" asp-action="Index" class="@(currentController == "Showtime" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">schedule</span> Showtimes
             </a>
+            
             <a asp-controller="Equipment" asp-action="Index" class="@(currentController == "Equipment" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">settings_input_component</span> Equipment
             </a>

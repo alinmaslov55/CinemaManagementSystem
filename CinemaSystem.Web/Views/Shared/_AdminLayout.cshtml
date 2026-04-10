@@ -1,0 +1,113 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - CineAdmin</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#665788",
+                        "primary-container": "#d8c6ff",
+                        "primary-fixed": "#eaddff",
+                        "secondary": "#645b71",
+                        "tertiary": "#7d516e",
+                        "surface": "#fdf8fd",
+                        "surface-container-low": "#f7f2f9",
+                        "surface-container": "#f1ecf4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#343139",
+                        "on-surface-variant": "#615e67",
+                        "outline": "#7d7982",
+                        "outline-variant": "#cbc4cf",
+                        "error": "#a8364b"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: #f7f2f9; }
+        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body flex min-h-screen overflow-x-hidden">
+
+    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-[#8675A9] font-headline text-sm w-64 border-r border-white/10 shadow-xl">
+        <div class="p-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
+                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
+            <a asp-controller="Dashboard" asp-action="Index" class="@(currentController == "Dashboard" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            <a asp-controller="Cinema" asp-action="Index" class="@(currentController == "Cinema" || currentController == "CinemaHall" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">theater_comedy</span> Cinemas
+            </a>
+            <a asp-controller="Movie" asp-action="Index" class="@(currentController == "Movie" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">movie</span> Movies
+            </a>
+            <a asp-controller="Showtime" asp-action="Index" class="@(currentController == "Showtime" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">schedule</span> Showtimes
+            </a>
+            <a asp-controller="Equipment" asp-action="Index" class="@(currentController == "Equipment" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">settings_input_component</span> Equipment
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/10">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">public</span> Public Site
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 ml-64 flex flex-col h-screen overflow-y-auto">
+        <header class="flex justify-between items-center px-8 h-16 w-full shrink-0 z-40 bg-[#8675A9] text-white border-b border-white/10 shadow-sm sticky top-0">
+            <span class="text-xl font-bold tracking-tight font-headline">@ViewData["Title"]</span>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden md:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
+                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search operations..." type="text"/>
+                </div>
+                <div class="h-6 w-px bg-white/20 mx-2"></div>
+                <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
+            </div>
+        </header>
+
+        @RenderBody()
+
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -3,234 +3,129 @@
 
 @{
     ViewData["Title"] = "Cinema Index";
-    Layout = null;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>@ViewData["Title"] - CineAdmin</title>
+<main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
     
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#665788",
-                        "primary-container": "#d8c6ff",
-                        "primary-fixed": "#eaddff",
-                        "secondary": "#645b71",
-                        "tertiary": "#7d516e",
-                        "surface": "#fdf8fd",
-                        "surface-container-low": "#f7f2f9",
-                        "surface-container": "#f1ecf4",
-                        "on-surface": "#343139",
-                        "on-surface-variant": "#615e67",
-                        "outline": "#7d7982",
-                        "outline-variant": "#b5b0ba",
-                        "error": "#a8364b"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                        "label": ["Inter", "sans-serif"]
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        ::-webkit-scrollbar { height: 6px; width: 6px; }
-        ::-webkit-scrollbar-track { background: #f7f2f9; }
-        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
-    </style>
-</head>
-<body class="bg-surface text-on-surface antialiased font-body">
-
-    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-[#8675A9] font-headline text-sm w-64 border-r border-white/10 shadow-xl">
-        <div class="p-6">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
-                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
-                </div>
-            </div>
+    <div class="flex items-end justify-between mb-10">
+        <div>
+            <h2 class="text-4xl font-extrabold text-primary tracking-tight font-headline">Cinema Index</h2>
+            <p class="text-on-surface-variant text-sm mt-1 font-body">Manage and monitor global theatre locations</p>
         </div>
-        <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
-            <a asp-controller="Dashboard" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">dashboard</span> Dashboard
-            </a>
-            
-            <a asp-controller="Cinema" asp-action="Index" class="bg-white/20 text-white font-semibold rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">theater_comedy</span> Cinemas
-            </a>
-            
-            <a asp-controller="Movie" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">movie</span> Movies
-            </a>
-            <a href="#" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">schedule</span> Showtimes
-            </a>
-            <a asp-controller="Equipment" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">settings_input_component</span> Equipment
-            </a>
-        </nav>
-        <div class="p-4 border-t border-white/10">
-            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">public</span> Public Site
-            </a>
-        </div>
-    </aside>
-
-    <header class="fixed top-0 w-full z-50 bg-[#8675A9] border-b border-white/10 shadow-sm flex justify-between items-center h-16 px-6 ml-64 pr-[288px]">
-        <div class="flex items-center gap-4">
-            <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50">search</span>
-                <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm text-white placeholder:text-white/50 focus:ring-2 focus:ring-white/20 w-64 outline-none" placeholder="Search locations..." type="text"/>
-            </div>
-        </div>
-        <div class="flex items-center gap-4 pr-64">
-            <button class="text-white/70 hover:bg-white/10 p-2 rounded-full transition-colors relative">
-                <span class="material-symbols-outlined">notifications</span>
+        <div class="flex gap-3">
+            <button class="bg-white border border-outline-variant/30 text-on-surface-variant px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-sm">
+                <span class="material-symbols-outlined text-lg">filter_list</span>
+                Filter
             </button>
-            <div class="h-8 w-px bg-white/10 mx-2"></div>
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
-                <span class="text-white font-medium text-sm">Admin Terminal</span>
-            </div>
+            <a asp-controller="Cinema" asp-action="Upsert" class="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md hover:bg-[#564777] hover:-translate-y-0.5 transition-all">
+                <span class="material-symbols-outlined text-lg">add_circle</span>
+                Add New Cinema
+            </a>
         </div>
-    </header>
+    </div>
 
-    <main class="ml-64 pt-24 pb-12 px-8 min-h-screen max-w-[1600px] mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-primary-fixed text-primary rounded-lg">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
+                </div>
+                <span class="text-[10px] font-bold text-tertiary uppercase tracking-widest">Total Locations</span>
+            </div>
+            <p class="text-3xl font-extrabold text-on-surface font-headline">@Model.Count()</p>
+            <p class="text-xs text-on-surface-variant mt-1">Operational sites</p>
+        </div>
         
-        <div class="flex items-end justify-between mb-10">
-            <div>
-                <h2 class="text-4xl font-extrabold text-primary tracking-tight font-headline">Cinema Index</h2>
-                <p class="text-on-surface-variant text-sm mt-1 font-body">Manage and monitor global theatre locations</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                </div>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Active Now</span>
             </div>
-            <div class="flex gap-3">
-                <button class="bg-white border border-outline-variant/30 text-on-surface-variant px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-sm">
-                    <span class="material-symbols-outlined text-lg">filter_list</span>
-                    Filter
-                </button>
-                <a asp-controller="Cinema" asp-action="Upsert" class="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md hover:bg-[#564777] hover:-translate-y-0.5 transition-all">
-                    <span class="material-symbols-outlined text-lg">add_circle</span>
-                    Add New Cinema
-                </a>
+            <p class="text-3xl font-extrabold text-on-surface font-headline">@Model.Count()</p>
+            <p class="text-xs text-on-surface-variant mt-1">100% capacity</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
+                </div>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Maintenance</span>
             </div>
+            <p class="text-3xl font-extrabold text-on-surface font-headline">0</p>
+            <p class="text-xs text-on-surface-variant mt-1">Scheduled upgrades</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-primary-fixed text-primary rounded-lg">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
+                </div>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Total Halls</span>
+            </div>
+            <p class="text-3xl font-extrabold text-on-surface font-headline">--</p>
+            <p class="text-xs text-on-surface-variant mt-1">Across all sites</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-outline-variant/20">
+        <div class="grid grid-cols-12 px-8 py-5 border-b border-outline-variant/20 bg-surface-container-low/50">
+            <div class="col-span-5 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Cinema Details</div>
+            <div class="col-span-3 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Location</div>
+            <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Status</div>
+            <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em] text-right">Actions</div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-2 bg-primary-fixed text-primary rounded-lg">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
+        @foreach (var obj in Model)
+        {
+            <div class="grid grid-cols-12 px-8 py-6 items-center hover:bg-primary-fixed/10 transition-colors border-b border-outline-variant/10 group">
+                
+                <div class="col-span-5 flex items-center gap-4">
+                    <div class="h-14 w-14 rounded-xl overflow-hidden bg-surface-container flex-shrink-0 border border-outline-variant/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-3xl opacity-50">theaters</span>
                     </div>
-                    <span class="text-[10px] font-bold text-tertiary uppercase tracking-widest">Total Locations</span>
+                    <div>
+                        <h4 class="font-bold text-on-surface text-base font-headline">@obj.Name</h4>
+                        <p class="text-[11px] text-on-surface-variant uppercase tracking-widest mt-0.5">Ethereal Network</p>
+                    </div>
                 </div>
-                <p class="text-3xl font-extrabold text-on-surface font-headline">@Model.Count()</p>
-                <p class="text-xs text-on-surface-variant mt-1">Operational sites</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                    </div>
-                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Active Now</span>
+                
+                <div class="col-span-3 pr-4">
+                    <p class="text-sm font-medium text-on-surface-variant line-clamp-2">@obj.Address</p>
                 </div>
-                <p class="text-3xl font-extrabold text-on-surface font-headline">@Model.Count()</p>
-                <p class="text-xs text-on-surface-variant mt-1">100% capacity</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
-                    </div>
-                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Maintenance</span>
+                
+                <div class="col-span-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Active
+                    </span>
                 </div>
-                <p class="text-3xl font-extrabold text-on-surface font-headline">0</p>
-                <p class="text-xs text-on-surface-variant mt-1">Scheduled upgrades</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-2 bg-primary-fixed text-primary rounded-lg">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
-                    </div>
-                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Total Halls</span>
-                </div>
-                <p class="text-3xl font-extrabold text-on-surface font-headline">--</p>
-                <p class="text-xs text-on-surface-variant mt-1">Across all sites</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-outline-variant/20">
-            <div class="grid grid-cols-12 px-8 py-5 border-b border-outline-variant/20 bg-surface-container-low/50">
-                <div class="col-span-5 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Cinema Details</div>
-                <div class="col-span-3 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Location</div>
-                <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Status</div>
-                <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em] text-right">Actions</div>
-            </div>
-
-            @foreach (var obj in Model)
-            {
-                <div class="grid grid-cols-12 px-8 py-6 items-center hover:bg-primary-fixed/10 transition-colors border-b border-outline-variant/10 group">
-                    
-                    <div class="col-span-5 flex items-center gap-4">
-                        <div class="h-14 w-14 rounded-xl overflow-hidden bg-surface-container flex-shrink-0 border border-outline-variant/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-                            <span class="material-symbols-outlined text-3xl opacity-50">theaters</span>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-on-surface text-base font-headline">@obj.Name</h4>
-                            <p class="text-[11px] text-on-surface-variant uppercase tracking-widest mt-0.5">Ethereal Network</p>
-                        </div>
-                    </div>
-                    
-                    <div class="col-span-3 pr-4">
-                        <p class="text-sm font-medium text-on-surface-variant line-clamp-2">@obj.Address</p>
-                    </div>
-                    
-                    <div class="col-span-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
-                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Active
-                        </span>
-                    </div>
-                    
-                    <div class="col-span-2 flex justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                        <a asp-controller="Cinema" asp-action="Upsert" asp-route-id="@obj.Id" title="Edit Cinema"
+                
+                <div class="col-span-2 flex justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <a asp-controller="Cinema" asp-action="Upsert" asp-route-id="@obj.Id" title="Edit Cinema"
                            class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-all flex items-center justify-center">
-                            <span class="material-symbols-outlined text-xl">edit_square</span>
-                        </a>
-                        <a asp-controller="Cinema" asp-action="Delete" asp-route-id="@obj.Id" title="Delete Cinema"
+                        <span class="material-symbols-outlined text-xl">edit_square</span>
+                    </a>
+                    <a asp-controller="Cinema" asp-action="Delete" asp-route-id="@obj.Id" title="Delete Cinema"
                            class="p-2 text-outline hover:text-error hover:bg-error/10 rounded-lg transition-all flex items-center justify-center">
-                            <span class="material-symbols-outlined text-xl">delete</span>
-                        </a>
-                    </div>
+                        <span class="material-symbols-outlined text-xl">delete</span>
+                    </a>
                 </div>
-            }
-
-            @if (!Model.Any())
-            {
-                <div class="p-12 text-center text-on-surface-variant">
-                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">domain_disabled</span>
-                    <p class="font-medium">No cinema locations registered yet.</p>
-                </div>
-            }
-
-            <div class="flex items-center justify-between px-8 py-4 bg-surface-container-low/30 border-t border-outline-variant/20">
-                <p class="text-xs text-on-surface-variant font-medium">Showing total of @Model.Count() cinemas</p>
             </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="p-12 text-center text-on-surface-variant">
+                <span class="material-symbols-outlined text-4xl mb-2 opacity-50">domain_disabled</span>
+                <p class="font-medium">No cinema locations registered yet.</p>
+            </div>
+        }
+
+        <div class="flex items-center justify-between px-8 py-4 bg-surface-container-low/30 border-t border-outline-variant/20">
+            <p class="text-xs text-on-surface-variant font-medium">Showing total of @Model.Count() cinemas</p>
         </div>
-    </main>
-</body>
-</html>
+    </div>
+</main>

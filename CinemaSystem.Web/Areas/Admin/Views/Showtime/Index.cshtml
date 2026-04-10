@@ -3,263 +3,147 @@
 
 @{
     ViewData["Title"] = "Showtime Manager";
-    // OBJECTIVE FIX: Izolăm complet de layout-ul public
-    Layout = null; 
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Calculăm statisticile de bază
+    var allShowsToday = Model.SelectMany(h => h.Showtimes ?? new List<Showtime>())
+                             .Where(s => s.StartTime.Date == DateTime.Today).ToList();
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>@ViewData["Title"] - CineAdmin</title>
+<main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
     
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#665788",
-                        "primary-container": "#d8c6ff",
-                        "primary-fixed": "#eaddff",
-                        "secondary": "#645b71",
-                        "tertiary": "#7d516e",
-                        "surface": "#fdf8fd",
-                        "surface-container-low": "#f7f2f9",
-                        "surface-container": "#f1ecf4",
-                        "on-surface": "#343139",
-                        "on-surface-variant": "#615e67",
-                        "outline": "#7d7982",
-                        "outline-variant": "#cbc4cf",
-                        "error": "#a8364b"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                        "label": ["Inter", "sans-serif"]
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        ::-webkit-scrollbar { height: 6px; width: 6px; }
-        ::-webkit-scrollbar-track { background: #f7f2f9; }
-        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
-    </style>
-</head>
-<body class="bg-surface text-on-surface antialiased font-body flex min-h-screen">
-
-    <aside class="flex flex-col h-screen fixed left-0 z-[60] bg-[#8675A9] font-headline text-sm w-64 border-r border-white/10 shadow-xl">
-        <div class="p-6">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
-                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
-                </div>
-            </div>
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight">Showtime Index</h1>
+            <p class="text-on-surface-variant mt-2 max-w-xl font-body">Manage daily schedules and monitor hall assignments across your cinema complex.</p>
         </div>
-        <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
-            <a asp-controller="Dashboard" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">dashboard</span> Dashboard
-            </a>
-            <a asp-controller="Cinema" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">theater_comedy</span> Cinemas
-            </a>
-            <a asp-controller="Movie" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">movie</span> Movies
-            </a>
-            
-            <a asp-controller="Showtime" asp-action="Index" class="bg-white/20 text-white font-semibold rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all shadow-md">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule</span> Showtimes
-            </a>
-            
-            <a asp-controller="Equipment" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">settings_input_component</span> Equipment
-            </a>
-        </nav>
-        <div class="p-4 border-t border-white/10">
-            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">public</span> Public Site
-            </a>
-        </div>
-    </aside>
-
-    <div class="flex-1 ml-64 flex flex-col">
-        <header class="flex justify-between items-center px-8 h-16 w-full sticky top-0 z-40 bg-[#8675A9] text-white border-b border-white/10 shadow-sm">
-            <span class="text-xl font-bold tracking-tight font-headline">Showtime Manager</span>
-            <div class="flex items-center gap-4">
-                <div class="relative hidden md:block">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
-                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search halls or movies..." type="text"/>
-                </div>
-                <div class="h-6 w-px bg-white/20 mx-2"></div>
-                <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
-            </div>
-        </header>
-
-        <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
-            
-            @{
-                // Calculate basic stats safely
-                var allShowsToday = Model.SelectMany(h => h.Showtimes ?? new List<Showtime>())
-                                         .Where(s => s.StartTime.Date == DateTime.Today).ToList();
-            }
-
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-                <div>
-                    <h1 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight">Showtime Index</h1>
-                    <p class="text-on-surface-variant mt-2 max-w-xl font-body">Manage daily schedules and monitor hall assignments across your cinema complex.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shadow-inner">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
-                    </div>
-                    <div>
-                        <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Today's Screenings</p>
-                        <h3 class="text-2xl font-bold text-on-surface font-headline">@allShowsToday.Count() <span class="text-sm font-normal text-outline">Sessions</span></h3>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shadow-inner">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
-                    </div>
-                    <div>
-                        <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Registered Halls</p>
-                        <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Count() <span class="text-sm font-normal text-outline">Total Rooms</span></h3>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 shadow-inner">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_seat</span>
-                    </div>
-                    <div>
-                        <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Total Capacity</p>
-                        <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Sum(h => h.TotalSeats).ToString("N0") <span class="text-sm font-normal text-outline">Seats</span></h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-outline-variant/30 mb-8">
-                <div class="flex items-center gap-2 px-2">
-                    <span class="material-symbols-outlined text-outline text-sm">location_on</span>
-                    <span class="text-sm font-bold text-on-surface">Global Network (All Cinemas)</span>
-                </div>
-                <div class="h-6 w-px bg-outline-variant/30 hidden md:block"></div>
-                <div class="flex items-center gap-2 px-2">
-                    <span class="material-symbols-outlined text-outline text-sm">calendar_month</span>
-                    <span class="text-sm font-bold text-on-surface">@DateTime.Today.ToString("MMM dd, yyyy")</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                @if (!Model.Any())
-                {
-                    <div class="col-span-1 lg:col-span-2 p-12 text-center text-on-surface-variant bg-white rounded-3xl border border-outline-variant/30 shadow-sm">
-                        <span class="material-symbols-outlined text-5xl mb-3 opacity-50">videocam_off</span>
-                        <h3 class="text-xl font-bold font-headline text-on-surface mb-2">No Halls Available</h3>
-                        <p class="font-body text-sm">You need to add Cinema Halls to the system before managing showtimes.</p>
-                    </div>
-                }
-
-                @foreach (var hall in Model)
-                {
-                    // Core logic extrasa din vechiul tau cod C#
-                    var nextShow = hall.Showtimes?
-                        .Where(s => s.StartTime > DateTime.Now)
-                        .OrderBy(s => s.StartTime)
-                        .FirstOrDefault();
-
-                    <div class="bg-white rounded-[1.5rem] p-6 shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow flex flex-col group">
-                        
-                        <div class="flex items-start justify-between mb-6">
-                            <div>
-                                <div class="flex gap-2 mb-1.5">
-                                    <span class="px-2 py-1 bg-surface-container text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded border border-outline-variant/30">
-                                        @hall.HallType
-                                    </span>
-                                </div>
-                                <h3 class="text-2xl font-bold font-headline text-on-surface">@hall.Name</h3>
-                                <p class="text-xs text-outline font-medium flex items-center gap-1 mt-0.5">
-                                    <span class="material-symbols-outlined text-[12px]">location_on</span> @hall.Cinema.Name
-                                </p>
-                            </div>
-                            <div class="flex gap-2">
-                                <a asp-controller="Showtime" asp-action="Upsert" asp-route-hallId="@hall.Id" class="p-2.5 bg-primary-fixed/50 hover:bg-primary text-primary hover:text-white rounded-xl transition-all shadow-sm border border-primary/10" title="Manage Schedule">
-                                    <span class="material-symbols-outlined text-xl">edit_calendar</span>
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <div class="flex gap-5 flex-1 bg-surface-container-low p-4 rounded-2xl border border-outline-variant/20">
-                            
-                            @if (nextShow != null)
-                            {
-                                <div class="relative w-24 h-36 rounded-xl overflow-hidden shadow-sm flex-shrink-0 border border-outline-variant/30">
-                                    <img class="w-full h-full object-cover" alt="@nextShow.Movie?.Title" 
-                                         src="@(string.IsNullOrEmpty(nextShow.Movie?.ImageUrl) ? "https://via.placeholder.com/200x300" : nextShow.Movie?.ImageUrl)" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                                    <div class="absolute bottom-2 left-0 right-0 text-[9px] text-white font-bold text-center tracking-widest uppercase">UPCOMING</div>
-                                </div>
-                                
-                                <div class="flex-1 flex flex-col justify-between py-1">
-                                    <div>
-                                        <p class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1 font-label">Next Screening</p>
-                                        <h4 class="text-lg font-extrabold text-on-surface font-headline leading-tight line-clamp-2">@nextShow.Movie?.Title</h4>
-                                        
-                                        <div class="flex items-center gap-2 mt-3 bg-white p-2 rounded-lg border border-outline-variant/30 w-fit">
-                                            <span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
-                                            <span class="text-sm font-bold text-on-surface">@nextShow.StartTime.ToString("hh:mm tt")</span>
-                                            <span class="text-[10px] text-outline font-bold uppercase tracking-widest border-l border-outline-variant/30 pl-2 ml-1">@nextShow.StartTime.ToString("MMM dd")</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mt-4 flex items-center justify-between border-t border-outline-variant/30 pt-3">
-                                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Capacity</span>
-                                        <span class="text-sm font-bold text-on-surface">@hall.TotalSeats Seats</span>
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="w-24 h-36 rounded-xl flex-shrink-0 bg-surface-container flex flex-col items-center justify-center border border-outline-variant/30">
-                                    <span class="material-symbols-outlined text-4xl text-outline-variant opacity-50">movie_filter</span>
-                                </div>
-                                <div class="flex-1 flex flex-col justify-center items-start py-1">
-                                    <p class="text-[10px] font-bold text-error uppercase tracking-widest mb-1 font-label">No Schedule</p>
-                                    <h4 class="text-lg font-bold text-on-surface font-headline leading-tight">No upcoming shows</h4>
-                                    <p class="text-xs text-on-surface-variant mt-2 max-w-[200px] leading-relaxed">Select "Manage Schedule" to assign movies to this hall.</p>
-                                    
-                                    <div class="mt-auto w-full flex items-center justify-between border-t border-outline-variant/30 pt-3">
-                                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Capacity</span>
-                                        <span class="text-sm font-bold text-on-surface">@hall.TotalSeats Seats</span>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-
-                    </div>
-                }
-
-            </div>
-
-        </main>
     </div>
 
-</body>
-</html>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shadow-inner">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
+            </div>
+            <div>
+                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Today's Screenings</p>
+                <h3 class="text-2xl font-bold text-on-surface font-headline">@allShowsToday.Count() <span class="text-sm font-normal text-outline">Sessions</span></h3>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shadow-inner">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
+            </div>
+            <div>
+                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Registered Halls</p>
+                <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Count() <span class="text-sm font-normal text-outline">Total Rooms</span></h3>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 shadow-inner">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_seat</span>
+            </div>
+            <div>
+                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Total Capacity</p>
+                <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Sum(h => h.TotalSeats).ToString("N0") <span class="text-sm font-normal text-outline">Seats</span></h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-outline-variant/30 mb-8">
+        <div class="flex items-center gap-2 px-2">
+            <span class="material-symbols-outlined text-outline text-sm">location_on</span>
+            <span class="text-sm font-bold text-on-surface">Global Network (All Cinemas)</span>
+        </div>
+        <div class="h-6 w-px bg-outline-variant/30 hidden md:block"></div>
+        <div class="flex items-center gap-2 px-2">
+            <span class="material-symbols-outlined text-outline text-sm">calendar_month</span>
+            <span class="text-sm font-bold text-on-surface">@DateTime.Today.ToString("MMM dd, yyyy")</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        @if (!Model.Any())
+        {
+            <div class="col-span-1 lg:col-span-2 p-12 text-center text-on-surface-variant bg-white rounded-3xl border border-outline-variant/30 shadow-sm">
+                <span class="material-symbols-outlined text-5xl mb-3 opacity-50">videocam_off</span>
+                <h3 class="text-xl font-bold font-headline text-on-surface mb-2">No Halls Available</h3>
+                <p class="font-body text-sm">You need to add Cinema Halls to the system before managing showtimes.</p>
+            </div>
+        }
+
+        @foreach (var hall in Model)
+        {
+            var nextShow = hall.Showtimes?
+                .Where(s => s.StartTime > DateTime.Now)
+                .OrderBy(s => s.StartTime)
+                .FirstOrDefault();
+
+            <div class="bg-white rounded-[1.5rem] p-6 shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow flex flex-col group">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <div class="flex gap-2 mb-1.5">
+                            <span class="px-2 py-1 bg-surface-container text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded border border-outline-variant/30">
+                                @hall.HallType
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold font-headline text-on-surface">@hall.Name</h3>
+                        <p class="text-xs text-outline font-medium flex items-center gap-1 mt-0.5">
+                            <span class="material-symbols-outlined text-[12px]">location_on</span> @hall.Cinema.Name
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a asp-controller="Showtime" asp-action="Upsert" asp-route-hallId="@hall.Id" class="p-2.5 bg-primary-fixed/50 hover:bg-primary text-primary hover:text-white rounded-xl transition-all shadow-sm border border-primary/10" title="Manage Schedule">
+                            <span class="material-symbols-outlined text-xl">edit_calendar</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex gap-5 flex-1 bg-surface-container-low p-4 rounded-2xl border border-outline-variant/20">
+                    @if (nextShow != null)
+                    {
+                        <div class="relative w-24 h-36 rounded-xl overflow-hidden shadow-sm flex-shrink-0 border border-outline-variant/30">
+                            <img class="w-full h-full object-cover" alt="@nextShow.Movie?.Title"
+                                 src="@(string.IsNullOrEmpty(nextShow.Movie?.ImageUrl) ? "https://via.placeholder.com/200x300" : nextShow.Movie?.ImageUrl)" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                            <div class="absolute bottom-2 left-0 right-0 text-[9px] text-white font-bold text-center tracking-widest uppercase">UPCOMING</div>
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col justify-between py-1">
+                            <div>
+                                <p class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1 font-label">Next Screening</p>
+                                <h4 class="text-lg font-extrabold text-on-surface font-headline leading-tight line-clamp-2">@nextShow.Movie?.Title</h4>
+                                
+                                <div class="flex items-center gap-2 mt-3 bg-white p-2 rounded-lg border border-outline-variant/30 w-fit">
+                                    <span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+                                    <span class="text-sm font-bold text-on-surface">@nextShow.StartTime.ToString("hh:mm tt")</span>
+                                    <span class="text-[10px] text-outline font-bold uppercase tracking-widest border-l border-outline-variant/30 pl-2 ml-1">@nextShow.StartTime.ToString("MMM dd")</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between border-t border-outline-variant/30 pt-3">
+                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Capacity</span>
+                                <span class="text-sm font-bold text-on-surface">@hall.TotalSeats Seats</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="w-24 h-36 rounded-xl flex-shrink-0 bg-surface-container flex flex-col items-center justify-center border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-4xl text-outline-variant opacity-50">movie_filter</span>
+                        </div>
+                        <div class="flex-1 flex flex-col justify-center items-start py-1">
+                            <p class="text-[10px] font-bold text-error uppercase tracking-widest mb-1 font-label">No Schedule</p>
+                            <h4 class="text-lg font-bold text-on-surface font-headline leading-tight">No upcoming shows</h4>
+                            <p class="text-xs text-on-surface-variant mt-2 max-w-[200px] leading-relaxed">Select "Manage Schedule" to assign movies to this hall.</p>
+                            <div class="mt-auto w-full flex items-center justify-between border-t border-outline-variant/30 pt-3">
+                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Capacity</span>
+                                <span class="text-sm font-bold text-on-surface">@hall.TotalSeats Seats</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</main>

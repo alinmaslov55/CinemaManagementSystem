@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@{
+    // Detectăm dacă suntem pe pagina de Home pentru a afișa acel Navbar transparent peste imagine
+    var isHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && 
+                 ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -11,6 +17,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     
     <script>
         tailwind.config = {
@@ -41,11 +48,10 @@
         .cta-gradient { background: linear-gradient(135deg, #7f6fa2 0%, #976987 100%); }
     </style>
 </head>
-
 <body class="bg-surface font-body text-on-background antialiased flex flex-col min-h-screen">
     
-    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-outline/10 h-20 transition-all shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-50 @(isHome ? "bg-white/80" : "bg-white") backdrop-blur-xl border-b border-outline/10 h-20 transition-all shadow-sm">
+        <div class="max-w-[1440px] mx-auto px-6 h-full flex justify-between items-center">
             
             <a asp-area="" asp-controller="Home" asp-action="Index" class="text-2xl font-light tracking-[0.3em] text-primary font-headline hover:opacity-80 transition-opacity">
                 ETHÉREAL
@@ -56,16 +62,16 @@
                 
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-area="Admin" asp-controller="Equipment" asp-action="Index" class="text-xs font-bold uppercase tracking-widest text-tertiary hover:text-primary transition-colors">Equipment Admin</a>
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="text-xs font-bold uppercase tracking-widest text-tertiary hover:text-primary transition-colors">Management Portal</a>
                 }
             </div>
 
-            <div class="flex items-center gap-6">
-                @if (User.Identity.IsAuthenticated)
+            <div class="hidden md:flex items-center gap-6">
+                @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a asp-area="" asp-controller="Booking" asp-action="History" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-primary transition-colors">My Tickets</a>
                     <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0">
-                        <button type="submit" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-danger transition-colors">Logout</button>
+                        <button type="submit" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-error transition-colors">Logout</button>
                     </form>
                 }
                 else
@@ -74,18 +80,47 @@
                     <a asp-area="Identity" asp-page="/Account/Login" class="cta-gradient text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform">Login</a>
                 }
             </div>
+
+            <button id="mobileMenuToggle" class="md:hidden text-primary focus:outline-none flex items-center justify-center p-2">
+                <span class="material-symbols-outlined text-3xl">menu</span>
+            </button>
             
+        </div>
+
+        <div id="mobileMenu" class="absolute top-20 left-0 w-full bg-white border-b border-outline/10 shadow-xl hidden flex-col px-6 py-6 space-y-6 md:hidden">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary block">Movies</a>
+            
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="text-sm font-bold uppercase tracking-widest text-tertiary hover:text-primary block">Management Portal</a>
+            }
+
+            <hr class="border-outline/10" />
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-area="" asp-controller="Booking" asp-action="History" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary block">My Tickets</a>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0">
+                    <button type="submit" class="text-sm font-bold uppercase tracking-widest text-[#a8364b] hover:opacity-80 block">Logout</button>
+                </form>
+            }
+            else
+            {
+                <a asp-area="Identity" asp-page="/Account/Register" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary block">Register</a>
+                <a asp-area="Identity" asp-page="/Account/Login" class="cta-gradient text-white text-center px-6 py-4 rounded-xl text-sm font-bold uppercase tracking-widest shadow-md block">Login</a>
+            }
         </div>
     </nav>
 
-    <main class="flex-grow pt-20">
-        <partial name="_Notification" /> @RenderBody()
+    <main class="flex-grow @(isHome ? "" : "pt-32 px-6 max-w-[1440px] mx-auto w-full")">
+        <partial name="_Notification" /> 
+        @RenderBody()
     </main>
 
     <footer class="bg-surface-container-high border-t border-outline/10 py-12 mt-auto">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-outline font-bold uppercase tracking-widest">
+        <div class="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-outline font-bold uppercase tracking-widest">
             <p>&copy; @DateTime.Now.Year ETHÉREAL CINEMA GROUP. ALL RIGHTS RESERVED.</p>
-            <div class="flex gap-8 mt-4 md:mt-0">
+            <div class="flex gap-8 mt-6 md:mt-0">
                 <a href="#" class="hover:text-primary transition-colors">Privacy</a>
                 <a href="#" class="hover:text-primary transition-colors">Terms</a>
                 <a href="https://github.com/your-profile" target="_blank" class="hover:text-primary transition-colors">GitHub</a>
@@ -96,6 +131,19 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    
+    <script>
+        const btn = document.getElementById('mobileMenuToggle');
+        const menu = document.getElementById('mobileMenu');
+        const icon = btn.querySelector('span');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+            icon.innerText = menu.classList.contains('hidden') ? 'menu' : 'close';
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

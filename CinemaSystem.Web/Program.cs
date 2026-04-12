@@ -38,7 +38,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddTransient<IEmailSender, EmailService>();
 
 builder.Services.AddHttpClient("OMDbClient", client =>
 {

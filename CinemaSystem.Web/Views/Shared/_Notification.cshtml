@@ -1,17 +1,48 @@
 ﻿@if (TempData["success"] != null)
 {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    <script type="text/javascript">
-        toastr.success('@TempData["success"]');
+    <script>
+        // Așteptăm ca tot DOM-ul și scripturile din subsol (inclusiv SweetAlert) să se încarce
+        document.addEventListener("DOMContentLoaded", function() {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'bg-white rounded-2xl shadow-xl border border-[#cbc4cf]/30 font-["Inter"]',
+                    title: 'text-sm font-bold text-[#1a1c1c]'
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: '@TempData["success"]'
+            });
+        });
     </script>
 }
 
 @if (TempData["error"] != null)
 {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    <script type="text/javascript">
-        toastr.error('@TempData["error"]');
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'bg-white rounded-2xl shadow-xl border border-[#cbc4cf]/30 font-["Inter"]',
+                    title: 'text-sm font-bold text-[#1a1c1c]'
+                }
+            });
+
+            Toast.fire({
+                icon: 'error',
+                title: '@TempData["error"]'
+            });
+        });
     </script>
 }

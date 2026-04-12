@@ -4,25 +4,27 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
-    </li>
-    <li class="nav-item">
-        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+    <div class="flex items-center gap-6">
+        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-xs font-bold uppercase tracking-widest text-[#7f6fa2] hover:text-[#976987] transition-colors" title="Manage Profile">
+            Hello, @UserManager.GetUserName(User)!
+        </a>
+        <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0">
+            <button type="submit" class="text-xs font-bold uppercase tracking-widest text-[#79767b] hover:text-[#a8364b] transition-colors">
+                Logout
+            </button>
         </form>
-    </li>
+    </div>
 }
 else
 {
-    <li class="nav-item">
-        <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
+    <div class="flex items-center gap-6">
+        <a asp-area="Identity" asp-page="/Account/Register" class="text-xs font-bold uppercase tracking-widest text-[#79767b] hover:text-[#7f6fa2] transition-colors">
+            Register
+        </a>
+        <a asp-area="Identity" asp-page="/Account/Login" class="bg-gradient-to-br from-[#7f6fa2] to-[#976987] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform">
+            Login
+        </a>
+    </div>
 }
-</ul>

@@ -14,23 +14,41 @@
     .hero-gradient { background: linear-gradient(180deg, rgba(249,249,249,0) 0%, rgba(249,249,249,1) 95%); }
     .primary-gradient { background: linear-gradient(135deg, #7f6fa2 0%, #976987 100%); }
     .custom-shadow { box-shadow: 0px 20px 40px rgba(127, 111, 162, 0.08); }
-    /* Eliminăm padding-ul implicit de sus din _Layout pentru ca Hero-ul să urce sub meniu */
-    main { padding-top: 0 !important; } 
 </style>
 
-<div class="bg-[#f9f9f9] text-[#1a1c1c] font-['Inter'] antialiased min-h-screen pb-20">
+<div class="bg-[#f9f9f9] text-[#1a1c1c] font-['Inter'] antialiased min-h-screen pb-20 w-full">
 
     <section class="relative h-[650px] w-full overflow-hidden">
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('@(string.IsNullOrEmpty(Model.Movie.ImageUrl) ? "https://via.placeholder.com/1920x1080" : Model.Movie.ImageUrl)')">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-xl"></div>
+        
+        @if (!string.IsNullOrEmpty(Model.Movie.ImageUrl))
+        {
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('@Model.Movie.ImageUrl')">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-xl"></div>
+                <div class="absolute inset-0 hero-gradient"></div>
+            </div>
+        }
+        else
+        {
+            <div class="absolute inset-0 bg-[#645485]/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[120px] text-[#645485]/20">movie</span>
+            </div>
             <div class="absolute inset-0 hero-gradient"></div>
-        </div>
+        }
         
         <div class="relative max-w-[1440px] mx-auto h-full flex items-end px-6 md:px-16 pb-16 pt-24">
             <div class="flex flex-col md:flex-row gap-12 items-end w-full">
                 
-                <div class="hidden md:block w-72 h-[420px] rounded-xl overflow-hidden shadow-2xl transform -rotate-2 ring-4 ring-white/10 flex-shrink-0 z-10">
-                    <img alt="@Model.Movie.Title" class="w-full h-full object-cover" src="@(string.IsNullOrEmpty(Model.Movie.ImageUrl) ? "https://via.placeholder.com/400x600" : Model.Movie.ImageUrl)"/>
+                <div class="hidden md:block w-72 h-[420px] rounded-xl overflow-hidden shadow-2xl transform -rotate-2 ring-4 ring-white/10 flex-shrink-0 z-10 bg-surface-container">
+                    @if (!string.IsNullOrEmpty(Model.Movie.ImageUrl))
+                    {
+                        <img alt="@Model.Movie.Title" class="w-full h-full object-cover" src="@Model.Movie.ImageUrl"/>
+                    }
+                    else
+                    {
+                        <div class="w-full h-full flex items-center justify-center bg-[#645485]/10 text-outline">
+                            <span class="material-symbols-outlined text-6xl">hide_image</span>
+                        </div>
+                    }
                 </div>
                 
                 <div class="flex-1 space-y-4 relative z-10">
@@ -103,7 +121,7 @@
 
                                 @foreach (var dateKvp in datesDict)
                                 {
-                                    <div class="bg-[#f9f9f9] p-5 rounded-2xl border border-[#cbc4cf]/30">
+                                    <div class="bg-[#f9f9f9] p-5 rounded-2xl border border-[#cbc4cf]/30 hover:border-[#7f6fa2]/30 transition-colors">
                                         <h4 class="text-sm font-bold text-[#7f6fa2] mb-4 uppercase tracking-widest">
                                             @dateKvp.Key.ToString("dddd, MMM dd")
                                         </h4>
@@ -111,7 +129,7 @@
                                             @foreach (var show in dateKvp.Value)
                                             {
                                                 <a asp-controller="Booking" asp-action="SelectSeats" asp-route-showtimeId="@show.Id"
-                                                   class="px-6 py-3 rounded-xl border border-[#cbc4cf] hover:bg-[#7f6fa2] hover:border-[#7f6fa2] hover:text-white transition-all text-[#1a1c1c] text-sm font-bold flex flex-col items-center group shadow-sm bg-white cursor-pointer">
+                                                   class="px-6 py-3 rounded-xl border border-[#cbc4cf] hover:bg-[#7f6fa2] hover:border-[#7f6fa2] hover:text-white transition-all text-[#1a1c1c] text-sm font-bold flex flex-col items-center group shadow-sm bg-white cursor-pointer active:scale-95">
                                                     <span>@show.StartTime.ToString("HH:mm")</span>
                                                     <span class="text-[9px] uppercase tracking-widest mt-1 text-[#79767b] group-hover:text-white/80">
                                                         @show.CinemaHall.Name
@@ -134,7 +152,7 @@
                 </div>
 
                 <div class="bg-[#f3f3f3] p-6 rounded-2xl border border-[#cbc4cf]/30">
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         <h4 class="font-bold text-[#1a1c1c] mb-4 text-sm uppercase tracking-widest">Share Your Experience</h4>
                         <form asp-controller="Home" asp-action="AddReview" method="post" class="space-y-4">
@@ -156,7 +174,7 @@
                                 <textarea name="comment" rows="3" class="w-full bg-white border border-[#cbc4cf]/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] shadow-sm placeholder:text-outline-variant" placeholder="How was the cinematography? The acting?"></textarea>
                             </div>
 
-                            <button type="submit" class="bg-[#7f6fa2] hover:bg-[#976987] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md flex items-center gap-2">
+                            <button type="submit" class="bg-[#7f6fa2] hover:bg-[#976987] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md flex items-center gap-2 active:scale-95">
                                 <span class="material-symbols-outlined text-sm">edit_square</span> Submit Review
                             </button>
                         </form>
@@ -179,10 +197,10 @@
                             <div class="p-6 bg-white rounded-2xl border border-[#cbc4cf]/30 custom-shadow space-y-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-[#eaddff] text-[#4e3e6e] flex justify-center items-center font-bold text-xs">
-                                            @review.ApplicationUser?.FullName?.Substring(0, 1).ToUpper()
+                                        <div class="w-8 h-8 rounded-full bg-[#eaddff] text-[#4e3e6e] flex justify-center items-center font-bold text-xs uppercase shadow-inner">
+                                            @(review.ApplicationUser?.FullName?.FirstOrDefault().ToString() ?? "A")
                                         </div>
-                                        <p class="text-xs font-bold text-[#1a1c1c]">@review.ApplicationUser?.FullName</p>
+                                        <p class="text-xs font-bold text-[#1a1c1c]">@(review.ApplicationUser?.FullName ?? "Anonymous")</p>
                                     </div>
                                     <div class="flex text-[10px] text-[#eab308]">
                                         @for (int i = 0; i < review.Rating; i++)
@@ -213,27 +231,21 @@
                     <h3 class="text-xs font-black uppercase tracking-widest text-[#79767b] mb-6 border-b border-[#f3f3f3] pb-2">Movie Intelligence</h3>
                     
                     <div class="space-y-3">
-                        @if (!string.IsNullOrEmpty(Model.Movie.ImdbRating))
-                        {
-                            <div class="flex items-center justify-between p-4 bg-[#f3f3f3] rounded-2xl">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[#eab308]" style="font-variation-settings: 'FILL' 1;">star</span>
-                                    <span class="font-bold text-sm text-[#1a1c1c]">IMDb Score</span>
-                                </div>
-                                <span class="font-black text-lg text-[#1a1c1c]">@Model.Movie.ImdbRating<span class="text-xs text-[#79767b] font-normal">/10</span></span>
+                        <div class="flex items-center justify-between p-4 bg-[#f3f3f3] rounded-2xl">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[#eab308]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-bold text-sm text-[#1a1c1c]">Ethereal Score</span>
                             </div>
-                        }
+                            <span class="font-black text-lg text-[#1a1c1c]">@Model.AverageRating.ToString("0.0")<span class="text-xs text-[#79767b] font-normal">/5.0</span></span>
+                        </div>
                         
-                        @if (!string.IsNullOrEmpty(Model.Movie.RottenTomatoesScore))
-                        {
-                            <div class="flex items-center justify-between p-4 bg-[#fff1f2] rounded-2xl border border-[#ffe4e6]">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[#e11d48]" style="font-variation-settings: 'FILL' 1;">favorite</span>
-                                    <span class="font-bold text-sm text-[#e11d48]">Rotten Tomatoes</span>
-                                </div>
-                                <span class="font-black text-lg text-[#e11d48]">@Model.Movie.RottenTomatoesScore</span>
+                        <div class="flex items-center justify-between p-4 bg-white border border-[#cbc4cf]/30 rounded-2xl">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[#7f6fa2]">calendar_month</span>
+                                <span class="font-bold text-sm text-[#1a1c1c]">Released</span>
                             </div>
-                        }
+                            <span class="font-bold text-sm text-[#79767b]">@Model.Movie.StartDate.ToString("MMM yyyy")</span>
+                        </div>
                     </div>
                 </div>
 
@@ -241,7 +253,7 @@
                 {
                     <div class="pt-4 border-t border-[#f3f3f3]">
                         <p class="text-[10px] text-[#79767b] uppercase tracking-widest font-bold mb-3 text-center">Sneak Peek</p>
-                        <a href="@Model.Movie.TrailerUrl" target="_blank" class="w-full py-4 rounded-xl border-2 border-[#7f6fa2] text-[#7f6fa2] hover:bg-[#7f6fa2] hover:text-white font-['Manrope'] font-bold text-xs tracking-widest uppercase transition-all flex justify-center items-center gap-2 group">
+                        <a href="@Model.Movie.TrailerUrl" target="_blank" class="w-full py-4 rounded-xl border-2 border-[#7f6fa2] text-[#7f6fa2] hover:bg-[#7f6fa2] hover:text-white font-['Manrope'] font-bold text-xs tracking-widest uppercase transition-all flex justify-center items-center gap-2 group active:scale-95">
                             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">play_circle</span>
                             Watch Official Trailer
                         </a>

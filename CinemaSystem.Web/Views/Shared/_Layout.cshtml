@@ -1,7 +1,10 @@
 ﻿@{
-    // Detectăm dacă suntem pe pagina de Home pentru a afișa acel Navbar transparent peste imagine
-    var isHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && 
-                 ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    
+    // Noul layout trebuie să fie "Hero-Ready" pe Home și Movie Details
+    var isHeroPage = (controller == "Home" && action == "Index") || 
+                     (controller == "Home" && action == "Details");
 }
 
 <!DOCTYPE html>
@@ -50,8 +53,7 @@
 </head>
 <body class="bg-surface font-body text-on-background antialiased flex flex-col min-h-screen">
     
-    <nav class="fixed top-0 w-full z-50 @(isHome ? "bg-white/80" : "bg-white") backdrop-blur-xl border-b border-outline/10 h-20 transition-all shadow-sm">
-        <div class="max-w-[1440px] mx-auto px-6 h-full flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-50 @(isHeroPage ? "bg-white/80" : "bg-white") backdrop-blur-xl ...">        <div class="max-w-[1440px] mx-auto px-6 h-full flex justify-between items-center">
             
             <a asp-area="" asp-controller="Home" asp-action="Index" class="text-2xl font-light tracking-[0.3em] text-primary font-headline hover:opacity-80 transition-opacity">
                 ETHÉREAL
@@ -112,8 +114,7 @@
         </div>
     </nav>
 
-    <main class="flex-grow @(isHome ? "" : "pt-32 px-6 max-w-[1440px] mx-auto w-full")">
-        <partial name="_Notification" /> 
+    <main class="flex-grow @(isHeroPage ? "" : "pt-32 px-6 max-w-[1440px] mx-auto w-full")">        <partial name="_Notification" /> 
         @RenderBody()
     </main>
 

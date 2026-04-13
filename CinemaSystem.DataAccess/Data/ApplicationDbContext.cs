@@ -130,8 +130,9 @@ namespace CinemaSystem.DataAccess.Data
                     Name = "Large Popcorn",
                     Description = "Classic salted butter popcorn (150g)",
                     Price = 12.50m,
+                    Category = ConcessionCategory.Popcorn,
                     IsActive = true,
-                    ImageUrl = "https://via.placeholder.com/150/ffcc00/000000?text=Popcorn",
+                    ImageUrl = null, // Removed external dependency
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Concession
@@ -140,8 +141,9 @@ namespace CinemaSystem.DataAccess.Data
                     Name = "Cheese Nachos",
                     Description = "Crispy tortilla chips with warm cheese dip",
                     Price = 14.00m,
+                    Category = ConcessionCategory.HotFood,
                     IsActive = true,
-                    ImageUrl = "https://via.placeholder.com/150/ff9900/000000?text=Nachos",
+                    ImageUrl = null, // Removed external dependency
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new Concession
@@ -150,8 +152,9 @@ namespace CinemaSystem.DataAccess.Data
                     Name = "Coca-Cola (Large)",
                     Description = "0.5L fountain drink",
                     Price = 6.50m,
+                    Category = ConcessionCategory.Beverage,
                     IsActive = true,
-                    ImageUrl = "https://via.placeholder.com/150/cc0000/ffffff?text=Cola",
+                    ImageUrl = null, // Removed external dependency
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

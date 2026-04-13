@@ -1,0 +1,98 @@
+﻿@model CinemaSystem.Models.Entities.Concession
+
+@{
+    ViewData["Title"] = "Delete Product";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<main class="flex-1 p-8 flex justify-center items-start">
+    
+    <div class="w-full max-w-3xl mt-8">
+        
+        <nav class="flex text-sm text-on-surface-variant mb-6 gap-2 font-label items-center uppercase tracking-wider font-bold">
+            <a asp-action="Index" class="hover:text-primary transition-colors">Concessions</a>
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            <span class="text-error font-semibold">Delete Product</span>
+        </nav>
+
+        <div class="bg-[#f97386]/10 border border-[#f97386]/30 p-6 rounded-2xl mb-8 flex items-start gap-4 shadow-sm">
+            <div class="bg-[#f97386]/20 p-2 rounded-full text-[#a8364b] flex-shrink-0">
+                <span class="material-symbols-outlined text-3xl">warning</span>
+            </div>
+            <div>
+                <h2 class="text-xl font-extrabold text-[#a8364b] font-headline mb-1">Confirm Permanent Deletion</h2>
+                <p class="text-[#a8364b]/80 text-sm font-medium leading-relaxed">
+                    You are about to permanently delete <strong>"@Model.Name"</strong> from the menu. This will also remove its associated image from the server. This cannot be undone. If you just want to hide it, consider marking it as "Inactive" instead.
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-lg border border-outline-variant/20 p-8 flex flex-col md:flex-row gap-8 items-center md:items-start relative overflow-hidden">
+            
+            <div class="absolute -right-16 -top-16 opacity-5 pointer-events-none">
+                <span class="material-symbols-outlined text-[250px]">fastfood</span>
+            </div>
+
+            <div class="w-32 h-32 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-surface-container border border-outline-variant/30 z-10 flex items-center justify-center">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="w-full h-full object-cover bg-white" alt="@Model.Name" />
+                }
+                else
+                {
+                    <span class="material-symbols-outlined text-5xl text-outline-variant opacity-50">fastfood</span>
+                }
+            </div>
+
+            <div class="flex-1 w-full z-10">
+                <div class="flex gap-2 mb-3">
+                    <span class="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-extrabold rounded uppercase tracking-widest border border-outline-variant/30">
+                        @Model.Category
+                    </span>
+                </div>
+                
+                <h3 class="text-3xl font-extrabold text-on-surface font-headline mb-2">@Model.Name</h3>
+                <p class="text-sm text-on-surface-variant mb-6 line-clamp-2">@(Model.Description ?? "No description provided.")</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Price</p>
+                        <p class="text-sm font-semibold text-primary flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px]">payments</span>
+                            $@Model.Price.ToString("F2")
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Status</p>
+                        @if (Model.IsActive)
+                        {
+                            <p class="text-sm font-semibold text-emerald-600 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">check_circle</span> Active
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-sm font-semibold text-error flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">cancel</span> Sold Out
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="mt-8 flex items-center justify-end gap-4 border-t border-outline-variant/30 pt-6">
+            <input asp-for="Id" hidden />
+            
+            <a asp-action="Index" class="px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
+                Cancel
+            </a>
+            
+            <button type="submit" class="px-10 py-3 rounded-xl bg-[#a8364b] hover:bg-[#8b2b3d] text-white font-bold shadow-lg shadow-[#a8364b]/20 active:scale-95 transition-all font-label flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">delete_forever</span>
+                Yes, Delete Product
+            </button>
+        </form>
+
+    </div>
+</main>

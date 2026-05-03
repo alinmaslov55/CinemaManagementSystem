@@ -1,63 +1,66 @@
 ﻿using CinemaSystem.DataAccess.Data;
+using CinemaSystem.DataAccess.DbInitializer.Seeders;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Utility;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace CinemaSystem.DataAccess.DbInitializer
 {
     public class DbInitializer : IDbInitializer
     {
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _env;
+        private readonly IMovieSyncService _syncService;
+        private readonly ILogger<DbInitializer> _logger;
 
         public DbInitializer(
+            ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ApplicationDbContext db)
+            IWebHostEnvironment env,
+            IMovieSyncService syncService,
+            ILogger<DbInitializer> logger)
         {
-            _roleManager = roleManager;
+            _context = context;
             _userManager = userManager;
-            _db = db;
+            _roleManager = roleManager;
+            _env = env;
+            _syncService = syncService;
+            _logger = logger;
         }
 
-        public void Initialize()
+        public async Task InitializeAsync()
         {
             try
             {
-                if (_db.Database.GetPendingMigrations().Count() > 0)
+                _logger.LogInformation("Începe aplicarea migrărilor...");
+                if (_context.Database.GetPendingMigrations().Any())
                 {
-                    _db.Database.Migrate();
+                    await _context.Database.MigrateAsync();
                 }
+
+                _logger.LogInformation("Începe popularea bazei de date (Seeding)...");
+                var basePath = _env.WebRootPath;
+
+                await IdentitySeeder.SeedAsync(_userManager, _roleManager);
+
+                await CinemaSeeder.SeedAsync(_context, basePath);
+
+                await MovieSeeder.SeedAsync(_context, basePath, _syncService);
+
+                await ShowtimeSeeder.SeedAsync(_context);
+
+                _logger.LogInformation("Popularea bazei de date s-a finalizat cu succes.");
             }
             catch (Exception ex)
             {
-                // log this error.
-            }
-
-            if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
-            {
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer)).GetAwaiter().GetResult();
-
-                var adminUser = new ApplicationUser
-                {
-                    UserName = "admin@cinema.com",
-                    Email = "admin@cinema.com",
-                    FullName = "System Administrator",
-                    EmailConfirmed = true
-                };
-
-                var result = _userManager.CreateAsync(adminUser, "Admin123*").GetAwaiter().GetResult();
-
-                if (result.Succeeded)
-                {
-                    var user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@cinema.com");
-                    _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
-                }
+                _logger.LogError(ex, "Eroare critică în procesul de inițializare a bazei de date.");
+                throw;
             }
         }
     }

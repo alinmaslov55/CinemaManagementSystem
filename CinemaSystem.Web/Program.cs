@@ -37,22 +37,18 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
 builder.Services.AddTransient<IEmailSender, EmailService>();
+builder.Services.AddScoped<IMovieSyncService, MovieSyncService>();
+
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddHttpClient("OMDbClient", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["OMDbSettings:BaseUrl"] ?? "https://www.omdbapi.com/");
 });
-
 builder.Services.AddHttpClient<IOllamaService, OllamaService>();
 
-builder.Services.AddScoped<IMovieSyncService, MovieSyncService>();
-
-builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-
 builder.Services.AddHostedService<SeatHoldCleanupService>();
-
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 var app = builder.Build();
@@ -65,10 +61,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
@@ -83,15 +77,18 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-SeedDatabase();
-
-app.Run();
-
-void SeedDatabase()
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+    try
     {
-        var dbInitializer = scope.ServiceProvider.GetRequiredService<CinemaSystem.DataAccess.DbInitializer.IDbInitializer>();
-        dbInitializer.Initialize();
+        await dbInitializer.InitializeAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "A apărut o eroare critică în timpul populării bazei de date (Seeding).");
     }
 }
+
+app.Run();

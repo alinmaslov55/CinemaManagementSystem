@@ -1,0 +1,4 @@
+﻿Name|City|Address|Description
+Downtown|București|Bulevardul Unirii 12|The flagship cinema featuring state-of-the-art IMAX technology and premium seating.
+Valley|Cluj-Napoca|Piața Unirii 5|A boutique cinematic experience nestled in the heart of Transylvania.
+Vertex|Timișoara|Piața Victoriei 2|Modern architecture meets classic cinema comfort.

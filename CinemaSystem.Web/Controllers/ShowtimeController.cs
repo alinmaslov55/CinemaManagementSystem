@@ -67,6 +67,8 @@ namespace CinemaSystem.Web.Controllers
         [HttpPost]
         public IActionResult UpsertAjax([FromBody] Showtime showtime)
         {
+            if (showtime == null) return Json(new { success = false, message = "Invalid data payload." });
+
             var movie = _unitOfWork.Movie.Get(u => u.Id == showtime.MovieId);
             if (movie == null) return Json(new { success = false, message = "Invalid Movie selection." });
 
@@ -80,7 +82,7 @@ namespace CinemaSystem.Web.Controllers
             }
 
             const int bufferMinutes = 20;
-            showtime.EndTime = showtime.StartTime.AddMinutes(movie.DurationInMinutes + bufferMinutes);
+            DateTime calculatedEndTime = showtime.StartTime.AddMinutes(movie.DurationInMinutes + bufferMinutes);
 
             var existingShows = _unitOfWork.Showtime.GetAll(s =>
                 s.CinemaHallId == showtime.CinemaHallId &&
@@ -88,7 +90,7 @@ namespace CinemaSystem.Web.Controllers
                 s.StartTime.Date == showtime.StartTime.Date);
 
             bool isOverlap = existingShows.Any(s =>
-                showtime.StartTime < s.EndTime && s.StartTime < showtime.EndTime);
+                showtime.StartTime < s.EndTime && s.StartTime < calculatedEndTime);
 
             if (isOverlap)
             {
@@ -99,8 +101,38 @@ namespace CinemaSystem.Web.Controllers
                 });
             }
 
-            if (showtime.Id == 0) _unitOfWork.Showtime.Add(showtime);
-            else _unitOfWork.Showtime.Update(showtime);
+            if (showtime.Id == 0)
+            {
+                Showtime newShowtime = new Showtime
+                {
+                    CinemaHallId = showtime.CinemaHallId,
+                    MovieId = showtime.MovieId,
+                    StartTime = showtime.StartTime,
+                    EndTime = calculatedEndTime,
+                    Language = showtime.Language,
+                    Price = showtime.Price
+                };
+                _unitOfWork.Showtime.Add(newShowtime);
+            }
+            else
+            {
+                var showtimeToUpdate = _unitOfWork.Showtime.Get(u => u.Id == showtime.Id);
+                if (showtimeToUpdate == null) return Json(new { success = false, message = "Showtime not found." });
+
+                bool hasBookings = _unitOfWork.Booking?.GetAll(b => b.ShowtimeId == showtime.Id).Any() ?? false;
+                if (hasBookings && (showtimeToUpdate.StartTime != showtime.StartTime || showtimeToUpdate.MovieId != showtime.MovieId))
+                {
+                    return Json(new { success = false, message = "Operation Denied: Tickets have already been sold for this session. You cannot alter the time or movie." });
+                }
+
+                showtimeToUpdate.MovieId = showtime.MovieId;
+                showtimeToUpdate.StartTime = showtime.StartTime;
+                showtimeToUpdate.EndTime = calculatedEndTime;
+                showtimeToUpdate.Language = showtime.Language;
+                showtimeToUpdate.Price = showtime.Price;
+
+                _unitOfWork.Showtime.Update(showtimeToUpdate);
+            }
 
             _unitOfWork.Save();
             return Json(new { success = true });
@@ -110,8 +142,17 @@ namespace CinemaSystem.Web.Controllers
         public IActionResult DeleteAjax(int id)
         {
             var obj = _unitOfWork.Showtime.Get(u => u.Id == id);
-            if (obj == null) return Json(new { success = false });
-            _unitOfWork.Showtime.Remove(obj);
+            if (obj == null) return Json(new { success = false, message = "Showtime not found." });
+
+            bool hasBookings = _unitOfWork.Booking?.GetAll(b => b.ShowtimeId == id && b.Status == Models.Data.Enums.BookingStatus.Confirmed).Any() ?? false;
+            if (hasBookings)
+            {
+                return Json(new { success = false, message = "Cannot delete this showtime as active bookings (tickets) exist. Please cancel the bookings first." });
+            }
+
+            obj.IsDeleted = true;
+            _unitOfWork.Showtime.Update(obj);
+
             _unitOfWork.Save();
             return Json(new { success = true });
         }

@@ -42,7 +42,7 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
 
             if (id == null || id == 0)
             {
-                return View(equipmentVM);
+                return View(equipmentVM); // Create
             }
             else
             {
@@ -54,30 +54,15 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                return View(equipmentVM);
+                return View(equipmentVM); // Edit
             }
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Upsert(EquipmentVM equipmentVM)
         {
-            if (ModelState.IsValid)
-            {
-                if (equipmentVM.Equipment.Id == 0)
-                {
-                    _unitOfWork.Equipment.Add(equipmentVM.Equipment);
-                    TempData["success"] = "Equipment registered successfully";
-                }
-                else
-                {
-                    _unitOfWork.Equipment.Update(equipmentVM.Equipment);
-                    TempData["success"] = "Equipment updated successfully";
-                }
-
-                _unitOfWork.Save();
-                return RedirectToAction("Index");
-            }
-            else
+            if (!ModelState.IsValid)
             {
                 equipmentVM.HallList = _unitOfWork.CinemaHall.GetAll(includeProperties: "Cinema").Select(u => new SelectListItem
                 {
@@ -86,18 +71,81 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
                 });
                 return View(equipmentVM);
             }
+
+            Equipment equipmentToSave;
+
+            if (equipmentVM.Equipment.Id == 0)
+            {
+                equipmentToSave = new Equipment();
+            }
+            else
+            {
+                equipmentToSave = _unitOfWork.Equipment.Get(u => u.Id == equipmentVM.Equipment.Id);
+                if (equipmentToSave == null) return NotFound();
+            }
+
+            equipmentToSave.Name = equipmentVM.Equipment.Name;
+            equipmentToSave.SerialNumber = equipmentVM.Equipment.SerialNumber;
+            equipmentToSave.Type = equipmentVM.Equipment.Type;
+            equipmentToSave.Status = equipmentVM.Equipment.Status;
+            equipmentToSave.PurchaseDate = equipmentVM.Equipment.PurchaseDate;
+            equipmentToSave.LastMaintenanceDate = equipmentVM.Equipment.LastMaintenanceDate;
+            equipmentToSave.NextMaintenanceDate = equipmentVM.Equipment.NextMaintenanceDate;
+            equipmentToSave.MaintenanceNotes = equipmentVM.Equipment.MaintenanceNotes;
+            equipmentToSave.CinemaHallId = equipmentVM.Equipment.CinemaHallId;
+
+            if (equipmentVM.Equipment.Id == 0)
+            {
+                _unitOfWork.Equipment.Add(equipmentToSave);
+                TempData["success"] = "Equipment registered successfully";
+            }
+            else
+            {
+                _unitOfWork.Equipment.Update(equipmentToSave);
+                TempData["success"] = "Equipment updated successfully";
+            }
+
+            _unitOfWork.Save();
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0) return NotFound();
+
+            var obj = _unitOfWork.Equipment.Get(u => u.Id == id, includeProperties: "CinemaHall");
+            if (obj == null) return NotFound();
+
+            return View(obj);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePOST(int? id)
+        {
+            var obj = _unitOfWork.Equipment.Get(u => u.Id == id);
+            if (obj == null) return NotFound();
+
+            obj.IsDeleted = true;
+            _unitOfWork.Equipment.Update(obj);
+            _unitOfWork.Save();
+
+            TempData["success"] = "Asset archived successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpDelete]
-        public IActionResult Delete(int? id)
+        public IActionResult DeleteAjax(int? id)
         {
             var objToBeDeleted = _unitOfWork.Equipment.Get(u => u.Id == id);
             if (objToBeDeleted == null)
             {
-                return Json(new { success = false, message = "Error while deleting" });
+                return Json(new { success = false, message = "Error: Asset not found." });
             }
 
-            _unitOfWork.Equipment.Remove(objToBeDeleted);
+            objToBeDeleted.IsDeleted = true;
+            _unitOfWork.Equipment.Update(objToBeDeleted);
             _unitOfWork.Save();
 
             return Json(new { success = true, message = "Delete Successful" });

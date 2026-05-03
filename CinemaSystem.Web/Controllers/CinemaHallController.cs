@@ -41,10 +41,13 @@ namespace CinemaSystem.Web.Controllers
 
             if (id == null || id == 0) return View(vm);
 
-            vm.CinemaHall = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Seats");
+            var hallFromDb = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Seats");
+            if (hallFromDb == null) return NotFound();
 
-            if(vm.CinemaHall.Seats != null && vm.CinemaHall.Seats.Any())
-{
+            vm.CinemaHall = hallFromDb;
+
+            if (vm.CinemaHall.Seats != null && vm.CinemaHall.Seats.Any())
+            {
                 var existingLayout = vm.CinemaHall.Seats.Select(s => new SeatLayoutDto
                 {
                     Row = s.Row,
@@ -89,9 +92,24 @@ namespace CinemaSystem.Web.Controllers
             vm.CinemaHall.TotalSeats = vm.Rows * vm.Cols;
             var incomingSeats = JsonSerializer.Deserialize<List<SeatLayoutDto>>(vm.SeatLayoutData);
 
+            if (incomingSeats == null || !incomingSeats.Any())
+            {
+                TempData["error"] = "No seat data found.";
+                vm.CinemaList = _unitOfWork.Cinema.GetAll().Select(u => new SelectListItem { Text = u.Name, Value = u.Id.ToString() });
+                return View(vm);
+            }
+
             if (vm.CinemaHall.Id == 0)
             {
-                _unitOfWork.CinemaHall.Add(vm.CinemaHall);
+                CinemaHall newHall = new CinemaHall
+                {
+                    Name = vm.CinemaHall.Name,
+                    TotalSeats = vm.CinemaHall.TotalSeats,
+                    HallType = vm.CinemaHall.HallType,
+                    CinemaId = vm.CinemaHall.CinemaId
+                };
+
+                _unitOfWork.CinemaHall.Add(newHall);
                 _unitOfWork.Save();
 
                 foreach (var item in incomingSeats)
@@ -102,13 +120,15 @@ namespace CinemaSystem.Web.Controllers
                         Column = item.Col,
                         SeatType = (SeatType)item.Type,
                         IsAccessible = item.IsAcc,
-                        CinemaHallId = vm.CinemaHall.Id
+                        CinemaHallId = newHall.Id
                     });
                 }
+                TempData["success"] = "Hall created successfully.";
             }
             else
             {
                 var hallFromDb = _unitOfWork.CinemaHall.Get(u => u.Id == vm.CinemaHall.Id, includeProperties: "Seats");
+                if (hallFromDb == null) return NotFound();
 
                 bool hasActiveShows = _unitOfWork.Showtime.GetAll(s => s.CinemaHallId == hallFromDb.Id).Any();
                 bool dimensionsChanged = hallFromDb.TotalSeats != vm.CinemaHall.TotalSeats;
@@ -152,46 +172,35 @@ namespace CinemaSystem.Web.Controllers
                 hallFromDb.Name = vm.CinemaHall.Name;
                 hallFromDb.HallType = vm.CinemaHall.HallType;
                 hallFromDb.TotalSeats = vm.CinemaHall.TotalSeats;
+                hallFromDb.CinemaId = vm.CinemaHall.CinemaId;
+
+                _unitOfWork.CinemaHall.Update(hallFromDb);
+                TempData["success"] = "Hall configured safely.";
             }
 
             _unitOfWork.Save();
-            TempData["success"] = "Hall configured safely.";
             return RedirectToAction("Index");
         }
 
-        // GET: CinemaHall/Delete/5
         public IActionResult Delete(int? id)
         {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
+            if (id == null || id == 0) return NotFound();
 
             var hallFromDb = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Cinema");
-
-            if (hallFromDb == null)
-            {
-                return NotFound();
-            }
+            if (hallFromDb == null) return NotFound();
 
             return View(hallFromDb);
         }
 
-        // POST: CinemaHall/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePOST(int? id)
         {
             var obj = _unitOfWork.CinemaHall.Get(u => u.Id == id, includeProperties: "Seats");
-
-            if (obj == null)
-            {
-                return NotFound();
-            }
+            if (obj == null) return NotFound();
 
             obj.IsDeleted = true;
             _unitOfWork.CinemaHall.Update(obj);
-
             _unitOfWork.Save();
 
             TempData["success"] = "Cinema Hall archived successfully.";

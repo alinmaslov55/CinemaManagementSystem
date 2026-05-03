@@ -3,7 +3,6 @@
 
 @{
     ViewData["Title"] = Model.Id != 0 ? "Update Movie" : "Add New Movie";
-    // ATENȚIE: Legăm pagina de layout-ul central de Admin
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -96,14 +95,14 @@
                     <div>
                         <label asp-for="MovieCategory" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Genre <span class="text-error">*</span></label>
                         <select asp-for="MovieCategory" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none cursor-pointer">
-                            <option disabled selected>-- Select Genre --</option>
+                            <option disabled selected value="">-- Select Genre --</option>
                         </select>
                         <span asp-validation-for="MovieCategory" class="text-error text-xs mt-1 block"></span>
                     </div>
                     <div>
                         <label asp-for="AgeRating" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Content Rating <span class="text-error">*</span></label>
                         <select asp-for="AgeRating" asp-items="Html.GetEnumSelectList<AgeRating>()" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none cursor-pointer">
-                            <option disabled selected>-- Select Rating --</option>
+                            <option disabled selected value="">-- Select Rating --</option>
                         </select>
                         <span asp-validation-for="AgeRating" class="text-error text-xs mt-1 block"></span>
                     </div>
@@ -170,32 +169,32 @@
                         
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" asp-for="IsReleased" class="sr-only peer">
-                                <div class="w-11 h-6 bg-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white/60"></div>
-                            </label>
-                        </div>
-                
-                        <hr class="border-white/20 my-4" />
-                
-                        <p class="text-[10px] text-white/70 italic leading-relaxed">
-                            Changes will be reflected immediately across the public application network.
-                        </p>
+                            <div class="w-11 h-6 bg-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white/60"></div>
+                        </label>
                     </div>
-                </section>
+                
+                    <hr class="border-white/20 my-4" />
+                
+                    <p class="text-[10px] text-white/70 italic leading-relaxed">
+                        Changes will be reflected immediately across the public application network.
+                    </p>
+                </div>
+            </section>
 
-            </div>
+        </div>
 
-            <div class="col-span-12 mt-6 flex items-center justify-end gap-4 border-t border-outline-variant/30 pt-8 pb-4">
-                <a asp-action="Index" class="px-8 py-2.5 rounded-lg font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
-                    Cancel
-                </a>
-                <button type="submit" class="px-10 py-2.5 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] active:scale-95 transition-all font-label flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">save</span>
-                    @(Model.Id != 0 ? "Save Changes" : "Publish Movie")
-                </button>
-            </div>
-        </form>
-    </main>
+        <div class="col-span-12 mt-6 flex items-center justify-end gap-4 border-t border-outline-variant/30 pt-8 pb-4">
+            <a asp-action="Index" class="px-8 py-2.5 rounded-lg font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
+                Cancel
+            </a>
+            <button type="submit" class="px-10 py-2.5 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] active:scale-95 transition-all font-label flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">save</span>
+                @(Model.Id != 0 ? "Save Changes" : "Publish Movie")
+            </button>
+        </div>
+    </form>
+</main>
 
-    @section Scripts {
-        <partial name="_ValidationScriptsPartial" />
-    }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

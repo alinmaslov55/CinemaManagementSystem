@@ -51,7 +51,7 @@
                     <div>
                         <label asp-for="Equipment.Type" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Category <span class="text-error">*</span></label>
                         <select asp-for="Equipment.Type" asp-items="Html.GetEnumSelectList<EquipmentType>()" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
-                            <option disabled selected>-- Select Type --</option>
+                            <option disabled selected value="">-- Select Type --</option>
                         </select>
                         <span asp-validation-for="Equipment.Type" class="text-error text-xs mt-1 block"></span>
                     </div>
@@ -73,7 +73,7 @@
                 <div>
                     <label asp-for="Equipment.CinemaHallId" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Installed Location (Hall) <span class="text-error">*</span></label>
                     <select asp-for="Equipment.CinemaHallId" asp-items="@Model.HallList" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
-                        <option disabled selected>-- Select Hall / Room --</option>
+                        <option disabled selected value="">-- Select Hall / Room --</option>
                     </select>
                     <span asp-validation-for="Equipment.CinemaHallId" class="text-error text-xs mt-1 block"></span>
                 </div>
@@ -204,7 +204,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch('/Admin/Equipment/Delete/@Model.Equipment.Id', {
+                    fetch('/Admin/Equipment/DeleteAjax/@Model.Equipment.Id', {
                         method: 'DELETE'
                     }).then(res => res.json()).then(data => {
                         if (data.success) {

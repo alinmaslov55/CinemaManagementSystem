@@ -31,7 +31,6 @@ namespace CinemaSystem.Models.Entities
         [ValidateNever]
         public string? ImageUrl { get; set; }
 
-        // Perfect for "Out of Stock" scenarios without breaking old receipts
         public bool IsActive { get; set; } = true;
     }
 }

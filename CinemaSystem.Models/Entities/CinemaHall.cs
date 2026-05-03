@@ -21,11 +21,12 @@ namespace CinemaSystem.Models.Entities
         [Range(1, int.MaxValue, ErrorMessage = "Total seats must be at least 1.")]
         public int TotalSeats { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Please select a Hall Type.")]
         [Display(Name = "Hall Type")]
         public HallType HallType { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Please select a cinema location.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Please select a valid cinema.")]
         [Display(Name = "Cinema")]
         public int CinemaId { get; set; }
 

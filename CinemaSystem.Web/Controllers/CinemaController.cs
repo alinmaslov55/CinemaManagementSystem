@@ -56,79 +56,81 @@ namespace CinemaSystem.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Upsert(CinemaVM vm, IFormFile? file)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                Cinema cinema = new Cinema
-                {
-                    Id = vm.Id,
-                    Name = vm.Name,
-                    Description = vm.Description,
-                    Address = vm.Address,
-                    City = vm.City,
-                    Logo = vm.Logo
-                };
-
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
-                if (file != null)
-                {
-                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
-                    string extension = Path.GetExtension(file.FileName).ToLower();
-
-                    if (!allowedExtensions.Contains(extension))
-                    {
-                        TempData["error"] = "Invalid file type. Only JPG, PNG, and WEBP are allowed.";
-                        return View(vm);
-                    }
-
-                    string fileName = Guid.NewGuid().ToString() + extension;
-                    string cinemaPath = Path.Combine(wwwRootPath, @"images\cinema");
-
-                    if (!Directory.Exists(cinemaPath)) Directory.CreateDirectory(cinemaPath);
-
-                    if (!string.IsNullOrEmpty(cinema.Logo))
-                    {
-                        var oldImagePath = Path.Combine(wwwRootPath, cinema.Logo.TrimStart('\\'));
-                        if (System.IO.File.Exists(oldImagePath)) System.IO.File.Delete(oldImagePath);
-                    }
-
-                    using (var fileStream = new FileStream(Path.Combine(cinemaPath, fileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-                    cinema.Logo = @"\images\cinema\" + fileName;
-                }
-
-                if (cinema.Id == 0)
-                {
-                    _unitOfWork.Cinema.Add(cinema);
-                }
-                else
-                {
-                    _unitOfWork.Cinema.Update(cinema);
-                }
-
-                _unitOfWork.Save();
-                TempData["success"] = "Cinema created/updated successfully";
-                return RedirectToAction("Index");
+                return View(vm);
             }
 
-            return View(vm);
+            Cinema cinemaToSave;
+
+            if (vm.Id == 0)
+            {
+                cinemaToSave = new Cinema();
+            }
+            else
+            {
+                cinemaToSave = _unitOfWork.Cinema.Get(u => u.Id == vm.Id);
+                if (cinemaToSave == null) return NotFound();
+            }
+
+            cinemaToSave.Name = vm.Name;
+            cinemaToSave.Description = vm.Description;
+            cinemaToSave.Address = vm.Address;
+            cinemaToSave.City = vm.City;
+
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
+            if (file != null)
+            {
+                string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+                string extension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    TempData["error"] = "Invalid file type. Only JPG, PNG, and WEBP are allowed.";
+                    return View(vm);
+                }
+
+                string fileName = Guid.NewGuid().ToString() + extension;
+                string cinemaPath = Path.Combine(wwwRootPath, "images", "cinema"); // Cross-platform safe
+
+                if (!Directory.Exists(cinemaPath)) Directory.CreateDirectory(cinemaPath);
+
+                if (!string.IsNullOrEmpty(cinemaToSave.Logo))
+                {
+                    var oldImagePath = Path.Combine(wwwRootPath, cinemaToSave.Logo.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(oldImagePath)) System.IO.File.Delete(oldImagePath);
+                }
+
+                using (var fileStream = new FileStream(Path.Combine(cinemaPath, fileName), FileMode.Create))
+                {
+                    file.CopyTo(fileStream);
+                }
+
+                cinemaToSave.Logo = "/images/cinema/" + fileName;
+            }
+
+            if (vm.Id == 0)
+            {
+                _unitOfWork.Cinema.Add(cinemaToSave);
+                TempData["success"] = "Cinema created successfully";
+            }
+            else
+            {
+                _unitOfWork.Cinema.Update(cinemaToSave);
+                TempData["success"] = "Cinema updated successfully";
+            }
+
+            _unitOfWork.Save();
+            return RedirectToAction("Index");
         }
 
         // GET: Cinema/Delete/5
         public IActionResult Delete(int? id)
         {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
+            if (id == null || id == 0) return NotFound();
 
             Cinema? cinemaFromDb = _unitOfWork.Cinema.Get(u => u.Id == id);
-
-            if (cinemaFromDb == null)
-            {
-                return NotFound();
-            }
+            if (cinemaFromDb == null) return NotFound();
 
             return View(cinemaFromDb);
         }
@@ -139,27 +141,14 @@ namespace CinemaSystem.Web.Controllers
         public IActionResult DeletePOST(int? id)
         {
             Cinema? obj = _unitOfWork.Cinema.Get(u => u.Id == id);
-            if (obj == null)
-            {
-                return NotFound();
-            }
+            if (obj == null) return NotFound();
 
+            // Soft Delete respectat
             obj.IsDeleted = true;
             _unitOfWork.Cinema.Update(obj);
-
-            // Physical File Cleanup is not needed when soft delete
-            //if (!string.IsNullOrEmpty(obj.Logo))
-            //{
-            //    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, obj.Logo.TrimStart('\\'));
-            //    if (System.IO.File.Exists(oldImagePath))
-            //    {
-            //        System.IO.File.Delete(oldImagePath);
-            //    }
-            //}
-
-            //_unitOfWork.Cinema.Remove(obj);
             _unitOfWork.Save();
-            TempData["success"] = "Cinema deleted successfully";
+
+            TempData["success"] = "Cinema archived successfully";
             return RedirectToAction("Index");
         }
     }

@@ -1,0 +1,41 @@
+﻿Suita 1: Index() Action
+
+Obiectiv: Validăm că dashboard-ul afișează corect lista locațiilor.
+
+    TC 1.1 (Happy Path): Când este apelată, metoda Index cere lista de la IUnitOfWork.Cinema.GetAll și o returnează într-un ViewResult.
+
+        Asserts: Returnează ViewResult; Modelul este de tip IEnumerable<Cinema>; Lista returnată este lista mock-uită.
+
+Suita 2: Upsert() [HttpGet] Action
+
+Obiectiv: Validăm încărcarea formularului pentru adăugare sau editare.
+
+    TC 2.1 (Add Mode): Dacă parametrul id este null (sau 0), returnează un ViewResult ce conține un CinemaVM nou, complet gol.
+
+    TC 2.2 (Edit Mode - Not Found): Dacă se trimite un id valid (ex: 99), dar baza de date nu îl găsește, returnează NotFoundResult (Protecție anti-tampering).
+
+    TC 2.3 (Edit Mode - Happy Path): Dacă se trimite un id valid și entitatea există în DB, mapează corect proprietățile din entitate în CinemaVM și returnează ViewResult cu acest ViewModel.
+
+Suita 3: Upsert() [HttpPost] Action
+
+Obiectiv: Aceasta este inima controller-ului. Aici este complexitatea maximă (Entity Tracking, File Upload, Mapare, Validare, Salvare).
+
+    TC 3.1 (Invalid Data): Dacă modelul (CinemaVM) pică validările (ex: nu are Name), se apelează return View(vm) direct. Nici o interacțiune cu UnitOfWork (Add/Update/Save) nu trebuie să aibă loc (Times.Never).
+
+    TC 3.2 (Edit Mode - Not Found): Dacă e trimis un id valid, formularul este valid, dar între timp entitatea a dispărut din DB, returnează NotFoundResult.
+
+    TC 3.3 (Invalid File Type): Dacă user-ul încearcă să urce un fișier care nu este .jpg, .png, .webp (ex: urcă un .exe sau .pdf), se populează TempData["error"], se anulează operațiunea și se returnează ViewResult. Baza de date nu se atinge.
+
+    (Notă arhitecturală: Testarea efectivă a upload-ului de fișiere cu IFormFile, lucrul cu path-uri IWebHostEnvironment, FileStream și ștergerea fișierelor pe disc se duce la granița dintre Unit Testing și Integration Testing, deoarece atinge I/O. Aici se fac mock-uri extrem de complexe sau testăm superficial).
+
+    TC 3.4 (Add Mode - Happy Path - No File): Creare de locație nouă (Id = 0), fără logo. Ne asigurăm că UnitOfWork.Cinema.Add() este apelată corect o singură dată și, cel mai important, că entitatea adăugată a preluat corect datele (Name, City, Address) din CinemaVM. Apoi returnează RedirectToActionResult către Index.
+
+    TC 3.5 (Edit Mode - Happy Path - No File): Modificarea unei locații existente. Ne asigurăm că UnitOfWork.Cinema.Get() e apelată, proprietățile (ex: Name, Address) sunt suprascrise corect, metoda UnitOfWork.Cinema.Update() este declanșată și redirectează spre Index.
+
+Suita 4: DeletePOST() [HttpPost] Action
+
+Obiectiv: Ne asigurăm că cinematograful nu se distruge, ci doar este arhivat (Soft Delete).
+
+    TC 4.1 (Not Found): Dacă id-ul trimis nu există, se oprește instant și returnează NotFoundResult.
+
+    TC 4.2 (Soft Delete Path): Dacă e valid, modifică entitatea setând explicit IsDeleted = true, apelează UnitOfWork.Cinema.Update(), apelează Save() și returnează redirect spre Index. Critica principală aici: Testul trebuie să verifice că se apelează Update(), nu metoda Remove()!

@@ -33,7 +33,7 @@
             <span class="text-[10px] uppercase font-bold tracking-widest text-amber-700/70 mt-1">Combos Available</span>
         </div>
         <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col justify-center">
-            <span class="text-primary font-black text-3xl font-headline">$@Model.Average(c => c.Price).ToString("F2")</span>
+            <span class="text-primary font-black text-3xl font-headline">$@(Model.Any() ? Model.Average(c => c.Price).ToString("F2") : "0.00")</span>
             <span class="text-[10px] uppercase font-bold tracking-widest text-primary/70 mt-1">Avg. Price</span>
         </div>
     </div>

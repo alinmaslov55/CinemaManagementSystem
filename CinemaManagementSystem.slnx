@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="CinemaSystem.DataAccess/CinemaSystem.DataAccess.csproj" />
   <Project Path="CinemaSystem.Models/CinemaSystem.Models.csproj" />
+  <Project Path="CinemaSystem.Tests/CinemaSystem.Tests.csproj" Id="1b8f0f1b-ce6e-4b72-a1f3-e73d03e231af" />
   <Project Path="CinemaSystem.Utility/CinemaSystem.Utility.csproj" />
   <Project Path="CinemaSystem.Web/CinemaSystem.Web.csproj" />
 </Solution>

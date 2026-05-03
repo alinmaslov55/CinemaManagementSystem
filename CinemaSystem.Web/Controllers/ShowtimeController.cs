@@ -1,4 +1,5 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Data.Enums;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Utility;
@@ -144,7 +145,7 @@ namespace CinemaSystem.Web.Controllers
             var obj = _unitOfWork.Showtime.Get(u => u.Id == id);
             if (obj == null) return Json(new { success = false, message = "Showtime not found." });
 
-            bool hasBookings = _unitOfWork.Booking?.GetAll(b => b.ShowtimeId == id && b.Status == Models.Data.Enums.BookingStatus.Confirmed).Any() ?? false;
+            bool hasBookings = _unitOfWork.Booking?.GetAll(b => b.ShowtimeId == id && b.Status == BookingStatus.Confirmed).Any() ?? false;
             if (hasBookings)
             {
                 return Json(new { success = false, message = "Cannot delete this showtime as active bookings (tickets) exist. Please cancel the bookings first." });

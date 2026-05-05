@@ -65,7 +65,6 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
                 if (concessionToSave == null) return NotFound();
             }
 
-            // Mapam STRICT proprietatile permise
             concessionToSave.Name = concession.Name;
             concessionToSave.Description = concession.Description;
             concessionToSave.Price = concession.Price;
@@ -89,7 +88,6 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
 
                 if (!Directory.Exists(concessionPath)) Directory.CreateDirectory(concessionPath);
 
-                // Ștergem imaginea veche (Edit mode) folosind Path.DirectorySeparatorChar
                 if (!string.IsNullOrEmpty(concessionToSave.ImageUrl))
                 {
                     var oldImagePath = Path.Combine(wwwRootPath, concessionToSave.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
@@ -101,7 +99,6 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
                     file.CopyTo(fileStream);
                 }
 
-                // Calea Web este MEREU cu /
                 concessionToSave.ImageUrl = "/images/concessions/" + fileName;
             }
 
@@ -140,8 +137,6 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             var concession = _unitOfWork.Concession.Get(u => u.Id == id);
             if (concession == null) return NotFound();
 
-            // Soft Delete recomandat pentru istoricul de comenzi (Bookings/Tickets). 
-            // Daca ștergem fizic, toate biletele trecute care conțineau acest produs vor crăpa la accesare!
             concession.IsDeleted = true;
             _unitOfWork.Concession.Update(concession);
             _unitOfWork.Save();

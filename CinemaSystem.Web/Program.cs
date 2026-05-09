@@ -40,6 +40,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<IEmailSender, EmailService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IMovieSyncService, MovieSyncService>();
+builder.Services.AddScoped<ITicketPdfService, TicketPdfService>();
 
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 

@@ -22,6 +22,7 @@ namespace CinemaSystem.Tests.Controllers
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IEmailService> _mockEmailService;
+        private readonly Mock<ITicketPdfService> _mockTicketPdfService;
         private readonly BookingController _controller;
         private readonly string _testUserId = "user-123";
 
@@ -29,8 +30,7 @@ namespace CinemaSystem.Tests.Controllers
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockEmailService = new Mock<IEmailService>();
-
-            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+            _mockTicketPdfService = new Mock<ITicketPdfService>();
 
             _mockUnitOfWork.Setup(u => u.Booking.GetAll(It.IsAny<Expression<Func<Booking, bool>>>(), It.IsAny<string>()))
                            .Returns(new List<Booking>());
@@ -41,13 +41,16 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Concession.GetAll(It.IsAny<Expression<Func<Concession, bool>>>(), It.IsAny<string>()))
                            .Returns(new List<Concession>());
 
-            _controller = new BookingController(_mockUnitOfWork.Object, _mockEmailService.Object);
+            _mockTicketPdfService.Setup(p => p.GenerateTicketPdfBytes(It.IsAny<Booking>()))
+                                 .Returns(new byte[] { 1, 2, 3 });
+
+            _controller = new BookingController(_mockUnitOfWork.Object, _mockEmailService.Object, _mockTicketPdfService.Object);
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-        new Claim(ClaimTypes.NameIdentifier, _testUserId),
-        new Claim(ClaimTypes.Name, "test@user.com")
-    }, "mock"));
+                new Claim(ClaimTypes.NameIdentifier, _testUserId),
+                new Claim(ClaimTypes.Name, "test@user.com")
+            }, "mock"));
 
             _controller.ControllerContext = new ControllerContext
             {
@@ -171,16 +174,36 @@ namespace CinemaSystem.Tests.Controllers
             var result = _controller.FinalizeOrder(showtimeId, cIds, cQtys);
 
             _mockUnitOfWork.Verify(u => u.Booking.Add(It.Is<Booking>(b => b.ApplicationUserId == _testUserId)), Times.Once);
-
             _mockUnitOfWork.Verify(u => u.Ticket.Add(It.Is<Ticket>(t => t.SeatId == 10)), Times.Once);
-
             _mockUnitOfWork.Verify(u => u.SeatHold.RemoveRange(activeHolds), Times.Once);
             _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
 
+            _mockTicketPdfService.Verify(p => p.GenerateTicketPdfBytes(It.IsAny<Booking>()), Times.Once);
             _mockEmailService.Verify(e => e.SendEmailWithAttachmentAsync("user@test.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<string>()), Times.Once);
 
             var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
             redirectResult.ActionName.Should().Be("OrderConfirmation");
+        }
+
+        [Fact]
+        public void DownloadTickets_ReturnsPdfFile_WhenBookingIsValid()
+        {
+            var mockBooking = new Booking { Id = 1, ApplicationUserId = _testUserId, ConfirmationCode = "MOCK-XYZ" };
+
+            _mockUnitOfWork.Setup(u => u.Booking.Get(It.IsAny<Expression<Func<Booking, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(mockBooking);
+
+            var fakePdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+            _mockTicketPdfService.Setup(p => p.GenerateTicketPdfBytes(mockBooking)).Returns(fakePdfBytes);
+
+            var result = _controller.DownloadTickets(1);
+
+            var fileResult = result.Should().BeOfType<FileContentResult>().Subject;
+            fileResult.ContentType.Should().Be("application/pdf");
+            fileResult.FileDownloadName.Should().Be("CinemaTickets_MOCK-XYZ.pdf");
+            fileResult.FileContents.Should().BeEquivalentTo(fakePdfBytes);
+
+            _mockTicketPdfService.Verify(p => p.GenerateTicketPdfBytes(mockBooking), Times.Once);
         }
 
         [Fact]

@@ -22,12 +22,16 @@ namespace CinemaSystem.Web.Controllers
             var thirtyDaysAgo = today.AddDays(-30);
             var sevenDaysAgo = today.AddDays(-6);
 
-            var allBookings = _unitOfWork.Booking.GetAll(includeProperties: "User,Tickets").ToList();
-            var allShowtimes = _unitOfWork.Showtime.GetAll(includeProperties: "Movie,CinemaHall").ToList();
+            // REFACTORIZARE CRITICĂ: Filtrare la nivel de Bază de Date (SQL Server), NU în RAM
+            var validBookings = _unitOfWork.Booking.GetAll(
+                filter: b => !b.IsDeleted,
+                includeProperties: "User,Tickets"
+            ).ToList();
 
-            // 1. DATA SANITIZATION: Excludem comenzile și spectacolele șterse (Soft Deleted)
-            var validBookings = allBookings.Where(b => !b.IsDeleted).ToList();
-            var validShowtimes = allShowtimes.Where(s => !s.IsDeleted && s.CinemaHall != null).ToList();
+            var validShowtimes = _unitOfWork.Showtime.GetAll(
+                filter: s => !s.IsDeleted && s.CinemaHall != null,
+                includeProperties: "Movie,CinemaHall"
+            ).ToList();
 
             // --- 1. KPIs ---
             decimal totalRev = validBookings.Sum(b => b.TotalAmount);
@@ -36,17 +40,10 @@ namespace CinemaSystem.Web.Controllers
 
             var recentShowtimes = validShowtimes.Where(s => s.StartTime >= thirtyDaysAgo && s.StartTime <= DateTime.Now).ToList();
 
-            int totalCapacity = 0;
-            int totalTicketsForRecent = 0;
-
-            foreach (var show in recentShowtimes)
-            {
-                totalCapacity += show.CinemaHall.TotalSeats;
-
-                totalTicketsForRecent += validBookings
-                    .Where(b => b.ShowtimeId == show.Id)
-                    .Sum(b => b.Tickets?.Count() ?? 0);
-            }
+            int totalCapacity = recentShowtimes.Sum(s => s.CinemaHall.TotalSeats);
+            int totalTicketsForRecent = validBookings
+                .Where(b => recentShowtimes.Select(s => s.Id).Contains(b.ShowtimeId))
+                .Sum(b => b.Tickets?.Count() ?? 0);
 
             double occupancy = totalCapacity > 0
                 ? Math.Round(((double)totalTicketsForRecent / totalCapacity) * 100, 1)
@@ -114,13 +111,10 @@ namespace CinemaSystem.Web.Controllers
                 TodayRevenue = todayRev,
                 TotalTicketsSold = totalTickets,
                 OccupancyRate = occupancy,
-
                 MovieLabels = salesByMovie.Select(s => s.Title).ToArray(),
                 MovieSalesData = salesByMovie.Select(s => s.Tickets).ToArray(),
-
                 DateLabels = revenueTrend.Keys.ToArray(),
                 RevenueTrendData = revenueTrend.Values.ToArray(),
-
                 EmptyShowtimes = emptyShowtimes,
                 RecentBookings = recentBookings
             };

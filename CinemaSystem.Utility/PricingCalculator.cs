@@ -1,7 +1,5 @@
 ﻿using CinemaSystem.Models.Data.Enums;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CinemaSystem.Utility
 {
@@ -11,7 +9,7 @@ namespace CinemaSystem.Utility
         {
             decimal basePrice = showtimePriceOverride ?? movieBasePrice;
 
-            return seatType switch
+            decimal calculatedPrice = seatType switch
             {
                 SeatType.Standard => basePrice,
                 SeatType.Premium => basePrice + 5.00m,
@@ -19,6 +17,8 @@ namespace CinemaSystem.Utility
                 SeatType.Handicap => basePrice - 2.00m,
                 _ => basePrice
             };
+
+            return Math.Max(0m, calculatedPrice);
         }
     }
 }

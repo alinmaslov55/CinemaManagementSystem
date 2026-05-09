@@ -51,8 +51,20 @@ namespace CinemaSystem.Tests.Controllers
             var activeBooking = new Booking { Id = 1, TotalAmount = 100, IsDeleted = false, CreatedDate = DateTime.Now };
             var deletedBooking = new Booking { Id = 2, TotalAmount = 500, IsDeleted = true, CreatedDate = DateTime.Now };
 
+            var dbBookings = new List<Booking> { activeBooking, deletedBooking };
+
             _mockUnitOfWork.Setup(u => u.Booking.GetAll(It.IsAny<Expression<Func<Booking, bool>>>(), It.IsAny<string>()))
-                           .Returns(new List<Booking> { activeBooking, deletedBooking });
+                           .Returns((Expression<Func<Booking, bool>> filter, string includeProperties) =>
+                           {
+                               if (filter != null)
+                               {
+                                   return dbBookings.AsQueryable().Where(filter).ToList();
+                               }
+                               return dbBookings;
+                           });
+
+            _mockUnitOfWork.Setup(u => u.Showtime.GetAll(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>()))
+                           .Returns(new List<Showtime>());
 
             var result = _controller.Index();
 

@@ -4,6 +4,8 @@ using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using System;
+using System.Threading.Tasks;
 
 namespace CinemaSystem.Utility
 {
@@ -11,12 +13,13 @@ namespace CinemaSystem.Utility
     {
         private readonly IConfiguration _config;
         private readonly ILogger<EmailService> _logger;
+        private readonly ISmtpClient _smtpClient;
 
-        // Injected Logger to track SMTP failures
-        public EmailService(IConfiguration config, ILogger<EmailService> logger)
+        public EmailService(IConfiguration config, ILogger<EmailService> logger, ISmtpClient smtpClient)
         {
             _config = config;
             _logger = logger;
+            _smtpClient = smtpClient;
         }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
@@ -40,7 +43,6 @@ namespace CinemaSystem.Utility
 
                 var bodyBuilder = new BodyBuilder { HtmlBody = htmlMessage };
 
-                // Handle optional attachments safely
                 if (attachmentBytes != null && !string.IsNullOrWhiteSpace(attachmentName))
                 {
                     bodyBuilder.Attachments.Add(attachmentName, attachmentBytes, ContentType.Parse("application/pdf"));
@@ -48,35 +50,30 @@ namespace CinemaSystem.Utility
 
                 message.Body = bodyBuilder.ToMessageBody();
 
-                using var client = new SmtpClient();
-
-                // Connect
-                await client.ConnectAsync(
+                await _smtpClient.ConnectAsync(
                     _config["EmailSettings:SmtpServer"],
                     int.Parse(_config["EmailSettings:Port"]),
                     SecureSocketOptions.StartTls);
 
-                // Authenticate
-                await client.AuthenticateAsync(
+                await _smtpClient.AuthenticateAsync(
                     _config["EmailSettings:Username"],
                     _config["EmailSettings:Password"]);
 
-                // Send
-                await client.SendAsync(message);
+                await _smtpClient.SendAsync(message);
 
                 _logger.LogInformation("Successfully sent email to {Email} with subject {Subject}", email, subject);
             }
             catch (Exception ex)
             {
-                // We catch and log the error so it doesn't crash the calling thread (e.g., during user registration)
                 _logger.LogError(ex, "Failed to send email to {Email}. Subject: {Subject}", email, subject);
-                throw; // Re-throw if you want the calling controller to know it failed, or remove 'throw' to fail silently
+                throw;
             }
             finally
             {
-                // Disconnect is only valid if we successfully created the client
-                // Ensure the client is properly disconnected
-                // Note: The 'using' statement handles disposal, but explicit disconnect is good practice in MailKit
+                if (_smtpClient.IsConnected)
+                {
+                    await _smtpClient.DisconnectAsync(true);
+                }
             }
         }
     }

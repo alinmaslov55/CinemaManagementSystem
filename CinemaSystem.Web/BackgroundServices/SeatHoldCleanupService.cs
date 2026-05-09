@@ -3,8 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CinemaSystem.Web.BackgroundServices
 {
@@ -38,7 +39,7 @@ namespace CinemaSystem.Web.BackgroundServices
             }
         }
 
-        private void CleanUpExpiredHolds()
+        public void CleanUpExpiredHolds()
         {
             using (var scope = _serviceProvider.CreateScope())
             {

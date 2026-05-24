@@ -13,13 +13,11 @@ namespace CinemaSystem.Utility
     {
         private readonly IConfiguration _config;
         private readonly ILogger<EmailService> _logger;
-        private readonly ISmtpClient _smtpClient;
 
-        public EmailService(IConfiguration config, ILogger<EmailService> logger, ISmtpClient smtpClient)
+        public EmailService(IConfiguration config, ILogger<EmailService> logger)
         {
             _config = config;
             _logger = logger;
-            _smtpClient = smtpClient;
         }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
@@ -50,16 +48,20 @@ namespace CinemaSystem.Utility
 
                 message.Body = bodyBuilder.ToMessageBody();
 
-                await _smtpClient.ConnectAsync(
+                using var smtpClient = new SmtpClient();
+
+                await smtpClient.ConnectAsync(
                     _config["EmailSettings:SmtpServer"],
                     int.Parse(_config["EmailSettings:Port"]),
                     SecureSocketOptions.StartTls);
 
-                await _smtpClient.AuthenticateAsync(
+                await smtpClient.AuthenticateAsync(
                     _config["EmailSettings:Username"],
                     _config["EmailSettings:Password"]);
 
-                await _smtpClient.SendAsync(message);
+                await smtpClient.SendAsync(message);
+
+                await smtpClient.DisconnectAsync(true);
 
                 _logger.LogInformation("Successfully sent email to {Email} with subject {Subject}", email, subject);
             }
@@ -67,13 +69,6 @@ namespace CinemaSystem.Utility
             {
                 _logger.LogError(ex, "Failed to send email to {Email}. Subject: {Subject}", email, subject);
                 throw;
-            }
-            finally
-            {
-                if (_smtpClient.IsConnected)
-                {
-                    await _smtpClient.DisconnectAsync(true);
-                }
             }
         }
     }

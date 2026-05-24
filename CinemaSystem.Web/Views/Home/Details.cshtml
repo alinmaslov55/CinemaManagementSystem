@@ -95,7 +95,22 @@
                     Select Showtime
                 </h2>
 
-                @if (!Model.ShowtimesByCinema.Any())
+                @if (!Model.IsEligibleToWatch)
+                {
+                    <div class="bg-[#ffebee] border border-[#ef5350] text-[#c62828] p-8 rounded-2xl shadow-sm flex flex-col items-center text-center">
+                        <span class="material-symbols-outlined text-6xl mb-4">block</span>
+                        <h3 class="text-xl font-bold uppercase tracking-widest mb-2">Age Restriction</h3>
+                        <p class="font-medium mb-6">@Model.RestrictionReason</p>
+                        
+                        @if (User.Identity?.IsAuthenticated == false)
+                        {
+                            <a asp-area="Identity" asp-page="/Account/Login" class="bg-[#c62828] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md hover:bg-[#b71c1c]">
+                                Log In to Verify
+                            </a>
+                        }
+                    </div>
+                }
+                else if (!Model.ShowtimesByCinema.Any())
                 {
                     <div class="bg-[#f3f3f3] text-center p-8 rounded-2xl text-[#79767b]">
                         <span class="material-symbols-outlined text-4xl mb-2 opacity-50">event_busy</span>

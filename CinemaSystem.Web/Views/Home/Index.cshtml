@@ -301,7 +301,7 @@
     <span class="material-symbols-outlined text-2xl md:text-3xl" data-icon="smart_toy">smart_toy</span>
 </button>
 
-<div id="aiChatWindow" class="fixed bottom-40 md:bottom-28 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[360px] hidden flex-col bg-[#f9f9f9] shadow-2xl border border-[#cbc4cf]/50 rounded-2xl z-[1050] overflow-hidden">
+<div id="aiChatWindow" class="fixed bottom-40 md:bottom-28 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[380px] hidden flex-col bg-[#f9f9f9] shadow-2xl border border-[#cbc4cf]/50 rounded-2xl z-[1050] overflow-hidden">
     
     <div class="cta-gradient text-white flex justify-between items-center p-4 border-b border-white/10">
         <h6 class="mb-0 font-['Manrope'] font-bold text-sm flex items-center gap-2">
@@ -313,10 +313,22 @@
         </button>
     </div>
     
-    <div class="p-4" id="aiChatBody" style="height: 380px; overflow-y: auto;">
+    <div class="p-4" id="aiChatBody" style="height: 420px; overflow-y: auto;">
         <div class="flex mb-4">
             <div class="bg-[#e8e8e8] text-[#1a1c1c] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm" style="max-width: 85%; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
-                Greetings! I am the Ethereal Concierge. How may I guide your cinematic journey today?
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <p class="mb-2">Greetings! I am the Ethereal Concierge.</p>
+                    <p>Since you are securely logged in, I will tailor my movie recommendations according to your profile and age restrictions. What are you in the mood for today?</p>
+                }
+                else
+                {
+                    <p class="mb-2">Greetings! I am the Ethereal Concierge. How may I guide your cinematic journey today?</p>
+                    <p class="text-xs text-[#7f6fa2] font-bold mt-2 border-t border-[#cbc4cf] pt-2">
+                        <span class="material-symbols-outlined text-[12px] align-middle">info</span> 
+                        Tip: Log in to get age-appropriate and fully personalized recommendations!
+                    </p>
+                }
             </div>
         </div>
     </div>
@@ -342,7 +354,6 @@
         const chatInput = document.getElementById('aiChatInput');
         const chatSendBtn = document.getElementById('aiChatSend');
 
-        // Fetch the anti-forgery token for safe POST requests
         const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
         const token = tokenElement ? tokenElement.value : '';
 
@@ -365,6 +376,7 @@
         chatInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') sendMessage();
         });
+        
         chatSendBtn.addEventListener('click', sendMessage);
 
         function sendMessage() {
@@ -413,8 +425,8 @@
                 `;
             } else {
                 msgDiv.innerHTML = `
-                    <div class="bg-[#e8e8e8] text-[#1a1c1c] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm" style="max-width: 85%; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
-                        ${escapeHTML(text)}
+                    <div class="bg-[#e8e8e8] text-[#1a1c1c] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm" style="max-width: 85%; font-size: 0.85rem; font-family: 'Inter', sans-serif; line-height: 1.5;">
+                        ${formatAIResponse(text)}
                     </div>
                 `;
             }
@@ -449,6 +461,18 @@
             return str.replace(/[&<>'"]/g, tag => ({
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
             }[tag]));
+        }
+
+        // Formats basic Markdown used by Llama 3 into clean HTML
+        function formatAIResponse(str) {
+            let formatted = escapeHTML(str);
+            // Replace **text** with <strong>text</strong>
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Replace newlines with <br/> for proper paragraph spacing
+            formatted = formatted.replace(/\n/g, '<br/>');
+            // Replace *text* with <em>text</em>
+            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            return formatted;
         }
     </script>
 }

@@ -5,10 +5,14 @@ using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Utility;
 using CinemaSystem.Web.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -16,11 +20,13 @@ namespace CinemaSystem.Web.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOllamaService _ollamaService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public HomeController(IUnitOfWork unitOfWork, IOllamaService ollamaService)
+        public HomeController(IUnitOfWork unitOfWork, IOllamaService ollamaService, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _ollamaService = ollamaService;
+            _userManager = userManager;
         }
 
         public IActionResult Index(string? searchString, MovieCategory? category, DateTime? selectedDate)
@@ -39,12 +45,18 @@ namespace CinemaSystem.Web.Controllers
                 allMovies = allMovies.Where(m => m.MovieCategory == category.Value).ToList();
             }
 
-            var nowPlayingRaw = allMovies.Where(m => m.IsReleased && m.StartDate.Date <= today && m.EndDate.Date >= today);
-            var comingSoonRaw = allMovies.Where(m => !m.IsReleased || m.StartDate.Date > today);
+            var nowPlayingRaw = allMovies.Where(m =>
+                m.Showtimes.Any(s => s.StartTime.Date >= today) ||
+                (m.IsReleased && m.StartDate.Date <= today)
+            ).ToList();
+
+            var comingSoonRaw = allMovies.Where(m =>
+                !m.IsReleased && m.StartDate.Date > today && !m.Showtimes.Any(s => s.StartTime.Date >= today)
+            ).ToList();
 
             if (selectedDate.HasValue)
             {
-                nowPlayingRaw = nowPlayingRaw.Where(m => m.Showtimes.Any(s => s.StartTime.Date == selectedDate.Value.Date));
+                nowPlayingRaw = nowPlayingRaw.Where(m => m.Showtimes.Any(s => s.StartTime.Date == selectedDate.Value.Date)).ToList();
             }
 
             var nowPlayingCards = nowPlayingRaw.Select(m => new MovieCardVM
@@ -63,14 +75,11 @@ namespace CinemaSystem.Web.Controllers
 
             var vm = new HomeVM
             {
-                // Zone 1: Grab up to 3 highly-rated or newest movies for the massive Hero banner
-                HeroMovies = nowPlayingCards.OrderByDescending(m => m.AverageRating).Take(3),
+                HeroMovies = nowPlayingCards.OrderByDescending(m => m.AverageRating).ThenByDescending(m => m.Movie.Id).Take(3),
 
-                // Zone 3 & 4
                 NowPlaying = nowPlayingCards,
                 ComingSoon = comingSoonCards,
 
-                // Zone 2 State
                 CurrentSearch = searchString,
                 CurrentCategory = category,
                 SelectedDate = selectedDate
@@ -79,7 +88,7 @@ namespace CinemaSystem.Web.Controllers
             return View(vm);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id) // Converted to async Task
         {
             var movie = _unitOfWork.Movie.Get(m => m.Id == id, includeProperties: "Reviews,Reviews.ApplicationUser");
 
@@ -103,7 +112,7 @@ namespace CinemaSystem.Web.Controllers
                 );
 
             double averageRating = 0;
-            if(movie.Reviews != null && movie.Reviews.Any())
+            if (movie.Reviews != null && movie.Reviews.Any())
             {
                 averageRating = movie.Reviews.Average(r => r.Rating);
             }
@@ -112,8 +121,44 @@ namespace CinemaSystem.Web.Controllers
             {
                 Movie = movie,
                 ShowtimesByCinema = groupedShowtimes,
-                AverageRating = Math.Round(averageRating, 1)
+                AverageRating = Math.Round(averageRating, 1),
+                IsEligibleToWatch = true
             };
+
+            int requiredAge = GetRequiredAge(movie.AgeRating);
+            string displayRating = GetEnumDisplayName(movie.AgeRating);
+
+            if (requiredAge > 0)
+            {
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
+                    {
+                        if (!user.DateOfBirth.HasValue)
+                        {
+                            vm.IsEligibleToWatch = false;
+                            vm.RestrictionReason = $"This movie is rated {displayRating}. Please update your Date of Birth in your account profile to view showtimes.";
+                        }
+                        else
+                        {
+                            int userAge = DateTime.Today.Year - user.DateOfBirth.Value.Year;
+                            if (user.DateOfBirth.Value.Date > DateTime.Today.AddYears(-userAge)) userAge--;
+
+                            if (userAge < requiredAge)
+                            {
+                                vm.IsEligibleToWatch = false;
+                                vm.RestrictionReason = $"Access Denied: You must be at least {requiredAge} years old to watch a {displayRating} rated movie.";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    vm.IsEligibleToWatch = false;
+                    vm.RestrictionReason = $"This movie is rated {displayRating}. Please log in to verify your age and access showtimes.";
+                }
+            }
 
             return View(vm);
         }
@@ -175,13 +220,41 @@ namespace CinemaSystem.Web.Controllers
 
             var contextBuilder = new System.Text.StringBuilder();
 
-            contextBuilder.AppendLine("--- CURRENT SHOWTIMES (Next 7 Days) ---");
+            contextBuilder.AppendLine("--- USER PROFILE & RESTRICTIONS ---");
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    contextBuilder.AppendLine($"Name: {user.FullName}");
 
+                    if (user.DateOfBirth.HasValue)
+                    {
+                        int userAge = DateTime.Today.Year - user.DateOfBirth.Value.Year;
+                        if (user.DateOfBirth.Value.Date > DateTime.Today.AddYears(-userAge)) userAge--;
+
+                        contextBuilder.AppendLine($"Age: {userAge}");
+                        contextBuilder.AppendLine($"CRITICAL RULE: You MUST NOT recommend any movie where the required age rating is higher than {userAge}. Filter them out of your suggestions completely.");
+                    }
+                    else
+                    {
+                        contextBuilder.AppendLine("Age: Unknown (Profile incomplete).");
+                        contextBuilder.AppendLine("RULE: If recommending an age-restricted movie, remind them they must update their Date of Birth in their profile to book tickets.");
+                    }
+                }
+            }
+            else
+            {
+                contextBuilder.AppendLine("Status: Anonymous Browsing (Not Logged In).");
+                contextBuilder.AppendLine("RULE: If you recommend a restricted movie (like R or PG-13), explicitly mention that they will need to log in to verify their age before booking.");
+            }
+
+            contextBuilder.AppendLine("\n--- CURRENT SHOWTIMES (Next 7 Days) ---");
             var groupedShowtimes = upcomingShowtimes.GroupBy(s => s.Movie.Title);
             foreach (var group in groupedShowtimes)
             {
                 var movie = group.First().Movie;
-                contextBuilder.AppendLine($"\nMOVIE: {movie.Title} (Genre: {movie.MovieCategory}, Rating: {movie.ImdbRating}/5)");
+                contextBuilder.AppendLine($"\nMOVIE: {movie.Title} (Genre: {movie.MovieCategory}, Rating: {movie.ImdbRating}/5, Age Rating: {GetEnumDisplayName(movie.AgeRating)})");
 
                 foreach (var show in group.OrderBy(s => s.StartTime))
                 {
@@ -209,6 +282,27 @@ namespace CinemaSystem.Web.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private int GetRequiredAge(AgeRating rating)
+        {
+            return rating switch
+            {
+                AgeRating.G => 0,
+                AgeRating.PG => 0,
+                AgeRating.PG13 => 13,
+                AgeRating.R => 17,
+                AgeRating.NC17 => 18,
+                _ => 0
+            };
+        }
+        private string GetEnumDisplayName(Enum enumValue)
+        {
+            var field = enumValue.GetType().GetField(enumValue.ToString());
+            if (field == null) return enumValue.ToString();
+
+            var attribute = field.GetCustomAttribute<DisplayAttribute>();
+            return attribute == null ? enumValue.ToString() : attribute.Name;
         }
     }
 }

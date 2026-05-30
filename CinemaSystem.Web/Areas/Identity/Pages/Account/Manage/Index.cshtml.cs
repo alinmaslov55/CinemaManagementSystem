@@ -29,6 +29,9 @@ namespace CinemaSystem.Web.Areas.Identity.Pages.Account.Manage
         [TempData]
         public string StatusMessage { get; set; }
 
+        public int LoyaltyPoints { get; set; }
+        public string MembershipTier { get; set; }
+
         [BindProperty]
         public InputModel Input { get; set; }
 
@@ -61,6 +64,8 @@ namespace CinemaSystem.Web.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
+            LoyaltyPoints = user.LoyaltyPoints;
+            MembershipTier = user.MembershipTier;
 
             Input = new InputModel
             {

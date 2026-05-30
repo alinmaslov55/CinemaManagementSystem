@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -17,12 +18,14 @@ namespace CinemaSystem.Web.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
         private readonly ITicketPdfService _ticketPdfService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BookingController(IUnitOfWork unitOfWork, IEmailService emailService, ITicketPdfService ticketPdfService)
+        public BookingController(IUnitOfWork unitOfWork, IEmailService emailService, ITicketPdfService ticketPdfService, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _ticketPdfService = ticketPdfService;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -184,9 +187,12 @@ namespace CinemaSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult FinalizeOrder(int showtimeId, int[] concessionIds, int[] concessionQuantities)
+        public async Task<IActionResult> FinalizeOrder(int showtimeId, int[] concessionIds, int[] concessionQuantities)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var currentUser = await _userManager.FindByIdAsync(userId);
+            if (currentUser == null) return Unauthorized();
 
             var activeHolds = _unitOfWork.SeatHold.GetAll(h =>
                 h.ShowtimeId == showtimeId &&
@@ -248,8 +254,20 @@ namespace CinemaSystem.Web.Controllers
                 }
             }
 
-            newBooking.TotalAmount = ticketsTotal + concessionsTotal;
-            newBooking.LoyaltyPointsEarned = (int)newBooking.TotalAmount;
+            decimal subTotal = ticketsTotal + concessionsTotal;
+            decimal discountPercentage = 0m;
+
+            if (currentUser.MembershipTier == "Gold") discountPercentage = 0.15m; // 15% reducere
+            else if (currentUser.MembershipTier == "Silver") discountPercentage = 0.10m; // 10% reducere
+
+            decimal discountAmount = subTotal * discountPercentage;
+            newBooking.TotalAmount = subTotal - discountAmount;
+
+            newBooking.LoyaltyPointsEarned = (int)Math.Round(newBooking.TotalAmount);
+
+            currentUser.LoyaltyPoints += newBooking.LoyaltyPointsEarned;
+            await _userManager.UpdateAsync(currentUser);
+
 
             _unitOfWork.Booking.Add(newBooking);
 

@@ -71,9 +71,18 @@
             <div class="hidden md:flex items-center gap-6">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a asp-area="" asp-controller="Booking" asp-action="History" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-primary transition-colors">My Tickets</a>
-                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0">
-                        <button type="submit" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-error transition-colors">Logout</button>
+                    <a asp-area="" asp-controller="Booking" asp-action="History" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-primary transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">receipt_long</span> Tickets
+                    </a>
+
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-primary transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">account_circle</span> Profile
+                    </a>
+
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0 ml-2">
+                        <button type="submit" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-[#a8364b] transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">logout</span> Logout
+                        </button>
                     </form>
                 }
                 else
@@ -101,9 +110,18 @@
 
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a asp-area="" asp-controller="Booking" asp-action="History" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary block">My Tickets</a>
-                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0">
-                    <button type="submit" class="text-sm font-bold uppercase tracking-widest text-[#a8364b] hover:opacity-80 block">Logout</button>
+                <a asp-area="" asp-controller="Booking" asp-action="History" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined">receipt_long</span> My Tickets
+                </a>
+
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined">account_circle</span> Manage Profile
+                </a>
+
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0 p-0 mt-4">
+                    <button type="submit" class="text-sm font-bold uppercase tracking-widest text-white bg-[#a8364b] w-full py-3 rounded-xl flex items-center justify-center gap-2 hover:opacity-80 transition-opacity">
+                        <span class="material-symbols-outlined">logout</span> Logout
+                    </button>
                 </form>
             }
             else

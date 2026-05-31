@@ -35,7 +35,7 @@ namespace CinemaSystem.Utility
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Ethereal Cinema", _config["EmailSettings:SenderEmail"]));
+                message.From.Add(new MailboxAddress("CinemaSystem", _config["EmailSettings:SenderEmail"]));
                 message.To.Add(new MailboxAddress("", email));
                 message.Subject = subject;
 

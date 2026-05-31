@@ -102,7 +102,7 @@
                         </div>
                     </section>
 
-                    @if (Model.AvailableConcessions != null && Model.AvailableConcessions.Any())
+                    @if (Model.AvailableFnBProducts != null && Model.AvailableFnBProducts.Any())
                     {
                         <section class="mt-12">
                             <h3 class="text-xl font-['Manrope'] font-bold mb-6 flex items-center gap-2 text-[#1a1c1c]">
@@ -112,30 +112,30 @@
                             
                             <div class="bg-[#f3f3f3] rounded-3xl p-6 md:p-8 border border-[#cbc4cf]/30">
                                 <div class="space-y-4">
-                                    @foreach (var concession in Model.AvailableConcessions)
+                                    @foreach (var fnBProduct in Model.AvailableFnBProducts)
                                     {
                                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-[#cbc4cf]/20 shadow-sm transition-all hover:shadow-md">
                                             
-                                            <input type="hidden" name="concessionIds" value="@concession.Id" />
-                                            <input type="hidden" name="concessionQuantities" id="input-qty-@concession.Id" value="0" class="concession-qty-input" data-price="@concession.Price.ToString(CultureInfo.InvariantCulture)" />
+                                            <input type="hidden" name="fnBProductIds" value="@fnBProduct.Id" />
+                                            <input type="hidden" name="fnBProductQuantities" id="input-qty-@fnBProduct.Id" value="0" class="fnBProduct-qty-input" data-price="@fnBProduct.Price.ToString(CultureInfo.InvariantCulture)" />
 
                                             <div class="flex items-center gap-4">
                                                 <div class="w-16 h-16 rounded-xl bg-surface-container overflow-hidden border border-[#cbc4cf]/30 shrink-0">
-                                                    <img class="w-full h-full object-cover" alt="@concession.Name" src="@(string.IsNullOrEmpty(concession.ImageUrl) ? "https://via.placeholder.com/100" : concession.ImageUrl)"/>
+                                                    <img class="w-full h-full object-cover" alt="@fnBProduct.Name" src="@(string.IsNullOrEmpty(fnBProduct.ImageUrl) ? "https://via.placeholder.com/100" : fnBProduct.ImageUrl)"/>
                                                 </div>
                                                 <div>
-                                                    <p class="font-bold text-[#1a1c1c] text-sm">@concession.Name</p>
-                                                    <p class="text-[10px] text-[#7a757f] uppercase tracking-widest font-bold mb-1">@concession.Description</p>
-                                                    <span class="font-bold text-[#645485] text-sm">$@concession.Price.ToString("F2")</span>
+                                                    <p class="font-bold text-[#1a1c1c] text-sm">@fnBProduct.Name</p>
+                                                    <p class="text-[10px] text-[#7a757f] uppercase tracking-widest font-bold mb-1">@fnBProduct.Description</p>
+                                                    <span class="font-bold text-[#645485] text-sm">$@fnBProduct.Price.ToString("F2")</span>
                                                 </div>
                                             </div>
                                             
                                             <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30 w-32 sm:w-auto shrink-0 self-end sm:self-auto">
-                                                <button type="button" onclick="updateQty(@concession.Id, -1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
+                                                <button type="button" onclick="updateQty(@fnBProduct.Id, -1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
                                                     <span class="material-symbols-outlined text-sm">remove</span>
                                                 </button>
-                                                <span class="px-4 text-sm font-bold text-[#1a1c1c] font-mono" id="display-qty-@concession.Id">0</span>
-                                                <button type="button" onclick="updateQty(@concession.Id, 1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
+                                                <span class="px-4 text-sm font-bold text-[#1a1c1c] font-mono" id="display-qty-@fnBProduct.Id">0</span>
+                                                <button type="button" onclick="updateQty(@fnBProduct.Id, 1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
                                                     <span class="material-symbols-outlined text-sm">add</span>
                                                 </button>
                                             </div>
@@ -254,7 +254,7 @@
 
 @section Scripts {
     <script>
-        // === Concessions Logic (Legat la C# via Data Attributes) ===
+        // === Food & Beverages Logic (Legat la C# via Data Attributes) ===
         const baseTicketTotal = parseFloat('@Model.TotalAmount.ToString(CultureInfo.InvariantCulture)');
         
         function updateQty(id, change) {

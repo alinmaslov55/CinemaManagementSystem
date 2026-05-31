@@ -7,12 +7,12 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
-    public class ConcessionController : Controller
+    public class FnBProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ConcessionController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public FnBProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
@@ -20,8 +20,8 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            List<Concession> objConcessionList = _unitOfWork.Concession.GetAll().ToList();
-            return View(objConcessionList);
+            List<FnBProduct> objFnBProductList = _unitOfWork.FnBProduct.GetAll().ToList();
+            return View(objFnBProductList);
         }
 
         // UPSERT: GET
@@ -30,12 +30,12 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             if (id == null || id == 0)
             {
                 // Create Mode
-                return View(new Concession());
+                return View(new FnBProduct());
             }
             else
             {
                 // Edit Mode
-                var concession = _unitOfWork.Concession.Get(u => u.Id == id);
+                var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
                 if (concession == null) return NotFound();
                 return View(concession);
             }
@@ -44,7 +44,7 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
         // UPSERT: POST
         [HttpPost]
         [ValidateAntiForgeryToken] // Securitate adaugata: Prevenire CSRF
-        public IActionResult Upsert(Concession concession, IFormFile? file)
+        public IActionResult Upsert(FnBProduct concession, IFormFile? file)
         {
             if (!ModelState.IsValid)
             {
@@ -52,16 +52,16 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             }
 
             string wwwRootPath = _webHostEnvironment.WebRootPath;
-            Concession concessionToSave;
+            FnBProduct concessionToSave;
 
             // 1. ENTITY TRACKING PROTECTION
             if (concession.Id == 0)
             {
-                concessionToSave = new Concession();
+                concessionToSave = new FnBProduct();
             }
             else
             {
-                concessionToSave = _unitOfWork.Concession.Get(u => u.Id == concession.Id);
+                concessionToSave = _unitOfWork.FnBProduct.Get(u => u.Id == concession.Id);
                 if (concessionToSave == null) return NotFound();
             }
 
@@ -105,13 +105,13 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             // 3. DATABASE SAVE
             if (concession.Id == 0)
             {
-                _unitOfWork.Concession.Add(concessionToSave);
-                TempData["success"] = "Concession item created successfully.";
+                _unitOfWork.FnBProduct.Add(concessionToSave);
+                TempData["success"] = "Food & Beverage item created successfully.";
             }
             else
             {
-                _unitOfWork.Concession.Update(concessionToSave);
-                TempData["success"] = "Concession item updated successfully.";
+                _unitOfWork.FnBProduct.Update(concessionToSave);
+                TempData["success"] = "Food & Beverage item updated successfully.";
             }
 
             _unitOfWork.Save();
@@ -123,7 +123,7 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
         {
             if (id == null || id == 0) return NotFound();
 
-            var concession = _unitOfWork.Concession.Get(u => u.Id == id);
+            var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
             if (concession == null) return NotFound();
 
             return View(concession);
@@ -134,14 +134,14 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken] // Securitate adaugata: Prevenire CSRF
         public IActionResult DeletePOST(int? id)
         {
-            var concession = _unitOfWork.Concession.Get(u => u.Id == id);
+            var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
             if (concession == null) return NotFound();
 
             concession.IsDeleted = true;
-            _unitOfWork.Concession.Update(concession);
+            _unitOfWork.FnBProduct.Update(concession);
             _unitOfWork.Save();
 
-            TempData["success"] = "Concession item archived successfully.";
+            TempData["success"] = "Food & Beverage item archived successfully.";
             return RedirectToAction(nameof(Index));
         }
     }

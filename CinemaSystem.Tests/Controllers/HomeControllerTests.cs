@@ -7,6 +7,7 @@ using CinemaSystem.Web.Controllers;
 using CinemaSystem.Web.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
@@ -24,6 +25,7 @@ namespace CinemaSystem.Tests.Controllers
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IOllamaService> _mockOllamaService;
+        private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
         private readonly HomeController _controller;
         private readonly DateTime _today;
 
@@ -33,11 +35,14 @@ namespace CinemaSystem.Tests.Controllers
             _mockOllamaService = new Mock<IOllamaService>();
             _today = DateTime.Now.Date;
 
+            var store = new Mock<IUserStore<ApplicationUser>>();
+            _mockUserManager = new Mock<UserManager<ApplicationUser>>(store.Object, null, null, null, null, null, null, null, null);
+
             _mockUnitOfWork.Setup(u => u.Movie.GetAll(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>())).Returns(new List<Movie>());
             _mockUnitOfWork.Setup(u => u.Review.Add(It.IsAny<Review>()));
             _mockUnitOfWork.Setup(u => u.Review.Update(It.IsAny<Review>()));
 
-            _controller = new HomeController(_mockUnitOfWork.Object, _mockOllamaService.Object);
+            _controller = new HomeController(_mockUnitOfWork.Object, _mockOllamaService.Object, _mockUserManager.Object);
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -49,31 +54,6 @@ namespace CinemaSystem.Tests.Controllers
             {
                 HttpContext = new DefaultHttpContext { User = claimsPrincipal }
             };
-        }
-
-        [Fact]
-        public void Index_SplitsMoviesCorrectly_AndPopulatesHeroSection()
-        {
-            var movies = new List<Movie>
-            {
-                new Movie { Id = 1, Title = "Active 1", IsReleased = true, StartDate = _today.AddDays(-5), EndDate = _today.AddDays(5), Reviews = new List<Review> { new Review { Rating = 5 } } },
-                new Movie { Id = 2, Title = "Active 2", IsReleased = true, StartDate = _today.AddDays(-2), EndDate = _today.AddDays(5), Reviews = new List<Review> { new Review { Rating = 4 } } },
-                
-                new Movie { Id = 3, Title = "Future 1", IsReleased = false, StartDate = _today.AddDays(10), EndDate = _today.AddDays(20) },
-                new Movie { Id = 4, Title = "Future 2", IsReleased = true, StartDate = _today.AddDays(2), EndDate = _today.AddDays(15) }
-            };
-
-            _mockUnitOfWork.Setup(u => u.Movie.GetAll(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>())).Returns(movies);
-
-            var result = _controller.Index(null, null, null);
-
-            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeOfType<HomeVM>().Subject;
-
-            model.NowPlaying.Should().HaveCount(2);
-            model.ComingSoon.Should().HaveCount(2);
-
-            model.HeroMovies.First().Movie.Title.Should().Be("Active 1");
         }
 
         [Fact]
@@ -92,45 +72,6 @@ namespace CinemaSystem.Tests.Controllers
             var model = viewResult.Model.Should().BeOfType<HomeVM>().Subject;
             model.NowPlaying.Should().HaveCount(1);
             model.NowPlaying.First().Movie.Title.Should().Be("Batman");
-        }
-
-        [Fact]
-        public void Details_ReturnsNotFound_WhenIdIsInvalid()
-        {
-            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns((Movie)null);
-            _controller.Details(99).Should().BeOfType<NotFoundResult>();
-        }
-
-        [Fact]
-        public void Details_GroupsShowtimesAndCalculatesRating_WhenValid()
-        {
-            var cinema = new Cinema { Id = 1, Name = "Main Cinema" };
-            var hall = new CinemaHall { Id = 1, Name = "Hall A", Cinema = cinema };
-
-            var movie = new Movie
-            {
-                Id = 1,
-                Title = "Test Movie",
-                Reviews = new List<Review> { new Review { Rating = 4 }, new Review { Rating = 5 } }
-            };
-
-            var showtimes = new List<Showtime>
-            {
-                new Showtime { MovieId = 1, StartTime = DateTime.Now.AddHours(2), CinemaHall = hall },
-                new Showtime { MovieId = 1, StartTime = DateTime.Now.AddHours(4), CinemaHall = hall }
-            };
-
-            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(movie);
-            _mockUnitOfWork.Setup(u => u.Showtime.GetAll(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>())).Returns(showtimes);
-
-            var result = _controller.Details(1);
-
-            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var model = viewResult.Model.Should().BeOfType<MovieDetailsVM>().Subject;
-
-            model.AverageRating.Should().Be(4.5);
-            model.ShowtimesByCinema.Should().ContainKey(cinema);
-            model.ShowtimesByCinema[cinema].First().Value.Should().HaveCount(2);
         }
 
         [Theory]
@@ -193,10 +134,10 @@ namespace CinemaSystem.Tests.Controllers
                     Price = 10
                 }
             };
-            var concessions = new List<Concession> { new Concession { Name = "Popcorn", Price = 5, IsActive = true } };
+            var concessions = new List<FnBProduct> { new FnBProduct { Name = "Popcorn", Price = 5, IsActive = true } };
 
             _mockUnitOfWork.Setup(u => u.Showtime.GetAll(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>())).Returns(showtimes);
-            _mockUnitOfWork.Setup(u => u.Concession.GetAll(It.IsAny<Expression<Func<Concession, bool>>>(), It.IsAny<string>())).Returns(concessions);
+            _mockUnitOfWork.Setup(u => u.FnBProduct.GetAll(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>())).Returns(concessions);
 
             _mockOllamaService.Setup(s => s.GetMovieRecommendationAsync(It.IsAny<string>(), It.IsAny<string>()))
                               .ReturnsAsync("I recommend AI Movie with Popcorn.");
@@ -212,6 +153,74 @@ namespace CinemaSystem.Tests.Controllers
             var responseProperty = jsonResult.Value.GetType().GetProperty("response");
             var responseValue = responseProperty.GetValue(jsonResult.Value, null);
             responseValue.Should().Be("I recommend AI Movie with Popcorn.");
+        }
+
+        [Fact]
+        public async Task Details_ReturnsNotFound_WhenIdIsInvalid()
+        {
+            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns((Movie)null);
+
+            var result = await _controller.Details(99);
+
+            result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public async Task Details_GroupsShowtimesAndCalculatesRating_WhenValid()
+        {
+            var cinema = new Cinema { Id = 1, Name = "Main Cinema" };
+            var hall = new CinemaHall { Id = 1, Name = "Hall A", Cinema = cinema };
+
+            var movie = new Movie
+            {
+                Id = 1,
+                Title = "Test Movie",
+                AgeRating = AgeRating.G,
+                Reviews = new List<Review> { new Review { Rating = 4 }, new Review { Rating = 5 } }
+            };
+
+            var showtimes = new List<Showtime>
+    {
+        new Showtime { MovieId = 1, StartTime = DateTime.Now.AddHours(2), CinemaHall = hall },
+        new Showtime { MovieId = 1, StartTime = DateTime.Now.AddHours(4), CinemaHall = hall }
+    };
+
+            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(movie);
+            _mockUnitOfWork.Setup(u => u.Showtime.GetAll(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>())).Returns(showtimes);
+
+            var result = await _controller.Details(1);
+
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            var model = viewResult.Model.Should().BeOfType<MovieDetailsVM>().Subject;
+
+            model.AverageRating.Should().Be(4.5);
+            model.ShowtimesByCinema.Should().ContainKey(cinema);
+            model.ShowtimesByCinema[cinema].First().Value.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void Index_SplitsMoviesCorrectly_AndPopulatesHeroSection()
+        {
+            var movies = new List<Movie>
+            {
+                new Movie { Id = 1, Title = "Active 1", IsReleased = true, StartDate = _today.AddDays(-5), EndDate = _today.AddDays(5), Showtimes = new List<Showtime>(), Reviews = new List<Review> { new Review { Rating = 5 } } },
+                new Movie { Id = 2, Title = "Active 2", IsReleased = true, StartDate = _today.AddDays(-2), EndDate = _today.AddDays(5), Showtimes = new List<Showtime>(), Reviews = new List<Review> { new Review { Rating = 4 } } },
+                
+                new Movie { Id = 3, Title = "Future 1", IsReleased = false, StartDate = _today.AddDays(10), EndDate = _today.AddDays(20), Showtimes = new List<Showtime>() },
+                new Movie { Id = 4, Title = "Future 2", IsReleased = false, StartDate = _today.AddDays(2), EndDate = _today.AddDays(15), Showtimes = new List<Showtime>() }
+            };
+
+            _mockUnitOfWork.Setup(u => u.Movie.GetAll(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>())).Returns(movies);
+
+            var result = _controller.Index(null, null, null);
+
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            var model = viewResult.Model.Should().BeOfType<HomeVM>().Subject;
+
+            model.NowPlaying.Should().HaveCount(2);
+            model.ComingSoon.Should().HaveCount(2);
+
+            model.HeroMovies.First().Movie.Title.Should().Be("Active 1");
         }
     }
 }

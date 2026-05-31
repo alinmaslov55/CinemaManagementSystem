@@ -40,6 +40,6 @@ namespace CinemaSystem.Models.Entities
         public virtual List<Ticket> Tickets { get; set; }
 
         [ValidateNever]
-        public virtual ICollection<BookingConcession> BookingConcessions { get; set; } = new List<BookingConcession>();
+        public virtual ICollection<BookingFnB> BookingFnBs { get; set; } = new List<BookingFnB>();
     }
 }

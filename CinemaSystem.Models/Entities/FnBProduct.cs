@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CinemaSystem.Models.Entities
 {
-    public enum ConcessionCategory
+    public enum FnBCategory
     {
         Popcorn,
         Beverage,
@@ -12,7 +12,7 @@ namespace CinemaSystem.Models.Entities
         Combo
     }
 
-    public class Concession : BaseEntity
+    public class FnBProduct : BaseEntity
     {
         [Required(ErrorMessage = "The item name is required.")]
         [MaxLength(100)]
@@ -26,7 +26,7 @@ namespace CinemaSystem.Models.Entities
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Please select a category.")]
-        public ConcessionCategory Category { get; set; }
+        public FnBCategory Category { get; set; }
 
         [ValidateNever]
         public string? ImageUrl { get; set; }

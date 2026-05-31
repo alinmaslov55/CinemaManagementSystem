@@ -7,7 +7,7 @@ namespace CinemaSystem.Models.ViewModels
         public Showtime Showtime { get; set; }
         public List<TicketItemDto> TicketItems { get; set; } = new List<TicketItemDto>();
         public decimal TotalAmount { get; set; }
-        public List<Concession> AvailableConcessions { get; set; } = new List<Concession>();
+        public List<FnBProduct> AvailableFnBProducts { get; set; } = new List<FnBProduct>();
     }
 
     public class TicketItemDto

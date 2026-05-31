@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using CinemaSystem.Web.Controllers;
 using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
@@ -23,6 +25,7 @@ namespace CinemaSystem.Tests.Controllers
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IEmailService> _mockEmailService;
         private readonly Mock<ITicketPdfService> _mockTicketPdfService;
+        private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
         private readonly BookingController _controller;
         private readonly string _testUserId = "user-123";
 
@@ -32,19 +35,29 @@ namespace CinemaSystem.Tests.Controllers
             _mockEmailService = new Mock<IEmailService>();
             _mockTicketPdfService = new Mock<ITicketPdfService>();
 
+            // Mock complex obligatoriu pentru UserManager
+            var store = new Mock<IUserStore<ApplicationUser>>();
+            _mockUserManager = new Mock<UserManager<ApplicationUser>>(store.Object, null, null, null, null, null, null, null, null);
+
             _mockUnitOfWork.Setup(u => u.Booking.GetAll(It.IsAny<Expression<Func<Booking, bool>>>(), It.IsAny<string>()))
                            .Returns(new List<Booking>());
             _mockUnitOfWork.Setup(u => u.Ticket.GetAll(It.IsAny<Expression<Func<Ticket, bool>>>(), It.IsAny<string>()))
                            .Returns(new List<Ticket>());
             _mockUnitOfWork.Setup(u => u.SeatHold.GetAll(It.IsAny<Expression<Func<SeatHold, bool>>>(), It.IsAny<string>()))
                            .Returns(new List<SeatHold>());
-            _mockUnitOfWork.Setup(u => u.Concession.GetAll(It.IsAny<Expression<Func<Concession, bool>>>(), It.IsAny<string>()))
-                           .Returns(new List<Concession>());
+            _mockUnitOfWork.Setup(u => u.FnBProduct.GetAll(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>()))
+                           .Returns(new List<FnBProduct>());
 
             _mockTicketPdfService.Setup(p => p.GenerateTicketPdfBytes(It.IsAny<Booking>()))
                                  .Returns(new byte[] { 1, 2, 3 });
 
-            _controller = new BookingController(_mockUnitOfWork.Object, _mockEmailService.Object, _mockTicketPdfService.Object);
+            // Instanțierea controlerului cu toți cei 4 parametri
+            _controller = new BookingController(
+                _mockUnitOfWork.Object,
+                _mockEmailService.Object,
+                _mockTicketPdfService.Object,
+                _mockUserManager.Object);
+
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
@@ -151,32 +164,41 @@ namespace CinemaSystem.Tests.Controllers
         }
 
         [Fact]
-        public void FinalizeOrder_ProcessesSuccessfully_WithEmailAndTickets()
+        public async Task FinalizeOrder_ProcessesSuccessfully_WithEmailAndTickets()
         {
+            // Aranjarea (Arrange) asincronă
             int showtimeId = 1;
             var mockSeat = new Seat { Id = 10, SeatType = SeatType.Standard, Row = "A", Column = 1 };
 
             var activeHolds = new List<SeatHold> { new SeatHold { SeatId = 10, Seat = mockSeat, ApplicationUserId = _testUserId, HoldExpiration = DateTime.Now.AddMinutes(5) } };
-
             var showtime = new Showtime { Id = showtimeId, Movie = new Movie { Title = "Test Movie", Price = 10 }, Price = 0 };
 
-            var concession = new Concession { Id = 5, Price = 5.0m };
-            int[] cIds = { 5 };
-            int[] cQtys = { 2 };
+            var fnBProduct = new FnBProduct { Id = 5, Price = 5.0m };
+            int[] fnbIds = { 5 };
+            int[] fnbQtys = { 2 };
+
+            var mockUser = new ApplicationUser { Id = _testUserId, Email = "user@test.com", LoyaltyPoints = 0 };
+
+            // Setarea mock-urilor esențiale pentru noua logică
+            _mockUserManager.Setup(m => m.FindByIdAsync(_testUserId)).ReturnsAsync(mockUser);
+            _mockUserManager.Setup(m => m.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
 
             _mockUnitOfWork.Setup(u => u.SeatHold.GetAll(It.IsAny<Expression<Func<SeatHold, bool>>>(), It.IsAny<string>())).Returns(activeHolds);
             _mockUnitOfWork.Setup(u => u.Showtime.Get(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(showtime);
-            _mockUnitOfWork.Setup(u => u.Concession.Get(It.IsAny<Expression<Func<Concession, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(concession);
+            _mockUnitOfWork.Setup(u => u.FnBProduct.Get(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(fnBProduct);
 
             _mockUnitOfWork.Setup(u => u.Booking.Get(It.IsAny<Expression<Func<Booking, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                .Returns(new Booking { Id = 100, ConfirmationCode = "TEST-123", User = new ApplicationUser { Email = "user@test.com" }, Showtime = new Showtime { Movie = new Movie { Title = "X" }, CinemaHall = new CinemaHall { Cinema = new Cinema() } }, Tickets = new List<Ticket>() });
+                .Returns(new Booking { Id = 100, ConfirmationCode = "TEST-123", User = mockUser, Showtime = new Showtime { Movie = new Movie { Title = "X" }, CinemaHall = new CinemaHall { Cinema = new Cinema() } }, Tickets = new List<Ticket>() });
 
-            var result = _controller.FinalizeOrder(showtimeId, cIds, cQtys);
+            // Acțiune (Act) - apelarea funcției asincrone
+            var result = await _controller.FinalizeOrder(showtimeId, fnbIds, fnbQtys);
 
-            _mockUnitOfWork.Verify(u => u.Booking.Add(It.Is<Booking>(b => b.ApplicationUserId == _testUserId)), Times.Once);
+            // Validare (Assert)
+            _mockUnitOfWork.Verify(u => u.Booking.Add(It.Is<Booking>(b => b.ApplicationUserId == _testUserId && b.BookingFnBs.Count == 1)), Times.Once);
             _mockUnitOfWork.Verify(u => u.Ticket.Add(It.Is<Ticket>(t => t.SeatId == 10)), Times.Once);
             _mockUnitOfWork.Verify(u => u.SeatHold.RemoveRange(activeHolds), Times.Once);
             _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+            _mockUserManager.Verify(u => u.UpdateAsync(It.Is<ApplicationUser>(user => user.LoyaltyPoints > 0)), Times.Once);
 
             _mockTicketPdfService.Verify(p => p.GenerateTicketPdfBytes(It.IsAny<Booking>()), Times.Once);
             _mockEmailService.Verify(e => e.SendEmailWithAttachmentAsync("user@test.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<string>()), Times.Once);

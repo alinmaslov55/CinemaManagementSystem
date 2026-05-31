@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CinemaSystem.Models.Entities
 {
-    public class BookingConcession : BaseEntity
+    public class BookingFnB : BaseEntity
     {
         [Required]
         public int BookingId { get; set; }
@@ -11,9 +11,9 @@ namespace CinemaSystem.Models.Entities
         public virtual Booking Booking { get; set; }
 
         [Required]
-        public int ConcessionId { get; set; }
+        public int FnBProductId { get; set; }
         [ValidateNever]
-        public virtual Concession Concession { get; set; }
+        public virtual FnBProduct FnBProduct { get; set; }
 
         [Required]
         public int Quantity { get; set; }

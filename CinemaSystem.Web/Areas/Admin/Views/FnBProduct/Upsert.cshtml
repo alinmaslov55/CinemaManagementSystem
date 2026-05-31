@@ -1,4 +1,4 @@
-﻿@model CinemaSystem.Models.Entities.Concession
+﻿@model CinemaSystem.Models.Entities.FnBProduct
 @using CinemaSystem.Models.Entities
 
 @{
@@ -30,7 +30,7 @@
         <div class="mb-8 flex justify-between items-end">
             <div>
                 <nav class="flex text-sm text-on-surface-variant mb-2 gap-2 items-center font-label font-bold uppercase tracking-wider">
-                    <a asp-action="Index" class="hover:text-primary transition-colors">Concessions</a>
+                    <a asp-action="Index" class="hover:text-primary transition-colors">Food & Beverage</a>
                     <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     <span class="text-primary font-medium">@(Model.Id != 0 ? "Update" : "Add New") Product</span>
                 </nav>
@@ -78,7 +78,7 @@
 
                         <div>
                             <label asp-for="Category" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Category <span class="text-error">*</span></label>
-                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<ConcessionCategory>()" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
+                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<FnBCategory>()" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
                                 <option disabled selected value="">-- Select --</option>
                             </select>
                             <span asp-validation-for="Category" class="text-error text-xs mt-1 block"></span>

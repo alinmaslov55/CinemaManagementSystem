@@ -180,7 +180,7 @@ namespace CinemaSystem.Web.Controllers
 
             vm.TotalAmount = runningTotal;
 
-            vm.AvailableConcessions = _unitOfWork.Concession.GetAll(c => c.IsActive).ToList();
+            vm.AvailableFnBProducts = _unitOfWork.FnBProduct.GetAll(c => c.IsActive).ToList();
 
             return View(vm);
         }
@@ -238,14 +238,14 @@ namespace CinemaSystem.Web.Controllers
                 {
                     if (concessionQuantities[i] > 0)
                     {
-                        var concession = _unitOfWork.Concession.Get(c => c.Id == concessionIds[i]);
+                        var concession = _unitOfWork.FnBProduct.Get(c => c.Id == concessionIds[i]);
                         if (concession != null)
                         {
                             concessionsTotal += (concession.Price * concessionQuantities[i]);
 
-                            newBooking.BookingConcessions.Add(new BookingConcession
+                            newBooking.BookingFnBs.Add(new BookingFnB
                             {
-                                ConcessionId = concession.Id,
+                                FnBProductId = concession.Id,
                                 Quantity = concessionQuantities[i],
                                 PriceAtPurchase = concession.Price
                             });
@@ -316,7 +316,7 @@ namespace CinemaSystem.Web.Controllers
 
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingConcessions,BookingConcessions.Concession"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingFnB,BookingFnB.FnBProduct"
             );
 
             if (booking == null)
@@ -334,7 +334,7 @@ namespace CinemaSystem.Web.Controllers
 
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingConcessions,BookingConcessions.Concession"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingFnB,BookingFnB.FnBProducts"
             );
 
             if (booking == null) return NotFound("Order not found or access denied.");

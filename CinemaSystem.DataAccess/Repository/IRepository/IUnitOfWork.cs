@@ -12,7 +12,7 @@
         ITicketRepository Ticket { get; }
         IReviewRepository Review { get; }
         ISeatHoldRepository SeatHold { get; }
-        IConcessionRepository Concession { get; }
+        IFnBProductRepository FnBProduct { get; }
         IEquipmentRepository Equipment { get; }
         void Save();
     }

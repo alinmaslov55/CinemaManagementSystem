@@ -20,8 +20,8 @@ namespace CinemaSystem.DataAccess.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<SeatHold> SeatHolds { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-        public DbSet<Concession> Concessions { get; set; }
-        public DbSet<BookingConcession> BookingConcessions { get; set; }
+        public DbSet<FnBProduct> FnBProducts { get; set; }
+        public DbSet<BookingFnB> BookingFnBs { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,8 +46,8 @@ namespace CinemaSystem.DataAccess.Data
 
             modelBuilder.Entity<SeatHold>().HasQueryFilter(e => !e.IsDeleted && !e.Seat.IsDeleted && !e.Showtime.IsDeleted);
 
-            modelBuilder.Entity<Concession>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<BookingConcession>().HasQueryFilter(e => !e.IsDeleted && !e.Booking.IsDeleted);
+            modelBuilder.Entity<FnBProduct>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<BookingFnB>().HasQueryFilter(e => !e.IsDeleted && !e.Booking.IsDeleted);
 
             modelBuilder.Entity<Equipment>().HasQueryFilter(e => !e.IsDeleted && !e.CinemaHall.IsDeleted);
 
@@ -71,8 +71,8 @@ namespace CinemaSystem.DataAccess.Data
             modelBuilder.Entity<Booking>().Property(b => b.TotalAmount).HasPrecision(18, 2);
             modelBuilder.Entity<Ticket>().Property(t => t.Price).HasPrecision(18, 2);
 
-            modelBuilder.Entity<Concession>().Property(c => c.Price).HasPrecision(18, 2);
-            modelBuilder.Entity<BookingConcession>().Property(bc => bc.PriceAtPurchase).HasPrecision(18, 2);
+            modelBuilder.Entity<FnBProduct>().Property(c => c.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<BookingFnB>().Property(bc => bc.PriceAtPurchase).HasPrecision(18, 2);
 
             modelBuilder.Entity<CinemaHall>()
                 .HasOne(ch => ch.Cinema)
@@ -123,36 +123,36 @@ namespace CinemaSystem.DataAccess.Data
                 .HasForeignKey(b => b.ShowtimeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Concession>().HasData(
-                new Concession
+            modelBuilder.Entity<FnBProduct>().HasData(
+                new FnBProduct
                 {
                     Id = 1,
                     Name = "Large Popcorn",
                     Description = "Classic salted butter popcorn (150g)",
                     Price = 12.50m,
-                    Category = ConcessionCategory.Popcorn,
+                    Category = FnBCategory.Popcorn,
                     IsActive = true,
                     ImageUrl = null, // Removed external dependency
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
-                new Concession
+                new FnBProduct
                 {
                     Id = 2,
                     Name = "Cheese Nachos",
                     Description = "Crispy tortilla chips with warm cheese dip",
                     Price = 14.00m,
-                    Category = ConcessionCategory.HotFood,
+                    Category = FnBCategory.HotFood,
                     IsActive = true,
                     ImageUrl = null, // Removed external dependency
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
-                new Concession
+                new FnBProduct
                 {
                     Id = 3,
                     Name = "Coca-Cola (Large)",
                     Description = "0.5L fountain drink",
                     Price = 6.50m,
-                    Category = ConcessionCategory.Beverage,
+                    Category = FnBCategory.Beverage,
                     IsActive = true,
                     ImageUrl = null, // Removed external dependency
                     CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)

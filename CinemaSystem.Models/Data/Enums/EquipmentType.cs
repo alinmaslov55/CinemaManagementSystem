@@ -7,7 +7,7 @@
         Screen,
         HVAC, // Heating, Ventilation, Air Conditioning
         Lighting,
-        ConcessionMachine,
+        FnBProductsMachine,
         Other
     }
 }

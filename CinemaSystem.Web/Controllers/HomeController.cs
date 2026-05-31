@@ -216,7 +216,7 @@ namespace CinemaSystem.Web.Controllers
                 includeProperties: "Movie,CinemaHall,CinemaHall.Cinema"
             ).ToList();
 
-            var concessions = _unitOfWork.Concession.GetAll(c => c.IsActive).ToList();
+            var fnBProducts = _unitOfWork.FnBProduct.GetAll(c => c.IsActive).ToList();
 
             var contextBuilder = new System.Text.StringBuilder();
 
@@ -263,7 +263,7 @@ namespace CinemaSystem.Web.Controllers
             }
 
             contextBuilder.AppendLine("\n--- AVAILABLE SNACKS & DRINKS (CONCESSIONS) ---");
-            foreach (var item in concessions)
+            foreach (var item in fnBProducts)
             {
                 contextBuilder.AppendLine($"- {item.Name}: ${item.Price.ToString("F2")} ({item.Description})");
             }

@@ -62,11 +62,11 @@ namespace CinemaSystem.Utility
                             });
                         }
 
-                        if (booking.BookingConcessions != null && booking.BookingConcessions.Any())
+                        if (booking.BookingFnBs != null && booking.BookingFnBs.Any())
                         {
                             col.Item().PaddingTop(15).Text("Food & Beverage Vouchers").FontSize(16).SemiBold().FontColor(Colors.Orange.Darken2);
 
-                            foreach (var concession in booking.BookingConcessions)
+                            foreach (var concession in booking.BookingFnBs)
                             {
                                 col.Item().Border(1).BorderColor(Colors.Orange.Lighten2).Background(Colors.White).Padding(15).Row(row =>
                                 {
@@ -74,7 +74,7 @@ namespace CinemaSystem.Utility
 
                                     row.RelativeItem().AlignMiddle().Column(cCol =>
                                     {
-                                        cCol.Item().Text(concession.Concession.Name).FontSize(16).SemiBold();
+                                        cCol.Item().Text(concession.FnBProduct.Name).FontSize(16).SemiBold();
                                         cCol.Item().Text("Present this voucher at the concession stand").FontSize(10).FontColor(Colors.Grey.Medium);
                                     });
 

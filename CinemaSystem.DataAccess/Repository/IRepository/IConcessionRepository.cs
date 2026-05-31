@@ -2,8 +2,8 @@
 
 namespace CinemaSystem.DataAccess.Repository.IRepository
 {
-    public interface IConcessionRepository : IGenericRepository<Concession>
+    public interface IFnBProductRepository : IGenericRepository<FnBProduct>
     {
-        void Update(Concession obj);
+        void Update(FnBProduct obj);
     }
 }

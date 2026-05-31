@@ -4,18 +4,18 @@ using CinemaSystem.Models.Entities;
 
 namespace CinemaSystem.DataAccess.Repository
 {
-    public class ConcessionRepository : Repository<Concession>, IConcessionRepository
+    public class FnBProductRepository : Repository<FnBProduct>, IFnBProductRepository
     {
         private ApplicationDbContext _db;
 
-        public ConcessionRepository(ApplicationDbContext db) : base(db)
+        public FnBProductRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
 
-        public void Update(Concession obj)
+        public void Update(FnBProduct obj)
         {
-            _db.Concessions.Update(obj);
+            _db.FnBProducts.Update(obj);
         }
     }
 }

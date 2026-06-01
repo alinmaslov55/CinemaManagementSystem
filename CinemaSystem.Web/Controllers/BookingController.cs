@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -19,13 +20,20 @@ namespace CinemaSystem.Web.Controllers
         private readonly IEmailService _emailService;
         private readonly ITicketPdfService _ticketPdfService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public BookingController(IUnitOfWork unitOfWork, IEmailService emailService, ITicketPdfService ticketPdfService, UserManager<ApplicationUser> userManager)
+        public BookingController(
+            IUnitOfWork unitOfWork,
+            IEmailService emailService,
+            ITicketPdfService ticketPdfService,
+            UserManager<ApplicationUser> userManager,
+            IStringLocalizer<SharedResource> localizer) // Injectare
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _ticketPdfService = ticketPdfService;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -36,10 +44,9 @@ namespace CinemaSystem.Web.Controllers
                 includeProperties: "Movie,CinemaHall,CinemaHall.Cinema,CinemaHall.Seats"
             );
 
-            if (showtime == null) return NotFound("Showtime not found.");
+            if (showtime == null) return NotFound(_localizer["Error_ShowtimeNotFound"].Value);
 
             var hallSeats = showtime.CinemaHall?.Seats ?? new List<Seat>();
-
             var bookedSeatIds = _unitOfWork.Ticket?.GetAll(t => t.Booking.ShowtimeId == showtimeId)
                                     .Select(t => t.SeatId).ToList() ?? new List<int>();
 
@@ -83,7 +90,7 @@ namespace CinemaSystem.Web.Controllers
         {
             if (dto == null || dto.SelectedSeatIds == null || !dto.SelectedSeatIds.Any())
             {
-                return Json(new { success = false, message = "No seats selected." });
+                return Json(new { success = false, message = _localizer["Error_NoSeatsSelected"].Value });
             }
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -94,7 +101,7 @@ namespace CinemaSystem.Web.Controllers
 
             if (bookedSeats.Any())
             {
-                return Json(new { success = false, message = "Transaction failed: One or more seats have already been purchased." });
+                return Json(new { success = false, message = _localizer["Error_SeatsAlreadyPurchased"].Value });
             }
 
             var activeHolds = _unitOfWork.SeatHold.GetAll(h =>
@@ -104,7 +111,7 @@ namespace CinemaSystem.Web.Controllers
 
             if (activeHolds.Any(h => h.ApplicationUserId != userId))
             {
-                return Json(new { success = false, message = "Transaction failed: Another user is currently checking out with these seats." });
+                return Json(new { success = false, message = _localizer["Error_CheckoutCollision"].Value });
             }
 
             var userExistingHolds = _unitOfWork.SeatHold.GetAll(h =>
@@ -146,7 +153,7 @@ namespace CinemaSystem.Web.Controllers
 
             if (!activeHolds.Any())
             {
-                TempData["error"] = "Your seat reservation has expired or no seats were selected. Please try again.";
+                TempData["error"] = _localizer["Error_SeatHoldExpired"].Value;
                 return RedirectToAction(nameof(SelectSeats), new { showtimeId = showtimeId });
             }
 
@@ -155,7 +162,7 @@ namespace CinemaSystem.Web.Controllers
                 includeProperties: "Movie,CinemaHall,CinemaHall.Cinema"
             );
 
-            if (showtime == null) return NotFound("Showtime details could not be loaded.");
+            if (showtime == null) return NotFound(_localizer["Error_ShowtimeDetailsFailed"].Value);
 
             var vm = new CheckoutVM
             {
@@ -179,7 +186,6 @@ namespace CinemaSystem.Web.Controllers
             }
 
             vm.TotalAmount = runningTotal;
-
             vm.AvailableFnBProducts = _unitOfWork.FnBProduct.GetAll(c => c.IsActive).ToList();
 
             return View(vm);
@@ -202,7 +208,7 @@ namespace CinemaSystem.Web.Controllers
 
             if (!activeHolds.Any())
             {
-                TempData["error"] = "Your session expired or your seats were released. Please try again.";
+                TempData["error"] = _localizer["Error_SessionExpired"].Value;
                 return RedirectToAction(nameof(SelectSeats), new { showtimeId = showtimeId });
             }
 
@@ -257,17 +263,15 @@ namespace CinemaSystem.Web.Controllers
             decimal subTotal = ticketsTotal + concessionsTotal;
             decimal discountPercentage = 0m;
 
-            if (currentUser.MembershipTier == "Gold") discountPercentage = 0.15m; // 15% reducere
-            else if (currentUser.MembershipTier == "Silver") discountPercentage = 0.10m; // 10% reducere
+            if (currentUser.MembershipTier == "Gold") discountPercentage = 0.15m;
+            else if (currentUser.MembershipTier == "Silver") discountPercentage = 0.10m;
 
             decimal discountAmount = subTotal * discountPercentage;
             newBooking.TotalAmount = subTotal - discountAmount;
 
             newBooking.LoyaltyPointsEarned = (int)Math.Round(newBooking.TotalAmount);
-
             currentUser.LoyaltyPoints += newBooking.LoyaltyPointsEarned;
             await _userManager.UpdateAsync(currentUser);
-
 
             _unitOfWork.Booking.Add(newBooking);
 
@@ -294,8 +298,10 @@ namespace CinemaSystem.Web.Controllers
             if (completedBooking != null && !string.IsNullOrEmpty(completedBooking.User?.Email))
             {
                 byte[] pdfAttachment = _ticketPdfService.GenerateTicketPdfBytes(completedBooking);
-                string subject = $"Your Tickets & Order for {completedBooking.Showtime.Movie.Title} - {completedBooking.ConfirmationCode}";
-                string htmlBody = $"<h3>Thank you for your purchase!</h3><p>Your tickets and F&B vouchers are attached as a PDF. Please present the QR codes at the cinema doors and concession stand.</p>";
+
+                // Email formatat localizat (Title și Code sunt injectate în cheia din dicționar)
+                string subject = string.Format(_localizer["Email_TicketSubject"].Value, completedBooking.Showtime.Movie.Title, completedBooking.ConfirmationCode);
+                string htmlBody = _localizer["Email_TicketBody"].Value;
 
                 try
                 {
@@ -316,13 +322,10 @@ namespace CinemaSystem.Web.Controllers
 
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingFnB,BookingFnB.FnBProduct"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingFnBs,BookingFnBs.FnBProduct"
             );
 
-            if (booking == null)
-            {
-                return NotFound("Order not found or access denied.");
-            }
+            if (booking == null) return NotFound(_localizer["Error_OrderNotFound"].Value);
 
             return View(booking);
         }
@@ -334,10 +337,10 @@ namespace CinemaSystem.Web.Controllers
 
             var booking = _unitOfWork.Booking.Get(
                 b => b.Id == bookingId && b.ApplicationUserId == userId,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingFnB,BookingFnB.FnBProducts"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,BookingFnBs,BookingFnBs.FnBProduct"
             );
 
-            if (booking == null) return NotFound("Order not found or access denied.");
+            if (booking == null) return NotFound(_localizer["Error_OrderNotFound"].Value);
 
             byte[] pdfBytes = _ticketPdfService.GenerateTicketPdfBytes(booking);
 

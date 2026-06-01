@@ -7,6 +7,7 @@ using CinemaSystem.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
@@ -21,12 +22,18 @@ namespace CinemaSystem.Web.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOllamaService _ollamaService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public HomeController(IUnitOfWork unitOfWork, IOllamaService ollamaService, UserManager<ApplicationUser> userManager)
+        public HomeController(
+            IUnitOfWork unitOfWork,
+            IOllamaService ollamaService,
+            UserManager<ApplicationUser> userManager,
+            IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
             _ollamaService = ollamaService;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         public IActionResult Index(string? searchString, MovieCategory? category, DateTime? selectedDate)
@@ -88,7 +95,7 @@ namespace CinemaSystem.Web.Controllers
             return View(vm);
         }
 
-        public async Task<IActionResult> Details(int id) // Converted to async Task
+        public async Task<IActionResult> Details(int id)
         {
             var movie = _unitOfWork.Movie.Get(m => m.Id == id, includeProperties: "Reviews,Reviews.ApplicationUser");
 
@@ -170,7 +177,7 @@ namespace CinemaSystem.Web.Controllers
         {
             if (rating < 1 || rating > 5)
             {
-                TempData["error"] = "Invalid rating value.";
+                TempData["error"] = _localizer["Error_InvalidRating"].Value;
                 return RedirectToAction(nameof(Details), new { id = movieId });
             }
 
@@ -183,7 +190,7 @@ namespace CinemaSystem.Web.Controllers
                 existingReview.Rating = rating;
                 existingReview.Comment = comment;
                 _unitOfWork.Review.Update(existingReview);
-                TempData["success"] = "Your review has been updated.";
+                TempData["success"] = _localizer["Success_ReviewUpdated"].Value;
             }
             else
             {
@@ -195,7 +202,7 @@ namespace CinemaSystem.Web.Controllers
                     Comment = comment
                 };
                 _unitOfWork.Review.Add(newReview);
-                TempData["success"] = "Thank you for your review!";
+                TempData["success"] = _localizer["Success_ReviewAdded"].Value;
             }
 
             _unitOfWork.Save();
@@ -296,6 +303,7 @@ namespace CinemaSystem.Web.Controllers
                 _ => 0
             };
         }
+
         private string GetEnumDisplayName(Enum enumValue)
         {
             var field = enumValue.GetType().GetField(enumValue.ToString());

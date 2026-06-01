@@ -68,6 +68,14 @@
             </div>
 
             <div class="hidden md:flex items-center gap-6">
+                <form id="selectLanguageDesktop" asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 p-0 flex items-center border-r border-outline/20 pr-6">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <span class="material-symbols-outlined text-neutral text-[16px] mr-1">language</span>
+                    <select name="culture" onchange="this.form.submit();" class="bg-transparent text-xs font-bold uppercase tracking-widest text-neutral hover:text-primary transition-colors border-none focus:ring-0 cursor-pointer p-0 pr-4 m-0 shadow-none">
+                        <!option value="en-US" @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "en-US" ? "selected" : "")>EN</!option>
+                        <!option value="ro-RO" @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "ro-RO" ? "selected" : "")>RO</!option>
+                    </select>
+                </form>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a asp-area="" asp-controller="Booking" asp-action="History" class="text-xs font-bold uppercase tracking-widest text-neutral hover:text-primary transition-colors flex items-center gap-1">
@@ -99,12 +107,22 @@
 
         <div id="mobileMenu" class="absolute top-20 left-0 w-full bg-white border-b border-outline/10 shadow-xl hidden flex-col px-6 py-6 space-y-6 md:hidden">
             <a asp-area="" asp-controller="Home" asp-action="Index" class="text-sm font-bold uppercase tracking-widest text-on-background hover:text-primary block">Movies</a>
-            
+
             @if (User.IsInRole("Admin"))
             {
                 <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="text-sm font-bold uppercase tracking-widest text-tertiary hover:text-primary block">Management Portal</a>
             }
 
+            <form id="selectLanguageMobile" asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 p-0 flex items-center justify-between w-full">
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <span class="text-sm font-bold uppercase tracking-widest text-neutral flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">language</span> Language
+                </span>
+                <select name="culture" onchange="this.form.submit();" class="bg-surface-container-low text-xs font-bold uppercase tracking-widest text-on-background rounded-lg border-none focus:ring-2 focus:ring-primary cursor-pointer py-2 px-3">
+                    <!option value="en-US" @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "en-US" ? "selected" : "")>English (EN)</!option>
+                    <!option value="ro-RO" @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "ro-RO" ? "selected" : "")>Română (RO)</!option>
+                </select>
+            </form>
             <hr class="border-outline/10" />
 
             @if (User.Identity?.IsAuthenticated == true)

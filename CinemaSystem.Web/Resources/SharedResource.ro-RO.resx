@@ -1,0 +1,387 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+    Microsoft ResX Schema 
+    Version 1.3
+    ... (schema standard .NET) ...
+  -->
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+
+	<!-- ============================================== -->
+	<!-- CHEI GENERALE & BUTOANE                        -->
+	<!-- ============================================== -->
+	<data name="Button_SecureTickets" xml:space="preserve">
+    <value>Rezervă Bilete</value>
+  </data>
+	<data name="Button_Trailer" xml:space="preserve">
+    <value>Vezi Trailer</value>
+  </data>
+	<data name="Button_Filter" xml:space="preserve">
+    <value>Filtrează</value>
+  </data>
+	<data name="Button_QuickBook" xml:space="preserve">
+    <value>Rezervare Rapidă</value>
+  </data>
+	<data name="Button_BookVIP" xml:space="preserve">
+    <value>Rezervă VIP Acum</value>
+  </data>
+	<data name="Button_ExploreVIP" xml:space="preserve">
+    <value>Descoperă VIP</value>
+  </data>
+	<data name="Button_ViewDashboard" xml:space="preserve">
+    <value>Către Contul Meu</value>
+  </data>
+	<data name="Button_JoinNow" xml:space="preserve">
+    <value>Înscrie-te Acum</value>
+  </data>
+	<data name="Button_LearnMore" xml:space="preserve">
+    <value>Află Mai Multe</value>
+  </data>
+	<data name="Label_Min" xml:space="preserve">
+    <value>min</value>
+  </data>
+	<data name="Label_Anonymous" xml:space="preserve">
+    <value>Anonim</value>
+  </data>
+
+	<!-- ============================================== -->
+	<!-- VIEW: HOME - INDEX                             -->
+	<!-- ============================================== -->
+	<data name="PageTitle_Home" xml:space="preserve">
+    <value>Pagina Principală</value>
+  </data>
+	<data name="Label_FeaturedPremiere" xml:space="preserve">
+    <value>Premieră Recomandată</value>
+  </data>
+	<data name="Label_Rating" xml:space="preserve">
+    <value>Notă</value>
+  </data>
+	<data name="Label_SearchTitle" xml:space="preserve">
+    <value>Caută Titlu</value>
+  </data>
+	<data name="Placeholder_SearchTitle" xml:space="preserve">
+    <value>ex. Inception...</value>
+  </data>
+	<data name="Label_Genre" xml:space="preserve">
+    <value>Genul</value>
+  </data>
+	<data name="Option_AllGenres" xml:space="preserve">
+    <value>Toate Genurile</value>
+  </data>
+	<data name="Label_Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+	<data name="Heading_NowShowing" xml:space="preserve">
+    <value>Acum în Cinema</value>
+  </data>
+	<data name="Subheading_NowShowing" xml:space="preserve">
+    <value>O selecție atentă din cinematografia globală</value>
+  </data>
+	<data name="Message_NoScreeningsFound" xml:space="preserve">
+    <value>Nu au fost găsite proiecții</value>
+  </data>
+	<data name="Message_AdjustFilters" xml:space="preserve">
+    <value>Încearcă să ajustezi filtrele de căutare sau data.</value>
+  </data>
+	<data name="Heading_VIPExperience" xml:space="preserve">
+    <value>Experiența Velvet</value>
+  </data>
+	<data name="Subheading_VIPExperience" xml:space="preserve">
+    <value>Ridicăm standardul vizionării cu servicii de masă și fotolii premium din piele.</value>
+  </data>
+	<data name="Heading_MemberRewards" xml:space="preserve">
+    <value>Recompense pentru Membri</value>
+  </data>
+	<data name="Subheading_MemberRewards" xml:space="preserve">
+    <value>Acumulează puncte pentru fiecare bilet și bucură-te de avantaje gratuite.</value>
+  </data>
+	<data name="Heading_StudentPasses" xml:space="preserve">
+    <value>Abonamente Studențești</value>
+  </data>
+	<data name="Subheading_StudentPasses" xml:space="preserve">
+    <value>Reduceri săptămânale cu un carnet de student valid. Cinema pentru toți.</value>
+  </data>
+	<data name="Heading_ComingSoon" xml:space="preserve">
+    <value>În Curând</value>
+  </data>
+
+	<!-- ============================================== -->
+	<!-- VIEW: WIDGET - AI ASSISTANT                    -->
+	<!-- ============================================== -->
+	<data name="Heading_AIAssistant" xml:space="preserve">
+    <value>Asistent CinemaSystem</value>
+  </data>
+	<data name="Message_AIGreeting" xml:space="preserve">
+    <value>Te salut! Sunt Asistentul CinemaSystem.</value>
+  </data>
+	<data name="Message_AILoggedInPrompt" xml:space="preserve">
+    <value>Fiindcă ești autentificat în siguranță, îți voi personaliza recomandările de filme în funcție de profilul tău și de restricțiile de vârstă. Ce ai vrea să vezi astăzi?</value>
+  </data>
+	<data name="Message_AIGuestPrompt" xml:space="preserve">
+    <value>Te salut! Sunt Asistentul CinemaSystem. Cum te pot ghida în călătoria ta cinematică astăzi?</value>
+  </data>
+	<data name="Message_AILoginTip" xml:space="preserve">
+    <value>Sfat: Autentifică-te pentru a primi recomandări personalizate și adecvate vârstei!</value>
+  </data>
+	<data name="Placeholder_AIPrompt" xml:space="preserve">
+    <value>Cere o recomandare...</value>
+  </data>
+	<data name="Error_AIDisconnected" xml:space="preserve">
+    <value>Momentan sunt deconectat de la nucleul principal. Te rog să încerci din nou mai târziu.</value>
+  </data>
+
+	<!-- ============================================== -->
+	<!-- VIEW: HOME - DETAILS                           -->
+	<!-- ============================================== -->
+	<data name="Label_NowShowing" xml:space="preserve">
+    <value>Acum în Cinema</value>
+  </data>
+	<data name="Label_LocalRating" xml:space="preserve">
+    <value>Rating Local</value>
+  </data>
+	<data name="Heading_TheNarrative" xml:space="preserve">
+    <value>Povestea</value>
+  </data>
+	<data name="Heading_SelectShowtime" xml:space="preserve">
+    <value>Alege Ora Proiecției</value>
+  </data>
+	<data name="Heading_AgeRestriction" xml:space="preserve">
+    <value>Restricție de Vârstă</value>
+  </data>
+	<data name="Button_LogInToVerify" xml:space="preserve">
+    <value>Autentifică-te pentru Verificare</value>
+  </data>
+	<data name="Message_NoShowtimes" xml:space="preserve">
+    <value>Nu există proiecții viitoare disponibile pentru acest film în acest moment.</value>
+  </data>
+	<data name="Heading_Reviews" xml:space="preserve">
+    <value>Vocile Spectatorilor</value>
+  </data>
+	<data name="Label_Reviews" xml:space="preserve">
+    <value>Recenzii</value>
+  </data>
+	<data name="Heading_ShareExperience" xml:space="preserve">
+    <value>Împărtășește-ne Experiența</value>
+  </data>
+	<data name="Label_YourRating" xml:space="preserve">
+    <value>Nota Ta</value>
+  </data>
+	<data name="Option_Rating5" xml:space="preserve">
+    <value>Capodoperă</value>
+  </data>
+	<data name="Option_Rating4" xml:space="preserve">
+    <value>Excelent</value>
+  </data>
+	<data name="Option_Rating3" xml:space="preserve">
+    <value>Bun</value>
+  </data>
+	<data name="Option_Rating2" xml:space="preserve">
+    <value>Decent</value>
+  </data>
+	<data name="Option_Rating1" xml:space="preserve">
+    <value>Slab</value>
+  </data>
+	<data name="Label_YourThoughts" xml:space="preserve">
+    <value>Părerile Tale (Opțional)</value>
+  </data>
+	<data name="Placeholder_ReviewComment" xml:space="preserve">
+    <value>Cum a fost imaginea? Dar actoria?</value>
+  </data>
+	<data name="Button_SubmitReview" xml:space="preserve">
+    <value>Trimite Recenzia</value>
+  </data>
+	<data name="Message_MustBeLoggedIn" xml:space="preserve">
+    <value>Trebuie să fii autentificat pentru a lăsa o recenzie.</value>
+  </data>
+	<data name="Button_LogInToReview" xml:space="preserve">
+    <value>Autentifică-te pentru a Recenza</value>
+  </data>
+	<data name="Heading_MovieIntelligence" xml:space="preserve">
+    <value>Inteligență Cinematică</value>
+  </data>
+	<data name="Label_CinemaSystemScore" xml:space="preserve">
+    <value>Scorul CinemaSystem</value>
+  </data>
+	<data name="Label_Released" xml:space="preserve">
+    <value>Lansat</value>
+  </data>
+	<data name="Label_SneakPeek" xml:space="preserve">
+    <value>Aruncă o Privire</value>
+  </data>
+	<data name="Button_WatchTrailer" xml:space="preserve">
+    <value>Vezi Trailerul Oficial</value>
+  </data>
+	<data name="Heading_ReadyToWatch" xml:space="preserve">
+    <value>Pregătit pentru vizionare?</value>
+  </data>
+	<data name="Subheading_ReadyToWatch" xml:space="preserve">
+    <value>Selectează o proiecție din listă pentru a-ți asigura locurile.</value>
+  </data>
+
+	<data name="Error_ShowtimeNotFound" xml:space="preserve"><value>Proiecția nu a fost găsită.</value></data>
+	<data name="Error_NoSeatsSelected" xml:space="preserve"><value>Nu ai selectat niciun loc.</value></data>
+	<data name="Error_SeatsAlreadyPurchased" xml:space="preserve"><value>Tranzacție eșuată: Unul sau mai multe locuri au fost deja achiziționate de altcineva.</value></data>
+	<data name="Error_CheckoutCollision" xml:space="preserve"><value>Tranzacție eșuată: Un alt utilizator finalizează comanda chiar acum pentru aceste locuri.</value></data>
+	<data name="Error_SeatHoldExpired" xml:space="preserve"><value>Rezervarea temporară a expirat. Te rugăm să încerci din nou.</value></data>
+	<data name="Error_ShowtimeDetailsFailed" xml:space="preserve"><value>Detaliile proiecției nu au putut fi încărcate.</value></data>
+	<data name="Error_SessionExpired" xml:space="preserve"><value>Sesiunea a expirat sau locurile au fost eliberate. Te rugăm să încerci din nou.</value></data>
+	<data name="Error_OrderNotFound" xml:space="preserve"><value>Comanda nu a fost găsită sau accesul este interzis.</value></data>
+
+	<data name="Email_TicketSubject" xml:space="preserve"><value>Biletele tale pentru {0} - Comanda {1}</value></data>
+	<data name="Email_TicketBody" xml:space="preserve"><value>&lt;h3&gt;Îți mulțumim pentru achiziție!&lt;/h3&gt;&lt;p&gt;Biletele și voucherele pentru gustări sunt atașate în format PDF. Te rugăm să prezinți codurile QR la intrarea în sală și la bufet.&lt;/p&gt;</value></data>
+
+	<data name="PageTitle_SelectSeats" xml:space="preserve"><value>Selectează Locurile</value></data>
+	<data name="Breadcrumb_Details" xml:space="preserve"><value>Detalii</value></data>
+	<data name="Breadcrumb_Seats" xml:space="preserve"><value>Locuri</value></data>
+	<data name="Breadcrumb_Food" xml:space="preserve"><value>Meniu</value></data>
+	<data name="Breadcrumb_Checkout" xml:space="preserve"><value>Plată</value></data>
+	<data name="Heading_SelectYour" xml:space="preserve"><value>Selectează</value></data>
+	<data name="Heading_Experience" xml:space="preserve"><value>Experiența</value></data>
+	<data name="Label_Screen" xml:space="preserve"><value>Ecran</value></data>
+	<data name="Label_Standard" xml:space="preserve"><value>Standard</value></data>
+	<data name="Label_Premium" xml:space="preserve"><value>Premium</value></data>
+	<data name="Label_VIPLounge" xml:space="preserve"><value>Lounge VIP</value></data>
+	<data name="Label_Selected" xml:space="preserve"><value>Selectat</value></data>
+	<data name="Label_Occupied" xml:space="preserve"><value>Ocupat</value></data>
+	<data name="Label_DateTime" xml:space="preserve"><value>Data și Ora</value></data>
+	<data name="Label_SelectedSeats" xml:space="preserve"><value>Locuri Selectate</value></data>
+	<data name="Message_NoSeatsSelected" xml:space="preserve"><value>Niciun loc selectat momentan.</value></data>
+	<data name="Label_TotalEstimate" xml:space="preserve"><value>Total Estimat</value></data>
+	<data name="Button_ProceedToCheckout" xml:space="preserve"><value>Mergi la Plată</value></data>
+	<data name="Message_SecureTransactionDisclaimer" xml:space="preserve"><value>Tranzacție securizată prin CinemaSystem Pay. Locurile sunt blocate timp de 10 minute pentru plată.</value></data>
+	<data name="Label_SeatsSelected" xml:space="preserve"><value>Locuri Selectate</value></data>
+	<data name="Alert_MaxSeats" xml:space="preserve"><value>Poți selecta maxim 8 locuri per tranzacție.</value></data>
+	<data name="Alert_SeatsTakenFallback" xml:space="preserve"><value>Unul sau mai multe locuri tocmai au fost rezervate! Te rugăm să reselectezi.</value></data>
+	<data name="Alert_NetworkError" xml:space="preserve"><value>A apărut o eroare de rețea. Te rugăm să încerci din nou.</value></data>
+	<data name="Label_Locking" xml:space="preserve"><value>Se blochează...</value></data>
+
+	<data name="PageTitle_Checkout" xml:space="preserve"><value>Finalizare Comandă</value></data>
+	<data name="Heading_SecureCheckout" xml:space="preserve"><value>Plată Securizată</value></data>
+	<data name="Message_EncryptedTransaction" xml:space="preserve"><value>Tranzacție criptată prin CinemaSystem Pay.</value></data>
+	<data name="Message_SeatsReservedFor" xml:space="preserve"><value>Locuri rezervate pentru</value></data>
+	<data name="Heading_SelectedAdmissions" xml:space="preserve"><value>Locuri Selectate</value></data>
+	<data name="Label_Seat" xml:space="preserve"><value>Loc</value></data>
+	<data name="Heading_AddTreats" xml:space="preserve"><value>Adaugă Gustări (Opțional)</value></data>
+	<data name="Heading_PaymentInformation" xml:space="preserve"><value>Informații Plată</value></data>
+	<data name="Label_CreditCard" xml:space="preserve"><value>Card Bancar</value></data>
+	<data name="Label_CardholderName" xml:space="preserve"><value>Numele Titularului</value></data>
+	<data name="Label_CardNumber" xml:space="preserve"><value>Numărul Cardului</value></data>
+	<data name="Heading_OrderSummary" xml:space="preserve"><value>Sumarul Comenzii</value></data>
+	<data name="Label_Tickets" xml:space="preserve"><value>Bilete</value></data>
+	<data name="Label_SnacksDrinks" xml:space="preserve"><value>Gustări &amp; Băuturi</value></data>
+	<data name="Label_TaxesFees" xml:space="preserve"><value>Taxe</value></data>
+	<data name="Label_Included" xml:space="preserve"><value>Inclus</value></data>
+	<data name="Label_TotalPayable" xml:space="preserve"><value>Total de Plată</value></data>
+	<data name="Label_Secure" xml:space="preserve"><value>Securizat</value></data>
+	<data name="Button_ConfirmPay" xml:space="preserve"><value>Confirmă &amp; Plătește</value></data>
+	<data name="Message_AgreementTerms" xml:space="preserve"><value>Prin apăsarea butonului 'Confirmă', ești de acord cu</value></data>
+	<data name="Label_Terms" xml:space="preserve"><value>Termenii și Condițiile</value></data>
+	<data name="Label_And" xml:space="preserve"><value>și</value></data>
+	<data name="Label_RefundPolicy" xml:space="preserve"><value>Politica de Rambursare</value></data>
+	<data name="Label_SessionExpired" xml:space="preserve"><value>Sesiune Expirată</value></data>
+	<data name="Alert_SessionExpired" xml:space="preserve"><value>Rezervarea locurilor a expirat. Vei fi redirecționat pentru a reselecta locurile.</value></data>
+	<data name="Label_Processing" xml:space="preserve"><value>Se procesează...</value></data>
+
+	<data name="Symbol_Currency" xml:space="preserve"><value>lei </value></data>
+	<data name="PageTitle_History" xml:space="preserve"><value>Istoric Rezervări</value></data>
+	<data name="Heading_History" xml:space="preserve"><value>Jurnalul tău Cinematic</value></data>
+	<data name="Greeting_Welcome" xml:space="preserve"><value>Bine ai revenit, {0}. Următoarea proiecție te așteaptă.</value></data>
+	<data name="Label_Cinephile" xml:space="preserve"><value>Cinefilule</value></data>
+	<data name="Label_GoldMember" xml:space="preserve"><value>Membru Gold</value></data>
+	<data name="Label_PointsNextReward" xml:space="preserve"><value>Următoarea recompensă la 15,000 puncte</value></data>
+	<data name="Heading_UpcomingExperiences" xml:space="preserve"><value>Proiecții Viitoare</value></data>
+	<data name="Heading_ScreenEmpty" xml:space="preserve"><value>Ecranul este gol</value></data>
+	<data name="Message_NoUpcomingBookings" xml:space="preserve"><value>Nu ai nicio rezervare activă pentru viitor.</value></data>
+	<data name="Button_BrowseMovies" xml:space="preserve"><value>Descoperă Filme</value></data>
+	<data name="Label_PremiereNight" xml:space="preserve"><value>Seară de Premieră</value></data>
+	<data name="Label_OrderRef" xml:space="preserve"><value>Comandă: #{0} • {1} Bilet(e)</value></data>
+	<data name="Button_DownloadPDF" xml:space="preserve"><value>Descarcă PDF</value></data>
+	<data name="Button_GetPDF" xml:space="preserve"><value>Obține PDF</value></data>
+	<data name="Heading_TotalSpent" xml:space="preserve"><value>Total Cheltuit</value></data>
+	<data name="Label_Lifetime" xml:space="preserve"><value>{0} istoric</value></data>
+	<data name="Heading_SyncCalendar" xml:space="preserve"><value>Sincronizare Calendar</value></data>
+	<data name="Label_SyncDetails" xml:space="preserve"><value>iCal, Google și Outlook</value></data>
+	<data name="Heading_ShareExperience" xml:space="preserve"><value>Distribuie Experiența</value></data>
+	<data name="Label_ShareDetails" xml:space="preserve"><value>Trimite biletul unui prieten</value></data>
+	<data name="Heading_PastMemories" xml:space="preserve"><value>Amintiri Treacute</value></data>
+	<data name="Message_NoPastMemories" xml:space="preserve"><value>Nu există istoric de vizionări înregistrat.</value></data>
+	<data name="Table_MovieExperience" xml:space="preserve"><value>Experiență</value></data>
+	<data name="Table_VisitedOn" xml:space="preserve"><value>Vizionat la</value></data>
+	<data name="Table_Amount" xml:space="preserve"><value>Sumă</value></data>
+	<data name="Table_Action" xml:space="preserve"><value>Acțiune</value></data>
+	<data name="Button_Receipt" xml:space="preserve"><value>Chitanță</value></data>
+
+	<data name="PageTitle_OrderConfirmed" xml:space="preserve"><value>Comandă Confirmată</value></data>
+	<data name="Heading_JourneyConfirmed" xml:space="preserve"><value>Călătoria ta cinematică este confirmată!</value></data>
+	<data name="Message_PrepareTakeoff" xml:space="preserve"><value>Pregătește-te de vizionare. Ți-am trimis un e-mail de confirmare cu detaliile și chitanța rezervării.</value></data>
+	<data name="Message_ScanEntrance" xml:space="preserve"><value>Scanează acest cod la intrare sau la bufet</value></data>
+	<data name="Button_DownloadDigitalTicket" xml:space="preserve"><value>Descarcă Bilet Digital (PDF)</value></data>
+	<data name="Button_AppleWallet" xml:space="preserve"><value>Adaugă în Apple Wallet</value></data>
+	<data name="Alert_AppleWallet" xml:space="preserve"><value>Integrarea Apple Wallet este în așteptarea eliberării certificatului.</value></data>
+	<data name="Heading_PreorderedTreats" xml:space="preserve"><value>Gustări Precomandate</value></data>
+	<data name="Label_Qty" xml:space="preserve"><value>Cant:</value></data>
+	<data name="Heading_PaymentSummary" xml:space="preserve"><value>Sumar Plată</value></data>
+	<data name="Label_Status" xml:space="preserve"><value>Status</value></data>
+	<data name="Label_TotalPaid" xml:space="preserve"><value>Total Achitat</value></data>
+	<data name="Heading_CinemaProtocol" xml:space="preserve"><value>Protocolul Cinematografului</value></data>
+	<data name="Message_ProtocolSnacks" xml:space="preserve"><value>Te rugăm să ajungi cu 15 minute înainte de proiecție. Gustările tale vor fi gata la ghișeul prioritar.</value></data>
+	<data name="Message_ProtocolNoSnacks" xml:space="preserve"><value>Te rugăm să ajungi cu 15 minute înainte de proiecție. Prezintă codul QR al biletului la intrare.</value></data>
+	<data name="Button_BackToHome" xml:space="preserve"><value>Înapoi la Principală</value></data>
+
+	<data name="PageTitle_PreorderFood" xml:space="preserve"><value>Precomandă Gustări</value></data>
+	<data name="Heading_EnhanceExperience" xml:space="preserve"><value>Îmbunătățește-ți Experiența</value></data>
+	<data name="Subheading_SkipQueue" xml:space="preserve"><value>Evită coada și găsește-ți gustările pregătite pentru film.</value></data>
+	<data name="Label_BestSeller" xml:space="preserve"><value>Cel mai vândut</value></data>
+	<data name="Heading_UltimateCombo" xml:space="preserve"><value>Meniul Suprem</value></data>
+	<data name="Desc_UltimateCombo" xml:space="preserve"><value>Popcorn mare cu unt, două sucuri premium și o cutie de dulciuri artizanale.</value></data>
+	<data name="Button_AddToOrder" xml:space="preserve"><value>Adaugă la Comandă — {0}</value></data>
+	<data name="Alert_ComboAdded" xml:space="preserve"><value>Meniul Suprem a fost adăugat la comanda ta!</value></data>
+	<data name="Heading_JumpTo" xml:space="preserve"><value>Sari la</value></data>
+	<data name="Label_Popcorn" xml:space="preserve"><value>Popcorn</value></data>
+	<data name="Label_Beverages" xml:space="preserve"><value>Băuturi</value></data>
+	<data name="Label_Sweets" xml:space="preserve"><value>Dulciuri</value></data>
+	<data name="Label_HotFood" xml:space="preserve"><value>Mâncare Caldă</value></data>
+	<data name="Heading_FreshlyPopped" xml:space="preserve"><value>Proaspăt Făcut</value></data>
+	<data name="Heading_IcedBeverages" xml:space="preserve"><value>Băuturi Reci</value></data>
+	<data name="Label_YourFoodBeverages" xml:space="preserve"><value>Produsele Tale</value></data>
+	<data name="Button_SkipFood" xml:space="preserve"><value>Fără Gustări</value></data>
+	<data name="Button_ContinueToCheckout" xml:space="preserve"><value>Continuă spre Plată</value></data>
+</root>

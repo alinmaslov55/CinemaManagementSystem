@@ -1,15 +1,16 @@
 ﻿@using CinemaSystem.Utility
+@using Microsoft.AspNetCore.Mvc.Localization
+@using CinemaSystem.Web
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> localizer
 @model CinemaSystem.Models.Entities.Booking
 
 @{
-    ViewData["Title"] = "Order Confirmed";
+    ViewData["Title"] = localizer["PageTitle_OrderConfirmed"];
     Layout = "_Layout";
 
-    // Grupăm vizual scaunele pentru design-ul premium (ex: "F12, F13")
     var seatStrings = Model.Tickets.Select(t => $"{t.Seat.Row}{t.Seat.Column}");
     string seatsDisplay = string.Join(", ", seatStrings);
 
-    // Generăm un singur QR Code master pentru întreaga comandă, perfect pentru biletul digital
     byte[] qrBytes = QRCodeHelper.GenerateQRCodeBytes(Model.ConfirmationCode);
     string qrBase64 = Convert.ToBase64String(qrBytes);
 }
@@ -28,10 +29,10 @@
                 <span class="material-symbols-outlined text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
             </div>
             <h1 class="text-4xl md:text-5xl font-extrabold font-headline tracking-tighter text-primary success-glow">
-                Your Cinematic Journey is Confirmed!
+                @localizer["Heading_JourneyConfirmed"]
             </h1>
             <p class="text-on-surface-variant font-body text-lg max-w-xl mx-auto">
-                Prepare for takeoff. We've sent a confirmation email with your booking details and receipt.
+                @localizer["Message_PrepareTakeoff"]
             </p>
         </div>
 
@@ -55,22 +56,22 @@
                             <div class="space-y-6">
                                 <div class="flex justify-between items-start gap-4">
                                     <div>
-                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Showtime</p>
-                                        <p class="text-on-surface font-semibold font-headline text-sm">@Model.Showtime.StartTime.ToString("dddd, MMM dd • hh:mm tt")</p>
+                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@localizer["Label_DateTime"]</p>
+                                        <p class="text-on-surface font-semibold font-headline text-sm">@Model.Showtime.StartTime.ToString("dddd, MMM dd • HH:mm")</p>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Location</p>
+                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@localizer["Label_Screen"]</p>
                                         <p class="text-on-surface font-semibold font-headline text-sm">@Model.Showtime.CinemaHall.Name</p>
                                     </div>
                                 </div>
                                 
                                 <div class="grid grid-cols-2 gap-4 py-6 border-y border-outline-variant/20">
                                     <div>
-                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Seats</p>
+                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@localizer["Label_SelectedSeats"]</p>
                                         <p class="text-on-surface font-semibold font-headline text-sm">@seatsDisplay</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Booking Ref</p>
+                                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@localizer["Label_BookingRef"]</p>
                                         <p class="text-primary font-bold font-headline text-sm">@Model.ConfirmationCode</p>
                                     </div>
                                 </div>
@@ -80,7 +81,7 @@
                                         <div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
                                             <div class="h-full w-2/3 signature-gradient"></div>
                                         </div>
-                                        <p class="text-[10px] text-outline italic font-medium">Scan this at the entrance or snack counter</p>
+                                        <p class="text-[10px] text-outline italic font-medium">@localizer["Message_ScanEntrance"]</p>
                                     </div>
                                     <div class="w-24 h-24 bg-surface-container-low p-2 rounded-xl border border-outline-variant/30">
                                         <img class="w-full h-full object-contain mix-blend-multiply opacity-90" alt="Order QR Code" src="data:image/png;base64,@qrBase64" />
@@ -97,11 +98,11 @@
                 <div class="mt-8 flex flex-col sm:flex-row gap-4">
                     <a asp-controller="Booking" asp-action="DownloadTickets" asp-route-bookingId="@Model.Id" class="flex-1 signature-gradient text-white py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-xl transition-all active:scale-95 text-sm">
                         <span class="material-symbols-outlined text-lg">download</span>
-                        Download Digital Ticket (PDF)
+                        @localizer["Button_DownloadDigitalTicket"]
                     </a>
-                    <button onclick="alert('Apple Wallet integration is pending certificate provisioning.')" class="flex-1 bg-white border border-outline-variant/30 text-primary py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all active:scale-95 text-sm shadow-sm">
+                    <button onclick="alert('@localizer["Alert_AppleWallet"]')" class="flex-1 bg-white border border-outline-variant/30 text-primary py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all active:scale-95 text-sm shadow-sm">
                         <span class="material-symbols-outlined text-lg">wallet</span>
-                        Add to Apple Wallet
+                        @localizer["Button_AppleWallet"]
                     </button>
                 </div>
             </div>
@@ -113,7 +114,7 @@
                     <div class="bg-white p-8 rounded-3xl space-y-6 shadow-sm border border-outline-variant/20">
                         <h2 class="font-headline font-bold text-xl text-primary flex items-center gap-2">
                             <span class="material-symbols-outlined">restaurant</span>
-                            Pre-ordered Treats
+                            @localizer["Heading_PreorderedTreats"]
                         </h2>
                         
                         <div class="space-y-4">
@@ -132,16 +133,16 @@
                                     </div>
                                     <div class="flex-1">
                                         <p class="font-bold text-on-surface text-sm">@item.FnBProduct.Name</p>
-                                        <p class="text-xs text-on-surface-variant mt-0.5">Qty: @item.Quantity</p>
+                                        <p class="text-xs text-on-surface-variant mt-0.5">@localizer["Label_Qty"]: @item.Quantity</p>
                                     </div>
-                                    <span class="font-headline font-bold text-primary">$@((item.Quantity * item.PriceAtPurchase).ToString("F2"))</span>
+                                    <span class="font-headline font-bold text-primary">@localizer["Symbol_Currency"]@((item.Quantity * item.PriceAtPurchase).ToString("F2"))</span>
                                 </div>
                             }
                         </div>
                         
                         <div class="pt-4 border-t border-outline-variant/20 flex justify-between items-center">
-                            <span class="text-on-surface-variant font-medium text-sm">Total Paid</span>
-                            <span class="text-2xl font-headline font-extrabold text-primary">$@Model.TotalAmount.ToString("F2")</span>
+                            <span class="text-on-surface-variant font-medium text-sm">@localizer["Label_TotalPaid"]</span>
+                            <span class="text-2xl font-headline font-extrabold text-primary">@localizer["Symbol_Currency"]@Model.TotalAmount.ToString("F2")</span>
                         </div>
                     </div>
                 }
@@ -150,15 +151,15 @@
                     <div class="bg-white p-8 rounded-3xl space-y-4 shadow-sm border border-outline-variant/20">
                         <h2 class="font-headline font-bold text-xl text-primary flex items-center gap-2 mb-4">
                             <span class="material-symbols-outlined">receipt_long</span>
-                            Payment Summary
+                            @localizer["Heading_PaymentSummary"]
                         </h2>
                         <div class="flex justify-between items-center">
-                            <span class="text-on-surface-variant font-medium text-sm">Status</span>
+                            <span class="text-on-surface-variant font-medium text-sm">@localizer["Label_Status"]</span>
                             <span class="text-emerald-600 font-bold text-sm bg-emerald-50 px-2 py-1 rounded border border-emerald-100 uppercase tracking-widest text-[10px]">@Model.PaymentStatus.ToString()</span>
                         </div>
                         <div class="pt-4 border-t border-outline-variant/20 flex justify-between items-center">
-                            <span class="text-on-surface-variant font-medium text-sm">Total Paid</span>
-                            <span class="text-2xl font-headline font-extrabold text-primary">$@Model.TotalAmount.ToString("F2")</span>
+                            <span class="text-on-surface-variant font-medium text-sm">@localizer["Label_TotalPaid"]</span>
+                            <span class="text-2xl font-headline font-extrabold text-primary">@localizer["Symbol_Currency"]@Model.TotalAmount.ToString("F2")</span>
                         </div>
                     </div>
                 }
@@ -167,10 +168,9 @@
                     <div class="flex gap-4">
                         <span class="material-symbols-outlined text-primary shrink-0">info</span>
                         <div>
-                            <p class="font-bold font-headline text-primary mb-1 text-sm">Cinema Protocol</p>
+                            <p class="font-bold font-headline text-primary mb-1 text-sm">@localizer["Heading_CinemaProtocol"]</p>
                             <p class="text-xs text-on-surface-variant leading-relaxed">
-                                Please arrive 15 minutes before the showtime. 
-                                @(Model.BookingFnBs != null && Model.BookingFnBs.Any() ? "Your snacks will be ready for pickup at the priority counter." : "Present your digital ticket QR code at the entrance.")
+                                @(Model.BookingFnBs != null && Model.BookingFnBs.Any() ? localizer["Message_ProtocolSnacks"].Value : localizer["Message_ProtocolNoSnacks"].Value)
                             </p>
                         </div>
                     </div>
@@ -178,7 +178,7 @@
 
                 <a asp-controller="Home" asp-action="Index" class="flex items-center justify-center gap-2 text-outline hover:text-primary transition-colors font-bold group text-sm">
                     <span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform text-[18px]">arrow_back</span>
-                    Back to Home
+                    @localizer["Button_BackToHome"]
                 </a>
             </div>
             

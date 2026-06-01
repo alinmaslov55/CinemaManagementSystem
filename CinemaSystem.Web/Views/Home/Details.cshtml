@@ -1,4 +1,8 @@
 ﻿@model CinemaSystem.Models.ViewModels.MovieDetailsVM
+@using Microsoft.AspNetCore.Mvc.Localization
+@using CinemaSystem.Web
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> localizer
 
 @{
     ViewData["Title"] = Model.Movie.Title;
@@ -54,11 +58,11 @@
                 <div class="flex-1 space-y-4 relative z-10">
                     <div class="flex items-center gap-3">
                         <span class="bg-[#ffd8e6] text-[#613b4c] px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm">
-                            Now Showing
+                            @localizer["Label_NowShowing"]
                         </span>
                         <span class="flex items-center text-white bg-[#7f6fa2]/80 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm">
                             <span class="material-symbols-outlined text-[12px] mr-1 text-[#ffd8e6]" style="font-variation-settings: 'FILL' 1;">star</span>
-                            @Model.AverageRating.ToString("0.0") Local Rating
+                            @Model.AverageRating.ToString("0.0") @localizer["Label_LocalRating"]
                         </span>
                     </div>
                     
@@ -69,7 +73,7 @@
                     <div class="flex items-center gap-4 md:gap-6 font-['Manrope'] text-sm font-bold text-[#7c738a] tracking-wider uppercase">
                         <span>@Model.Movie.MovieCategory</span>
                         <span class="w-1.5 h-1.5 rounded-full bg-[#cbc4cf]"></span>
-                        <span>@Model.Movie.DurationInMinutes min</span>
+                        <span>@Model.Movie.DurationInMinutes @localizer["Label_Min"]</span>
                         <span class="w-1.5 h-1.5 rounded-full bg-[#cbc4cf]"></span>
                         <span class="border border-[#7c738a] px-2 py-0.5 rounded text-xs">@Model.Movie.AgeRating</span>
                     </div>
@@ -83,7 +87,7 @@
         <div class="lg:col-span-8 space-y-16">
             
             <div class="space-y-6">
-                <h2 class="text-3xl font-['Manrope'] font-bold text-[#7f6fa2]">The Narrative</h2>
+                <h2 class="text-3xl font-['Manrope'] font-bold text-[#7f6fa2]">@localizer["Heading_TheNarrative"]</h2>
                 <p class="text-lg text-[#49454e] leading-relaxed font-light">
                     @Model.Movie.Description
                 </p>
@@ -92,20 +96,20 @@
             <div class="space-y-8 bg-white border border-[#cbc4cf]/30 p-8 rounded-3xl custom-shadow">
                 <h2 class="text-2xl font-['Manrope'] font-bold text-[#1a1c1c] flex items-center gap-2 border-b border-[#f3f3f3] pb-4">
                     <span class="material-symbols-outlined text-[#7f6fa2]">local_activity</span> 
-                    Select Showtime
+                    @localizer["Heading_SelectShowtime"]
                 </h2>
 
                 @if (!Model.IsEligibleToWatch)
                 {
                     <div class="bg-[#ffebee] border border-[#ef5350] text-[#c62828] p-8 rounded-2xl shadow-sm flex flex-col items-center text-center">
                         <span class="material-symbols-outlined text-6xl mb-4">block</span>
-                        <h3 class="text-xl font-bold uppercase tracking-widest mb-2">Age Restriction</h3>
+                        <h3 class="text-xl font-bold uppercase tracking-widest mb-2">@localizer["Heading_AgeRestriction"]</h3>
                         <p class="font-medium mb-6">@Model.RestrictionReason</p>
                         
                         @if (User.Identity?.IsAuthenticated == false)
                         {
                             <a asp-area="Identity" asp-page="/Account/Login" class="bg-[#c62828] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md hover:bg-[#b71c1c]">
-                                Log In to Verify
+                                @localizer["Button_LogInToVerify"]
                             </a>
                         }
                     </div>
@@ -114,7 +118,7 @@
                 {
                     <div class="bg-[#f3f3f3] text-center p-8 rounded-2xl text-[#79767b]">
                         <span class="material-symbols-outlined text-4xl mb-2 opacity-50">event_busy</span>
-                        <p class="font-medium">No upcoming showtimes available for this movie right now.</p>
+                        <p class="font-medium">@localizer["Message_NoShowtimes"]</p>
                     </div>
                 }
                 else
@@ -162,35 +166,35 @@
 
             <div class="space-y-8">
                 <div class="flex items-center justify-between border-b border-[#cbc4cf]/30 pb-4">
-                    <h2 class="text-2xl font-['Manrope'] font-bold text-[#1a1c1c]">Voices from the Dark</h2>
-                    <span class="text-[#7c738a] font-bold text-xs uppercase tracking-widest">@(Model.Movie.Reviews?.Count() ?? 0) Reviews</span>
+                    <h2 class="text-2xl font-['Manrope'] font-bold text-[#1a1c1c]">@localizer["Heading_Reviews"]</h2>
+                    <span class="text-[#7c738a] font-bold text-xs uppercase tracking-widest">@(Model.Movie.Reviews?.Count() ?? 0) @localizer["Label_Reviews"]</span>
                 </div>
 
                 <div class="bg-[#f3f3f3] p-6 rounded-2xl border border-[#cbc4cf]/30">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <h4 class="font-bold text-[#1a1c1c] mb-4 text-sm uppercase tracking-widest">Share Your Experience</h4>
+                        <h4 class="font-bold text-[#1a1c1c] mb-4 text-sm uppercase tracking-widest">@localizer["Heading_ShareExperience"]</h4>
                         <form asp-controller="Home" asp-action="AddReview" method="post" class="space-y-4">
                             <input type="hidden" name="movieId" value="@Model.Movie.Id" />
                             
                             <div class="w-full md:w-1/2">
-                                <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">Your Rating</label>
+                                <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">@localizer["Label_YourRating"]</label>
                                 <select name="rating" class="w-full bg-white border border-[#cbc4cf]/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] cursor-pointer shadow-sm" required>
-                                    <option value="5">⭐⭐⭐⭐⭐ (5/5) Masterpiece</option>
-                                    <option value="4">⭐⭐⭐⭐ (4/5) Great</option>
-                                    <option value="3">⭐⭐⭐ (3/5) Good</option>
-                                    <option value="2">⭐⭐ (2/5) Fair</option>
-                                    <option value="1">⭐ (1/5) Poor</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ (5/5) @localizer["Option_Rating5"]</option>
+                                    <option value="4">⭐⭐⭐⭐ (4/5) @localizer["Option_Rating4"]</option>
+                                    <option value="3">⭐⭐⭐ (3/5) @localizer["Option_Rating3"]</option>
+                                    <option value="2">⭐⭐ (2/5) @localizer["Option_Rating2"]</option>
+                                    <option value="1">⭐ (1/5) @localizer["Option_Rating1"]</option>
                                 </select>
                             </div>
                             
                             <div>
-                                <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">Your Thoughts (Optional)</label>
-                                <textarea name="comment" rows="3" class="w-full bg-white border border-[#cbc4cf]/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] shadow-sm placeholder:text-outline-variant" placeholder="How was the cinematography? The acting?"></textarea>
+                                <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">@localizer["Label_YourThoughts"]</label>
+                                <textarea name="comment" rows="3" class="w-full bg-white border border-[#cbc4cf]/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] shadow-sm placeholder:text-outline-variant" placeholder="@localizer["Placeholder_ReviewComment"]"></textarea>
                             </div>
 
                             <button type="submit" class="bg-[#7f6fa2] hover:bg-[#976987] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md flex items-center gap-2 active:scale-95">
-                                <span class="material-symbols-outlined text-sm">edit_square</span> Submit Review
+                                <span class="material-symbols-outlined text-sm">edit_square</span> @localizer["Button_SubmitReview"]
                             </button>
                         </form>
                     }
@@ -198,8 +202,8 @@
                     {
                         <div class="text-center py-6">
                             <span class="material-symbols-outlined text-4xl text-[#cbc4cf] mb-2">lock</span>
-                            <p class="text-[#79767b] text-sm mb-4">You must be logged in to leave a review.</p>
-                            <a asp-area="Identity" asp-page="/Account/Login" class="inline-block border border-[#7f6fa2] text-[#7f6fa2] hover:bg-[#7f6fa2] hover:text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">Log In to Review</a>
+                            <p class="text-[#79767b] text-sm mb-4">@localizer["Message_MustBeLoggedIn"]</p>
+                            <a asp-area="Identity" asp-page="/Account/Login" class="inline-block border border-[#7f6fa2] text-[#7f6fa2] hover:bg-[#7f6fa2] hover:text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">@localizer["Button_LogInToReview"]</a>
                         </div>
                     }
                 </div>
@@ -215,7 +219,7 @@
                                         <div class="w-8 h-8 rounded-full bg-[#eaddff] text-[#4e3e6e] flex justify-center items-center font-bold text-xs uppercase shadow-inner">
                                             @(review.ApplicationUser?.FullName?.FirstOrDefault().ToString() ?? "A")
                                         </div>
-                                        <p class="text-xs font-bold text-[#1a1c1c]">@(review.ApplicationUser?.FullName ?? "Anonymous")</p>
+                                        <p class="text-xs font-bold text-[#1a1c1c]">@(review.ApplicationUser?.FullName ?? localizer["Label_Anonymous"].Value)</p>
                                     </div>
                                     <div class="flex text-[10px] text-[#eab308]">
                                         @for (int i = 0; i < review.Rating; i++)
@@ -243,13 +247,13 @@
             <div class="sticky top-28 bg-white p-8 rounded-[2rem] border border-[#cbc4cf]/30 custom-shadow space-y-8">
                 
                 <div>
-                    <h3 class="text-xs font-black uppercase tracking-widest text-[#79767b] mb-6 border-b border-[#f3f3f3] pb-2">Movie Intelligence</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-[#79767b] mb-6 border-b border-[#f3f3f3] pb-2">@localizer["Heading_MovieIntelligence"]</h3>
                     
                     <div class="space-y-3">
                         <div class="flex items-center justify-between p-4 bg-[#f3f3f3] rounded-2xl">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[#eab308]" style="font-variation-settings: 'FILL' 1;">star</span>
-                                <span class="font-bold text-sm text-[#1a1c1c]">CinemaSystem Score</span>
+                                <span class="font-bold text-sm text-[#1a1c1c]">@localizer["Label_CinemaSystemScore"]</span>
                             </div>
                             <span class="font-black text-lg text-[#1a1c1c]">@Model.AverageRating.ToString("0.0")<span class="text-xs text-[#79767b] font-normal">/5.0</span></span>
                         </div>
@@ -257,7 +261,7 @@
                         <div class="flex items-center justify-between p-4 bg-white border border-[#cbc4cf]/30 rounded-2xl">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[#7f6fa2]">calendar_month</span>
-                                <span class="font-bold text-sm text-[#1a1c1c]">Released</span>
+                                <span class="font-bold text-sm text-[#1a1c1c]">@localizer["Label_Released"]</span>
                             </div>
                             <span class="font-bold text-sm text-[#79767b]">@Model.Movie.StartDate.ToString("MMM yyyy")</span>
                         </div>
@@ -267,18 +271,18 @@
                 @if (!string.IsNullOrEmpty(Model.Movie.TrailerUrl))
                 {
                     <div class="pt-4 border-t border-[#f3f3f3]">
-                        <p class="text-[10px] text-[#79767b] uppercase tracking-widest font-bold mb-3 text-center">Sneak Peek</p>
+                        <p class="text-[10px] text-[#79767b] uppercase tracking-widest font-bold mb-3 text-center">@localizer["Label_SneakPeek"]</p>
                         <a href="@Model.Movie.TrailerUrl" target="_blank" class="w-full py-4 rounded-xl border-2 border-[#7f6fa2] text-[#7f6fa2] hover:bg-[#7f6fa2] hover:text-white font-['Manrope'] font-bold text-xs tracking-widest uppercase transition-all flex justify-center items-center gap-2 group active:scale-95">
                             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">play_circle</span>
-                            Watch Official Trailer
+                            @localizer["Button_WatchTrailer"]
                         </a>
                     </div>
                 }
                 
                 <div class="bg-gradient-to-br from-[#f9f9f9] to-white p-4 rounded-2xl border border-[#cbc4cf]/20 text-center">
                     <span class="material-symbols-outlined text-[#976987] mb-2 text-3xl">chair</span>
-                    <h4 class="text-sm font-bold text-[#1a1c1c]">Ready to watch?</h4>
-                    <p class="text-xs text-[#79767b] mt-1">Select a showtime from the list to secure your seats.</p>
+                    <h4 class="text-sm font-bold text-[#1a1c1c]">@localizer["Heading_ReadyToWatch"]</h4>
+                    <p class="text-xs text-[#79767b] mt-1">@localizer["Subheading_ReadyToWatch"]</p>
                 </div>
 
             </div>

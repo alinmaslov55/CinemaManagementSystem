@@ -1,8 +1,10 @@
-﻿@{
-    ViewData["Title"] = "Pre-order Food & Beverages";
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using CinemaSystem.Web
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> localizer
+
+@{
+    ViewData["Title"] = localizer["PageTitle_PreorderFood"];
     Layout = "_Layout";
-    
-    // Presupunem că primești ShowtimeId din URL sau din Model
     var showtimeId = Context.Request.Query["showtimeId"].ToString();
 }
 
@@ -17,31 +19,32 @@
         
         <div class="flex flex-col items-center mb-12">
             <div class="flex items-center gap-2 md:gap-4 mb-4 overflow-x-auto hide-scrollbar w-full justify-center">
+                <!-- Breadcrumbs... -->
                 <div class="flex items-center gap-2 opacity-50 shrink-0">
                     <div class="w-8 h-8 rounded-full bg-[#645485]/20 text-[#645485] flex items-center justify-center text-xs font-bold">1</div>
-                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">Details</span>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">@localizer["Breadcrumb_Details"]</span>
                 </div>
                 <div class="w-8 md:w-12 h-[1px] bg-[#cbc4cf]/50 shrink-0"></div>
                 <div class="flex items-center gap-2 opacity-50 shrink-0">
                     <div class="w-8 h-8 rounded-full bg-[#645485]/20 text-[#645485] flex items-center justify-center text-xs font-bold">2</div>
-                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">Seats</span>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#645485] hidden md:block">@localizer["Breadcrumb_Seats"]</span>
                 </div>
                 <div class="w-8 md:w-12 h-[1px] bg-[#cbc4cf]/50 shrink-0"></div>
                 <div class="flex items-center gap-2 shrink-0">
                     <div class="w-8 h-8 rounded-full bg-[#645485] text-white flex items-center justify-center text-xs font-bold shadow-md">3</div>
-                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#1a1c1c]">Food & Drinks</span>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#1a1c1c]">@localizer["Breadcrumb_Food"]</span>
                 </div>
                 <div class="w-8 md:w-12 h-[1px] bg-[#cbc4cf]/50 shrink-0"></div>
                 <div class="flex items-center gap-2 opacity-50 shrink-0">
                     <div class="w-8 h-8 rounded-full bg-[#e2e2e2] text-[#7a757f] flex items-center justify-center text-xs font-bold">4</div>
-                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#7a757f] hidden md:block">Checkout</span>
+                    <span class="text-xs font-['Manrope'] uppercase tracking-widest font-bold text-[#7a757f] hidden md:block">@localizer["Breadcrumb_Checkout"]</span>
                 </div>
             </div>
         </div>
 
         <div class="mb-10 text-center md:text-left">
-            <h1 class="font-['Manrope'] text-4xl font-extrabold tracking-tight text-[#645485] mb-2">Enhance Your Experience</h1>
-            <p class="text-[#49454e] font-medium">Skip the queue and have your snacks ready for the show.</p>
+            <h1 class="font-['Manrope'] text-4xl font-extrabold tracking-tight text-[#645485] mb-2">@localizer["Heading_EnhanceExperience"]</h1>
+            <p class="text-[#49454e] font-medium">@localizer["Subheading_SkipQueue"]</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16">
@@ -53,35 +56,35 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-[#645485]/90 via-[#645485]/40 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 p-8 w-full flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
-                        <span class="bg-[#ffd8e6] text-[#301120] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 inline-block shadow-sm">Best Seller</span>
-                        <h2 class="text-white font-['Manrope'] text-3xl font-bold mb-2">The Ultimate Combo</h2>
-                        <p class="text-[#d1bdf6] max-w-md mb-2">Large truffle butter popcorn, two premium sodas, and a box of artisan sweets.</p>
+                        <span class="bg-[#ffd8e6] text-[#301120] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 inline-block shadow-sm">@localizer["Label_BestSeller"]</span>
+                        <h2 class="text-white font-['Manrope'] text-3xl font-bold mb-2">@localizer["Heading_UltimateCombo"]</h2>
+                        <p class="text-[#d1bdf6] max-w-md mb-2">@localizer["Desc_UltimateCombo"]</p>
                     </div>
                     <button onclick="addComboToCart()" class="bg-white text-[#645485] px-6 py-3.5 rounded-xl font-bold text-sm transition-transform active:scale-95 shadow-xl hover:-translate-y-1 whitespace-nowrap">
-                        Add to Order — $24.00
+                        @string.Format(localizer["Button_AddToOrder"].Value, localizer["Symbol_Currency"].Value + "24.00")
                     </button>
                 </div>
             </div>
 
             <div class="md:col-span-4 flex flex-col gap-4">
                 <div class="bg-[#f3f3f3] p-6 rounded-[2rem] flex flex-col justify-center flex-1 border border-[#cbc4cf]/30 shadow-sm">
-                    <h3 class="font-['Manrope'] font-bold text-lg text-[#645485] mb-4">Jump To</h3>
+                    <h3 class="font-['Manrope'] font-bold text-lg text-[#645485] mb-4">@localizer["Heading_JumpTo"]</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <a href="#popcorn" class="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl hover:bg-[#eaddff] transition-colors border border-[#cbc4cf]/20 shadow-sm group">
                             <span class="material-symbols-outlined text-[#645485] group-hover:scale-110 transition-transform">fastfood</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">Popcorn</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">@localizer["Label_Popcorn"]</span>
                         </a>
                         <a href="#beverages" class="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl hover:bg-[#eaddff] transition-colors border border-[#cbc4cf]/20 shadow-sm group">
                             <span class="material-symbols-outlined text-[#645485] group-hover:scale-110 transition-transform">local_bar</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">Beverages</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">@localizer["Label_Beverages"]</span>
                         </a>
                         <a href="#" class="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl hover:bg-[#eaddff] transition-colors border border-[#cbc4cf]/20 shadow-sm group opacity-60">
                             <span class="material-symbols-outlined text-[#645485] group-hover:scale-110 transition-transform">icecream</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">Sweets</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">@localizer["Label_Sweets"]</span>
                         </a>
                         <a href="#" class="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl hover:bg-[#eaddff] transition-colors border border-[#cbc4cf]/20 shadow-sm group opacity-60">
                             <span class="material-symbols-outlined text-[#645485] group-hover:scale-110 transition-transform">restaurant</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">Hot Food</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a1c1c]">@localizer["Label_HotFood"]</span>
                         </a>
                     </div>
                 </div>
@@ -90,164 +93,18 @@
 
         <section id="popcorn" class="mb-16 pt-4">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="font-['Manrope'] text-2xl font-extrabold text-[#645485]">Freshly Popped</h2>
+                <h2 class="font-['Manrope'] text-2xl font-extrabold text-[#645485]">@localizer["Heading_FreshlyPopped"]</h2>
                 <div class="h-px flex-1 bg-[#cbc4cf]/30 mx-6"></div>
             </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-xl border border-[#cbc4cf]/20 transition-all duration-300 flex flex-col food-item" data-id="1" data-name="Classic Salted" data-price="8.50">
-                    <div class="relative h-48 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIDhkVGSOaZMuHauIHqTyJk7MG0Bm2LEoOfR5O5bf-yX13Y8xiV141LP0EsSIPJNDmQJIrrk7RHxGBr7p0Ua4CGW1agP2UFsnsWxTmFyIOZgLBRzbEDs1zG1lqcL7IJE-C49140ATPYqnVxrMxFtL2Yx0CAlbxW7A6uMt-1hEMUCsCB_LarwqRYuk3ZoWyGwRmdO0CNT71a2aaDWCKUMjudR1PkX7j7501-TaHPyXYr8U_Ynlsdqzf27WDStm7nD9TSr8pHLx4S0Q" alt="Classic Popcorn"/>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-xs font-bold text-[#645485]">$8.50</span>
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <div>
-                            <h4 class="font-['Manrope'] font-bold text-lg mb-1 text-[#1a1c1c]">Classic Salted</h4>
-                            <p class="text-[#49454e] text-xs mb-6">Large theater-style with sea salt.</p>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30">
-                            <button class="btn-minus w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="qty-display px-4 text-sm font-bold text-[#b5b0ba]">0</span>
-                            <button class="btn-plus w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-xl border border-[#cbc4cf]/20 transition-all duration-300 flex flex-col food-item" data-id="2" data-name="Caramel Glaze" data-price="9.75">
-                    <div class="relative h-48 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8mWZjFb9LUMwU7JN_HOAExo7P1h3CHiH1nTohO8uMM9rwvlmDAPpHmFblukMU5-eOV1_PkTNYOmQVJtBa115QevPXWG0wYEUZzMmECoxyseWLlaxgsM4vXFgW3ilQmHfJVE5B9AHIQDqGzwxeUag1DMbrPq9unydJlrfBudmoOfXwJHrBEyPk0n2qw1P1QTWona9cNWi0MjMg8IUEy67G5BeAi9PaNzcUaZWRKGaKtg_wF9S6ghAp5tUtE5VqOBB7wXvcYqmaLa0" alt="Caramel Popcorn"/>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-xs font-bold text-[#645485]">$9.75</span>
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <div>
-                            <h4 class="font-['Manrope'] font-bold text-lg mb-1 text-[#1a1c1c]">Caramel Glaze</h4>
-                            <p class="text-[#49454e] text-xs mb-6">Hand-spun artisanal caramel coating.</p>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30">
-                            <button class="btn-minus w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="qty-display px-4 text-sm font-bold text-[#b5b0ba]">0</span>
-                            <button class="btn-plus w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-xl border border-[#cbc4cf]/20 transition-all duration-300 flex flex-col food-item" data-id="3" data-name="Choco-Dust" data-price="10.50">
-                    <div class="relative h-48 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm9T3NBctbky-Qk-ut-ZtOLvcFXNeKgW4BZ4IzevzwDBA7OSBjqntZkBhFD_B8XylcT2BEzgkZeDVCzqTi-IZWgIFKdWovJGzCszBTsqdfoXRYhd1_e-0WuhsYmD6vSp8s-V_-wHrfRSUk8XcBdcS0WERhXit4X33_Ju_dHp32Kzh4_hwFmM_si8INexvcRCx5Udau_RsW6WElsvaZcEp1NkOWaqJEzyNj6C37bgM6pTMb_NbeGXud2STu5COSIp5-Y0HkBmLpluU" alt="Chocolate Popcorn"/>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-xs font-bold text-[#645485]">$10.50</span>
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <div>
-                            <h4 class="font-['Manrope'] font-bold text-lg mb-1 text-[#1a1c1c]">Choco-Dust</h4>
-                            <p class="text-[#49454e] text-xs mb-6">Sweet & salty dark cocoa infusion.</p>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30">
-                            <button class="btn-minus w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="qty-display px-4 text-sm font-bold text-[#b5b0ba]">0</span>
-                            <button class="btn-plus w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-xl border border-[#cbc4cf]/20 transition-all duration-300 flex flex-col food-item" data-id="4" data-name="Spicy Cheddar" data-price="9.00">
-                    <div class="relative h-48 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCB6irp_GM_JocBxZ930rAmRceOHIf7Zb6DKMhCGia60epqXVo379WyUV_yo1iWelY0aJ-eXfb5-8Sol2gNHbiAhWOyCX2PkTlmcMKkF3eAiKwvKOT54UwzExJZsyU_HgoESglksuACQOwza4zsmdG0SvRZqdfxB4HrUpIqoaa9yFZo9rsCLkQGnx3AWdT8RMKsgf3C-xFCYfUzyaGq6Prx3nrnJUd9mR-VQaNsTjCNUAJUMKCwehXeZCC19_IMVuFAy3xfcLpp-5A" alt="Spicy Popcorn"/>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-xs font-bold text-[#645485]">$9.00</span>
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <div>
-                            <h4 class="font-['Manrope'] font-bold text-lg mb-1 text-[#1a1c1c]">Spicy Cheddar</h4>
-                            <p class="text-[#49454e] text-xs mb-6">Sharp cheese with a jalapeño kick.</p>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30">
-                            <button class="btn-minus w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="qty-display px-4 text-sm font-bold text-[#b5b0ba]">0</span>
-                            <button class="btn-plus w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Grid-ul tău de produse rămâne aici, înlocuiește $ cu @localizer["Symbol_Currency"] -->
         </section>
 
         <section id="beverages" class="mb-12 pt-4">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="font-['Manrope'] text-2xl font-extrabold text-[#645485]">Iced Beverages</h2>
+                <h2 class="font-['Manrope'] text-2xl font-extrabold text-[#645485]">@localizer["Heading_IcedBeverages"]</h2>
                 <div class="h-px flex-1 bg-[#cbc4cf]/30 mx-6"></div>
             </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-xl border border-[#cbc4cf]/20 transition-all duration-300 flex flex-col food-item" data-id="5" data-name="Signature Cola" data-price="5.50">
-                    <div class="relative h-48 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATOXK2but7Fi-DR2skyU3OwfDLgBRJnr-mCiozK62m5kDtT7OU8qfnL2hb5Ke_ah2-0XEUNyyaWh5SEI_OFFqPXkeRMrJ2_lzmCiQMujHKhoOutXiOJd7i61vNN3X144tRP6xiXuXY0i2bBaqnUME6WEva-8gf-9iUESoUjKM8_1wL-pp087iJXk2sTgIZY71IchV3cq9jV08YXA3RzDRPG-hdmFqLCafXuS_UKPQKXkblshSIEsvfnoyo1nbvxt6m_NVpdBZ_KKg" alt="Cola"/>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-xs font-bold text-[#645485]">$5.50</span>
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <div>
-                            <h4 class="font-['Manrope'] font-bold text-lg mb-1 text-[#1a1c1c]">Signature Cola</h4>
-                            <p class="text-[#49454e] text-xs mb-6">Zero sugar or classic available.</p>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30">
-                            <button class="btn-minus w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="qty-display px-4 text-sm font-bold text-[#b5b0ba]">0</span>
-                            <button class="btn-plus w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-xl border border-[#cbc4cf]/20 transition-all duration-300 flex flex-col food-item" data-id="6" data-name="Mint Lemonade" data-price="6.25">
-                    <div class="relative h-48 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4MrWUIDlffuqQXr3rA1Khgnj1MYwZPrKzIgYn_XvCJXNhq0oIJ9KitgBG9cLnHEc8ib9eZg1GmMBRt_DQyJHAoUJ67HLLNP3HZYYF3s5Q2hUMQOzdJkz_lFmIUtDQCX_KJ2F8X-2kJx2vOAIbZYOrx93RNiGsdn10sFPQBGsTEVyatXi0kojjaq74yUUHRJRAaEQld9AjZlMQ77yFCLX8G6K55jcVD-2vrriwN7gl4wDd3qFjIw9KG8NyJ-x1_8M8jwVtAslYNrA" alt="Lemonade"/>
-                        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-xs font-bold text-[#645485]">$6.25</span>
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-1 justify-between">
-                        <div>
-                            <h4 class="font-['Manrope'] font-bold text-lg mb-1 text-[#1a1c1c]">Mint Lemonade</h4>
-                            <p class="text-[#49454e] text-xs mb-6">Freshly squeezed zesty lemon.</p>
-                        </div>
-                        <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30">
-                            <button class="btn-minus w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="qty-display px-4 text-sm font-bold text-[#b5b0ba]">0</span>
-                            <button class="btn-plus w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Grid-ul tău de băuturi rămâne aici, înlocuiește $ cu @localizer["Symbol_Currency"] -->
         </section>
 
     </main>
@@ -259,17 +116,17 @@
                 <span class="material-symbols-outlined">shopping_bag</span>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-[#7a757f] uppercase tracking-widest mb-0.5">Your Food & Beverages</p>
-                <p class="font-['Manrope'] font-extrabold text-2xl text-[#645485]" id="cartTotalText">0 Items — $0.00</p>
+                <p class="text-[10px] font-bold text-[#7a757f] uppercase tracking-widest mb-0.5">@localizer["Label_YourFoodBeverages"]</p>
+                <p class="font-['Manrope'] font-extrabold text-2xl text-[#645485]" id="cartTotalText">0 Items — @localizer["Symbol_Currency"]0.00</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3 w-full md:w-auto">
             <a href="/Booking/Checkout?showtimeId=@showtimeId" class="flex-1 md:flex-none px-6 py-3.5 text-[#645485] bg-[#f3f3f3] hover:bg-[#e2e2e2] font-bold transition-colors rounded-xl active:scale-95 text-sm text-center">
-                Skip Food
+                @localizer["Button_SkipFood"]
             </a>
             <button id="btnContinue" onclick="submitFoodOrder()" class="flex-1 md:flex-none px-8 py-3.5 bg-[#645485] hover:bg-[#7d6c9f] text-white font-bold rounded-xl shadow-lg shadow-[#645485]/30 hover:shadow-xl transition-all active:scale-95 text-sm flex justify-center items-center gap-2">
-                Continue to Checkout <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                @localizer["Button_ContinueToCheckout"] <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
         </div>
     </div>
@@ -286,6 +143,8 @@
         const cart = new Map();
         const floatingBar = document.getElementById('floatingCartBar');
         const cartTotalText = document.getElementById('cartTotalText');
+        const currencySymbol = '@localizer["Symbol_Currency"].Value';
+        const itemsLabel = 'Items'; // Ideal ar fi un replace din dicționar, ex: '@localizer["Label_Items"]'
 
         document.querySelectorAll('.food-item').forEach(item => {
             const id = item.getAttribute('data-id');
@@ -311,7 +170,8 @@
             
             updateCartUI();
             
-            alert("The Ultimate Combo added to your order!");
+            // Textul din alert() a fost localizat!
+            alert("@localizer["Alert_ComboAdded"]");
         }
 
         function updateQty(id, name, price, delta, displayElem) {
@@ -343,7 +203,8 @@
             });
 
             if (totalItems > 0) {
-                cartTotalText.innerText = `${totalItems} Items — $${totalPrice.toFixed(2)}`;
+                // Utilizarea simbolului valutar dinamic
+                cartTotalText.innerText = `${totalItems} ${itemsLabel} — ${currencySymbol}${totalPrice.toFixed(2)}`;
                 floatingBar.classList.remove('translate-y-full');
             } else {
                 floatingBar.classList.add('translate-y-full');

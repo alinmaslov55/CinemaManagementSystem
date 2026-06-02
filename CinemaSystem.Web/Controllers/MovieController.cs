@@ -1,4 +1,5 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Data.Enums;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -21,10 +22,31 @@ namespace CinemaSystem.Web.Controllers
             _movieSyncService = movieSyncService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(MovieCategory? category, string? releaseStatus)
         {
-            var movieList = _unitOfWork.Movie.GetAll();
-            return View(movieList);
+            var movieList = _unitOfWork.Movie.GetAll().AsEnumerable();
+
+            if (category.HasValue)
+            {
+                movieList = movieList.Where(m => m.MovieCategory == category.Value);
+            }
+
+            if (!string.IsNullOrEmpty(releaseStatus) && releaseStatus != "All Movies")
+            {
+                if (releaseStatus == "Now Showing")
+                {
+                    movieList = movieList.Where(m => m.IsReleased);
+                }
+                else if (releaseStatus == "Upcoming")
+                {
+                    movieList = movieList.Where(m => !m.IsReleased);
+                }
+            }
+
+            ViewBag.CurrentCategory = category;
+            ViewBag.CurrentReleaseStatus = releaseStatus;
+
+            return View(movieList.ToList());
         }
 
         public IActionResult Upsert(int? id)

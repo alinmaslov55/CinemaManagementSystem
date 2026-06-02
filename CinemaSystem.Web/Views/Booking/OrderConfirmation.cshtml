@@ -95,15 +95,11 @@
                     <div class="hidden md:block absolute left-1/3 bottom-0 -translate-x-1/2 translate-y-1/2 w-8 h-8 rounded-full bg-surface border-t border-outline-variant/20"></div>
                 </div>
 
-                <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                    <a asp-controller="Booking" asp-action="DownloadTickets" asp-route-bookingId="@Model.Id" class="flex-1 signature-gradient text-white py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-xl transition-all active:scale-95 text-sm">
+                <div class="mt-8">
+                    <a asp-controller="Booking" asp-action="DownloadTickets" asp-route-bookingId="@Model.Id" class="w-full signature-gradient text-white py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-xl transition-all active:scale-95 text-sm">
                         <span class="material-symbols-outlined text-lg">download</span>
                         @localizer["Button_DownloadDigitalTicket"]
                     </a>
-                    <button onclick="alert('@localizer["Alert_AppleWallet"]')" class="flex-1 bg-white border border-outline-variant/30 text-primary py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all active:scale-95 text-sm shadow-sm">
-                        <span class="material-symbols-outlined text-lg">wallet</span>
-                        @localizer["Button_AppleWallet"]
-                    </button>
                 </div>
             </div>
 

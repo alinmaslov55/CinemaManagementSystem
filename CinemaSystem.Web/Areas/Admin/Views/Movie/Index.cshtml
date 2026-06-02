@@ -1,4 +1,5 @@
 ﻿@using CinemaSystem.Models.Entities
+@using CinemaSystem.Models.Data.Enums
 @model IEnumerable<Movie>
 
 @{
@@ -20,29 +21,46 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+        
         <div class="md:col-span-8 bg-white p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex flex-wrap items-center gap-4">
-            <div class="flex-1 min-w-[180px]">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-outline mb-1.5">Filter by Genre</label>
-                <select class="w-full bg-surface border border-outline-variant/30 rounded-xl text-sm py-2.5 px-3 focus:ring-2 focus:ring-primary/30 outline-none">
-                    <option>All Genres</option>
-                    <option>Sci-Fi & Fantasy</option>
-                    <option>Action</option>
-                    <option>Drama</option>
-                    <option>Thriller</option>
-                </select>
-            </div>
-            <div class="flex-1 min-w-[180px]">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-outline mb-1.5">Release Status</label>
-                <select class="w-full bg-surface border border-outline-variant/30 rounded-xl text-sm py-2.5 px-3 focus:ring-2 focus:ring-primary/30 outline-none">
-                    <option>All Movies</option>
-                    <option>Now Showing</option>
-                    <option>Upcoming</option>
-                </select>
-            </div>
-            <button class="mt-5 px-5 py-2.5 text-primary border border-outline-variant/30 rounded-xl hover:bg-primary-fixed/30 text-sm font-bold transition-colors">
-                Reset
-            </button>
+            <form method="get" asp-action="Index" class="flex flex-wrap items-end gap-4 w-full m-0">
+                
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-outline mb-1.5">Filter by Genre</label>
+                    <select name="category" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="w-full bg-surface border border-outline-variant/30 rounded-xl text-sm py-2.5 px-3 focus:ring-2 focus:ring-primary/30 outline-none">
+                        <option value="">All Genres</option>
+                    </select>
+                    @if (ViewBag.CurrentCategory != null)
+                    {
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                document.querySelector('select[name="category"]').value = "@((int)ViewBag.CurrentCategory)";
+                            });
+                        </script>
+                    }
+                </div>
+
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-outline mb-1.5">Release Status</label>
+                    <select name="releaseStatus" class="w-full bg-surface border border-outline-variant/30 rounded-xl text-sm py-2.5 px-3 focus:ring-2 focus:ring-primary/30 outline-none">
+                        <option value="All Movies" selected="@(ViewBag.CurrentReleaseStatus == "All Movies")">All Movies</option>
+                        <option value="Now Showing" selected="@(ViewBag.CurrentReleaseStatus == "Now Showing")">Now Showing</option>
+                        <option value="Upcoming" selected="@(ViewBag.CurrentReleaseStatus == "Upcoming")">Upcoming</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="px-5 py-2.5 bg-primary text-white border border-primary rounded-xl hover:bg-primary/90 text-sm font-bold transition-colors">
+                        Filter
+                    </button>
+                    <a asp-action="Index" class="px-5 py-2.5 text-primary border border-outline-variant/30 rounded-xl hover:bg-primary-fixed/30 text-sm font-bold transition-colors flex items-center justify-center">
+                        Reset
+                    </a>
+                </div>
+                
+            </form>
         </div>
+        
         <div class="md:col-span-4 grid grid-cols-2 gap-4">
             <div class="bg-primary/5 p-5 rounded-2xl flex flex-col justify-center border border-primary/10">
                 <span class="text-primary font-black text-3xl font-headline">@Model.Count()</span>
@@ -53,6 +71,7 @@
                 <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-700/70 mt-1">Active (Showing)</span>
             </div>
         </div>
+
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">

@@ -82,32 +82,39 @@
         <div class="px-6 md:px-24 relative z-20 @searchMarginClass">
             <form method="get" asp-action="Index" class="glass-panel p-6 rounded-3xl shadow-lg border border-[#7a757f]/20 bg-white/80">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
-                    <div class="md:col-span-4">
+        
+                    <div class="md:col-span-4 flex flex-col justify-end">
                         <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">@localizer["Label_SearchTitle"]</label>
-                        <div class="flex items-center bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 py-2.5 focus-within:ring-2 ring-[#7f6fa2] transition-all">
+                        <div class="flex items-center bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 h-11 focus-within:ring-2 ring-[#7f6fa2] transition-all">
                             <span class="material-symbols-outlined text-[#7f6fa2] text-sm mr-2" data-icon="search">search</span>
-                            <input type="text" name="searchString" class="bg-transparent border-none w-full focus:outline-none text-sm font-['Inter']" placeholder="@localizer["Placeholder_SearchTitle"]" value="@Model.CurrentSearch" />
+                            <input type="text" name="searchString" class="bg-transparent border-none w-full focus:outline-none text-sm font-['Inter'] p-0 focus:ring-0" placeholder="@localizer["Placeholder_SearchTitle"]" value="@Model.CurrentSearch" />
                         </div>
                     </div>
 
-                    <div class="md:col-span-3">
+                    <div class="md:col-span-3 flex flex-col justify-end">
                         <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">@localizer["Label_Genre"]</label>
-                        <select name="category" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="w-full bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] cursor-pointer">
+                        <select name="category" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="w-full bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 h-11 focus:outline-none focus:ring-2 focus:ring-[#7f6fa2] text-sm font-['Inter'] cursor-pointer">
                             <option value="">@localizer["Option_AllGenres"]</option>
                         </select>
                     </div>
 
-                    <div class="md:col-span-3">
+                    <div class="md:col-span-3 flex flex-col justify-end">
                         <label class="block text-[10px] font-bold text-[#79767b] uppercase tracking-widest mb-2">@localizer["Label_Date"]</label>
-                        <input type="date" name="selectedDate" class="w-full bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 ring-[#7f6fa2] text-sm font-['Inter'] text-[#1a1c1c]" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")" />
+                        <input type="date" name="selectedDate" class="w-full bg-white/60 border border-[#cbc4cf]/50 rounded-xl px-4 h-11 focus:outline-none focus:ring-2 focus:ring-[#7f6fa2] text-sm font-['Inter'] text-[#1a1c1c]" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")" />
                     </div>
 
-                    <div class="md:col-span-2 flex items-end gap-2 mt-2 md:mt-0">
-                        <button type="submit" class="w-full bg-[#7f6fa2] hover:bg-[#976987] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md">@localizer["Button_Filter"]</button>
-                        <a asp-action="Index" class="bg-[#f3f3f3] hover:bg-[#e2e2e2] text-[#79767b] py-3 px-4 rounded-xl transition-colors flex items-center justify-center shadow-sm">
-                            <span class="material-symbols-outlined text-[18px]">refresh</span>
-                        </a>
+                    <div class="md:col-span-2 flex flex-col justify-end">
+                        <label class="block text-[10px] invisible mb-2">-</label>
+                        <div class="flex gap-2 h-11">
+                            <button type="submit" class="w-full bg-[#7f6fa2] hover:bg-[#976987] text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors shadow-md flex items-center justify-center">
+                                @localizer["Button_Filter"]
+                            </button>
+                            <a asp-action="Index" class="bg-[#f3f3f3] hover:bg-[#e2e2e2] text-[#79767b] aspect-square h-11 rounded-xl transition-colors flex items-center justify-center shadow-sm shrink-0">
+                                <span class="material-symbols-outlined text-[18px]">refresh</span>
+                            </a>
+                        </div>
                     </div>
+        
                 </div>
             </form>
         </div>
@@ -199,67 +206,6 @@
                     }
                 </div>
             }
-        </section>
-
-        @* ==========================================
-           ZONE 4: OFFERS / VIP SECTION (Context-Aware)
-           ========================================== *@
-        <section class="py-12 md:py-16 bg-[#f3f3f3] px-6 md:px-24 rounded-[3rem] mx-4 md:mx-12 mb-16 md:mb-24 shadow-sm border border-[#cbc4cf]/20">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-                
-                <div class="relative rounded-3xl overflow-hidden h-[300px] md:h-[400px] flex items-center p-8 md:p-12 group">
-                    <img alt="VIP Cinema" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                         src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070&auto=format&fit=crop" />
-                    <div class="absolute inset-0 bg-[#7f6fa2]/50 backdrop-blur-[2px]"></div>
-                    <div class="relative z-10 max-w-sm">
-                        <h3 class="text-3xl md:text-4xl font-['Manrope'] font-extrabold text-white mb-4 tracking-tight">@localizer["Heading_VIPExperience"]</h3>
-                        <p class="text-white/90 mb-8 font-['Inter'] text-sm md:text-base">@localizer["Subheading_VIPExperience"]</p>
-                        
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <a href="#now-showing" class="inline-block bg-white text-[#7f6fa2] px-8 py-3 rounded-xl font-['Manrope'] text-xs font-bold uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-transform">@localizer["Button_BookVIP"]</a>
-                        }
-                        else
-                        {
-                            <a href="/Identity/Account/Login" class="inline-block bg-white text-[#7f6fa2] px-8 py-3 rounded-xl font-['Manrope'] text-xs font-bold uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-transform">@localizer["Button_ExploreVIP"]</a>
-                        }
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm flex flex-col justify-between border border-[#cbc4cf]/30 hover:shadow-md transition-shadow">
-                        <div>
-                            <span class="material-symbols-outlined text-[#976987] text-4xl mb-4" data-icon="redeem">redeem</span>
-                            <h4 class="text-xl font-['Manrope'] font-bold text-[#1a1c1c] mb-2">@localizer["Heading_MemberRewards"]</h4>
-                            <p class="text-sm text-[#79767b] leading-relaxed">@localizer["Subheading_MemberRewards"]</p>
-                        </div>
-                        
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <a class="text-[#7f6fa2] font-['Manrope'] text-xs font-bold uppercase tracking-widest mt-6 inline-flex items-center gap-2 hover:opacity-70 transition-opacity" href="/Customer/Dashboard">
-                                @localizer["Button_ViewDashboard"] <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                            </a>
-                        }
-                        else
-                        {
-                            <a class="text-[#7f6fa2] font-['Manrope'] text-xs font-bold uppercase tracking-widest mt-6 inline-flex items-center gap-2 hover:opacity-70 transition-opacity" href="/Identity/Account/Register">
-                                @localizer["Button_JoinNow"] <span class="material-symbols-outlined text-sm">person_add</span>
-                            </a>
-                        }
-                    </div>
-                    
-                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm flex flex-col justify-between border border-[#cbc4cf]/30 hover:shadow-md transition-shadow">
-                        <div>
-                            <span class="material-symbols-outlined text-[#976987] text-4xl mb-4" data-icon="local_activity">local_activity</span>
-                            <h4 class="text-xl font-['Manrope'] font-bold text-[#1a1c1c] mb-2">@localizer["Heading_StudentPasses"]</h4>
-                            <p class="text-sm text-[#79767b] leading-relaxed">@localizer["Subheading_StudentPasses"]</p>
-                        </div>
-                        <a class="text-[#7f6fa2] font-['Manrope'] text-xs font-bold uppercase tracking-widest mt-6 inline-flex items-center gap-2 hover:opacity-70 transition-opacity" href="#">
-                            @localizer["Button_LearnMore"] <span class="material-symbols-outlined text-sm">info</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
         </section>
 
         @* ==========================================

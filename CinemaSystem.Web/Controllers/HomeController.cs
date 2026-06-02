@@ -58,7 +58,8 @@ namespace CinemaSystem.Web.Controllers
             ).ToList();
 
             var comingSoonRaw = allMovies.Where(m =>
-                !m.IsReleased && m.StartDate.Date > today && !m.Showtimes.Any(s => s.StartTime.Date >= today)
+                (!m.IsReleased && m.StartDate.Date > today) ||
+                (m.IsReleased && !m.Showtimes.Any(s => s.StartTime.Date == today) && m.Showtimes.Any(s => s.StartTime.Date > today))
             ).ToList();
 
             if (selectedDate.HasValue)

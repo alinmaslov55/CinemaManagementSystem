@@ -1,7 +1,9 @@
 ﻿@using CinemaSystem.Models.Entities
 @using Microsoft.AspNetCore.Mvc.Localization
 @using CinemaSystem.Web
+@using Microsoft.AspNetCore.Identity
 @inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> localizer
+@inject UserManager<ApplicationUser> UserManager
 @model IEnumerable<Booking>
 
 @{
@@ -10,6 +12,8 @@
     var now = DateTime.Now;
     var upcomingBookings = Model.Where(b => b.Showtime.StartTime > now).OrderBy(b => b.Showtime.StartTime).ToList();
     var pastBookings = Model.Where(b => b.Showtime.StartTime <= now).OrderByDescending(b => b.Showtime.StartTime).ToList();
+
+    var currentUser = await UserManager.GetUserAsync(User);
 }
 
 <style>
@@ -32,10 +36,9 @@
                 </div>
                 <div>
                     <div class="flex items-center gap-2 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-[#795061]">@localizer["Label_GoldMember"]</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-[#795061]">@currentUser?.MembershipTier Member</span>
                     </div>
-                    <h3 class="text-2xl font-bold font-['Manrope'] text-[#645485]">12,450 <span class="text-sm font-medium text-[#49454e]">VP</span></h3>
-                    <p class="text-xs text-[#49454e] font-medium mt-1">@localizer["Label_PointsNextReward"]</p>
+                    <h3 class="text-2xl font-bold font-['Manrope'] text-[#645485]">@currentUser?.LoyaltyPoints.ToString("N0") <span class="text-sm font-medium text-[#49454e]">VP</span></h3>
                 </div>
             </div>
         </div>

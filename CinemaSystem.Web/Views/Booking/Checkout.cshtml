@@ -164,15 +164,25 @@
                         <div class="bg-[#f3f3f3] p-6 md:p-8 rounded-3xl space-y-5 border border-[#cbc4cf]/30">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div class="flex flex-col gap-1.5">
-                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">@localizer["Label_CardholderName"]</label>
-                                    <input class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all shadow-sm" placeholder="e.g. ALEX MERCER" type="text" required/>
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]" for="cardName">@localizer["Label_CardholderName"]</label>
+                                    <input id="cardName" name="cardName" class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all shadow-sm uppercase" placeholder="e.g. ALEX MERCER" type="text" required pattern="[a-zA-Z\s\-]+" title="Doar litere și spații sunt permise" />
                                 </div>
                                 <div class="flex flex-col gap-1.5">
-                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]">@localizer["Label_CardNumber"]</label>
-                                    <input class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all shadow-sm" placeholder="•••• •••• •••• 4412" type="text" required/>
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]" for="cardNumber">@localizer["Label_CardNumber"]</label>
+                                    <input id="cardNumber" name="cardNumber" class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all shadow-sm" placeholder="•••• •••• •••• 4412" type="text" inputmode="numeric" maxlength="19" required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\d{4})(?=\d)/g, '$1 ')" />
                                 </div>
                             </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                                <div class="flex flex-col gap-1.5 md:col-span-1">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]" for="cardExpiry">@localizer["Label_ExpiryDate"]</label>
+                                    <input id="cardExpiry" name="cardExpiry" class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all text-center shadow-sm" placeholder="MM/YY" type="text" inputmode="numeric" maxlength="5" required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/^(\d{2})(\d)/g, '$1/$2')" />
+                                </div>
+                                <div class="flex flex-col gap-1.5 md:col-span-1">
+                                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#7a757f]" for="cardCvv">CVV</label>
+                                    <input id="cardCvv" name="cardCvv" class="bg-white border border-[#cbc4cf]/50 rounded-xl p-3.5 focus:ring-2 focus:ring-[#645485]/30 text-[#1a1c1c] placeholder:text-[#b5b0ba] font-medium outline-none transition-all text-center shadow-sm" placeholder="•••" type="password" inputmode="numeric" maxlength="4" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                </div>
                             </div>
+                        </div>
                     </section>
 
                     <button type="submit" id="hiddenSubmitBtn" class="hidden">Submit</button>

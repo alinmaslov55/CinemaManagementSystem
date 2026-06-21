@@ -270,7 +270,7 @@ namespace CinemaSystem.Web.Controllers
                 }
             }
 
-            contextBuilder.AppendLine("\n--- AVAILABLE SNACKS & DRINKS (CONCESSIONS) ---");
+            contextBuilder.AppendLine("\n--- AVAILABLE SNACKS & DRINKS (Food & Beverage Products) ---");
             foreach (var item in fnBProducts)
             {
                 contextBuilder.AppendLine($"- {item.Name}: ${item.Price.ToString("F2")} ({item.Description})");

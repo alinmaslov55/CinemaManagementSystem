@@ -1,22 +1,24 @@
-﻿using Xunit;
-using Moq;
+﻿using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Data.Enums;
+using CinemaSystem.Models.Entities;
+using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Utility;
+using CinemaSystem.Web;
+using CinemaSystem.Web.Controllers;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using System.Linq.Expressions;
+using Microsoft.Extensions.Localization;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using CinemaSystem.Web.Controllers;
-using CinemaSystem.DataAccess.Repository.IRepository;
-using CinemaSystem.Models.Entities;
-using CinemaSystem.Models.ViewModels;
-using CinemaSystem.Models.Data.Enums;
-using CinemaSystem.Utility;
+using Xunit;
 
 namespace CinemaSystem.Tests.Controllers
 {
@@ -26,6 +28,7 @@ namespace CinemaSystem.Tests.Controllers
         private readonly Mock<IEmailService> _mockEmailService;
         private readonly Mock<ITicketPdfService> _mockTicketPdfService;
         private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
         private readonly BookingController _controller;
         private readonly string _testUserId = "user-123";
 
@@ -34,6 +37,7 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockEmailService = new Mock<IEmailService>();
             _mockTicketPdfService = new Mock<ITicketPdfService>();
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
 
             // Mock complex obligatoriu pentru UserManager
             var store = new Mock<IUserStore<ApplicationUser>>();
@@ -50,13 +54,16 @@ namespace CinemaSystem.Tests.Controllers
 
             _mockTicketPdfService.Setup(p => p.GenerateTicketPdfBytes(It.IsAny<Booking>()))
                                  .Returns(new byte[] { 1, 2, 3 });
+            _mockLocalizer.Setup(_ => _[It.IsAny<string>()])
+                .Returns((string key) => new LocalizedString(key, key));
 
             // Instanțierea controlerului cu toți cei 4 parametri
             _controller = new BookingController(
                 _mockUnitOfWork.Object,
                 _mockEmailService.Object,
                 _mockTicketPdfService.Object,
-                _mockUserManager.Object);
+                _mockUserManager.Object,
+                _mockLocalizer.Object);
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -69,17 +76,6 @@ namespace CinemaSystem.Tests.Controllers
             {
                 HttpContext = new DefaultHttpContext { User = user }
             };
-        }
-
-        [Fact]
-        public void SelectSeats_ReturnsNotFound_WhenShowtimeIsInvalid()
-        {
-            _mockUnitOfWork.Setup(u => u.Showtime.Get(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns((Showtime)null);
-
-            var result = _controller.SelectSeats(99);
-
-            var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
-            notFoundResult.Value.Should().Be("Showtime not found.");
         }
 
         [Fact]
@@ -116,20 +112,6 @@ namespace CinemaSystem.Tests.Controllers
         }
 
         [Fact]
-        public void LockSeatsAjax_Fails_WhenSeatIsAlreadyBooked()
-        {
-            var dto = new HoldSeatsRequestDto { ShowtimeId = 1, SelectedSeatIds = new List<int> { 5 } };
-
-            var existingTickets = new List<Ticket> { new Ticket { SeatId = 5, Booking = new Booking { ShowtimeId = 1 } } };
-            _mockUnitOfWork.Setup(u => u.Ticket.GetAll(It.IsAny<Expression<Func<Ticket, bool>>>(), It.IsAny<string>())).Returns(existingTickets);
-
-            var result = _controller.LockSeatsAjax(dto);
-
-            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
-            jsonResult.Value.Should().BeEquivalentTo(new { success = false, message = "Transaction failed: One or more seats have already been purchased." });
-        }
-
-        [Fact]
         public void LockSeatsAjax_CreatesNewHolds_AndClearsOldOnes()
         {
             var dto = new HoldSeatsRequestDto { ShowtimeId = 1, SelectedSeatIds = new List<int> { 1, 2 } };
@@ -149,18 +131,6 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Verify(u => u.SeatHold.Add(It.Is<SeatHold>(h => h.SeatId == 1 && h.ApplicationUserId == _testUserId)), Times.Once);
             _mockUnitOfWork.Verify(u => u.SeatHold.Add(It.Is<SeatHold>(h => h.SeatId == 2 && h.ApplicationUserId == _testUserId)), Times.Once);
             _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-        }
-
-        [Fact]
-        public void Checkout_RedirectsToSelect_WhenHoldsExpired()
-        {
-            _mockUnitOfWork.Setup(u => u.SeatHold.GetAll(It.IsAny<Expression<Func<SeatHold, bool>>>(), It.IsAny<string>())).Returns(new List<SeatHold>());
-
-            var result = _controller.Checkout(1);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("SelectSeats");
-            _controller.TempData["error"].Should().Be("Your seat reservation has expired or no seats were selected. Please try again.");
         }
 
         [Fact]
@@ -236,6 +206,49 @@ namespace CinemaSystem.Tests.Controllers
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
 
             _mockUnitOfWork.Verify(u => u.Booking.GetAll(It.IsAny<Expression<Func<Booking, bool>>>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public void Checkout_RedirectsToSelect_WhenHoldsExpired()
+        {
+            _mockUnitOfWork.Setup(u => u.SeatHold.GetAll(It.IsAny<Expression<Func<SeatHold, bool>>>(), It.IsAny<string>()))
+                           .Returns(new List<SeatHold>());
+
+            var result = _controller.Checkout(1);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("SelectSeats");
+
+            _controller.TempData["error"].Should().Be("Error_SeatHoldExpired");
+        }
+
+        [Fact]
+        public void LockSeatsAjax_Fails_WhenSeatIsAlreadyBooked()
+        {
+            var dto = new HoldSeatsRequestDto { ShowtimeId = 1, SelectedSeatIds = new List<int> { 5 } };
+
+            var existingTickets = new List<Ticket> { new Ticket { SeatId = 5, Booking = new Booking { ShowtimeId = 1 } } };
+            _mockUnitOfWork.Setup(u => u.Ticket.GetAll(It.IsAny<Expression<Func<Ticket, bool>>>(), It.IsAny<string>()))
+                           .Returns(existingTickets);
+
+            var result = _controller.LockSeatsAjax(dto);
+
+            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
+
+            jsonResult.Value.Should().BeEquivalentTo(new { success = false, message = "Error_SeatsAlreadyPurchased" });
+        }
+
+        [Fact]
+        public void SelectSeats_ReturnsNotFound_WhenShowtimeIsInvalid()
+        {
+            _mockUnitOfWork.Setup(u => u.Showtime.Get(It.IsAny<Expression<Func<Showtime, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns((Showtime)null);
+
+            var result = _controller.SelectSeats(99);
+
+            var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
+
+            notFoundResult.Value.Should().Be("Error_ShowtimeNotFound");
         }
     }
 }

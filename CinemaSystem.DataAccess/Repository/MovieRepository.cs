@@ -28,6 +28,7 @@ namespace CinemaSystem.DataAccess.Repository
                 objFromDb.MovieCategory = obj.MovieCategory;
                 objFromDb.AgeRating = obj.AgeRating;
                 objFromDb.IsReleased = obj.IsReleased;
+                objFromDb.IsDeleted = obj.IsDeleted;
 
                 objFromDb.UpdatedDate = DateTime.Now;
 

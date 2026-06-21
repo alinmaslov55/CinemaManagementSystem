@@ -193,7 +193,7 @@ namespace CinemaSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> FinalizeOrder(int showtimeId, int[] concessionIds, int[] concessionQuantities)
+        public async Task<IActionResult> FinalizeOrder(int showtimeId, int[] FnBProductIds, int[] FnBProductQuantities)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -236,23 +236,23 @@ namespace CinemaSystem.Web.Controllers
                 PaymentIntentId = "simulated_stripe_intent_id"
             };
 
-            decimal concessionsTotal = 0;
+            decimal FnBProductsTotal = 0;
 
-            if (concessionIds != null && concessionQuantities != null && concessionIds.Length == concessionQuantities.Length)
+            if (FnBProductIds != null && FnBProductQuantities != null && FnBProductIds.Length == FnBProductQuantities.Length)
             {
-                for (int i = 0; i < concessionIds.Length; i++)
+                for (int i = 0; i < FnBProductIds.Length; i++)
                 {
-                    if (concessionQuantities[i] > 0)
+                    if (FnBProductQuantities[i] > 0)
                     {
-                        var concession = _unitOfWork.FnBProduct.Get(c => c.Id == concessionIds[i]);
+                        var concession = _unitOfWork.FnBProduct.Get(c => c.Id == FnBProductIds[i]);
                         if (concession != null)
                         {
-                            concessionsTotal += (concession.Price * concessionQuantities[i]);
+                            FnBProductsTotal += (concession.Price * FnBProductQuantities[i]);
 
                             newBooking.BookingFnBs.Add(new BookingFnB
                             {
                                 FnBProductId = concession.Id,
-                                Quantity = concessionQuantities[i],
+                                Quantity = FnBProductQuantities[i],
                                 PriceAtPurchase = concession.Price
                             });
                         }
@@ -260,7 +260,7 @@ namespace CinemaSystem.Web.Controllers
                 }
             }
 
-            decimal subTotal = ticketsTotal + concessionsTotal;
+            decimal subTotal = ticketsTotal + FnBProductsTotal;
             decimal discountPercentage = 0m;
 
             if (currentUser.MembershipTier == "Gold") discountPercentage = 0.15m;

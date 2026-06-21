@@ -24,8 +24,9 @@ namespace CinemaSystem.Web.Controllers
 
         public IActionResult Index(MovieCategory? category, string? releaseStatus)
         {
-            var movieList = _unitOfWork.Movie.GetAll().AsEnumerable();
-
+            var movieList = _unitOfWork.Movie.GetAll()
+                                       .Where(m => !m.IsDeleted)
+                                       .AsEnumerable();
             if (category.HasValue)
             {
                 movieList = movieList.Where(m => m.MovieCategory == category.Value);

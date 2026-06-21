@@ -47,7 +47,7 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Movie.GetAll(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>()))
                            .Returns(fakeMovies);
 
-            var result = _controller.Index();
+            var result = _controller.Index(null, null);
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeAssignableTo<IEnumerable<Movie>>().Subject;

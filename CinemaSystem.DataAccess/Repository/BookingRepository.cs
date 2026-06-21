@@ -40,18 +40,18 @@ namespace CinemaSystem.DataAccess.Repository
             }
         }
 
-        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId)
+        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId) // NEEDS TO BE ADDED WHEN STRIPE PAYMENT IS IMPLEMENTED
         {
             var objFromDb = _db.Bookings.FirstOrDefault(u => u.Id == id);
             if (objFromDb != null)
             {
                 if (!string.IsNullOrEmpty(sessionId))
                 {
-                    // objFromDb.SessionId = sessionId; // Add these to entity later if needed
+                    // objFromDb.SessionId = sessionId;
                 }
                 if (!string.IsNullOrEmpty(paymentIntentId))
                 {
-                    // objFromDb.PaymentIntentId = paymentIntentId; // Add these to entity later if needed
+                    // objFromDb.PaymentIntentId = paymentIntentId;
                 }
             }
         }

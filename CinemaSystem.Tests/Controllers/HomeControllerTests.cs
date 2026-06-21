@@ -3,6 +3,7 @@ using CinemaSystem.Models.Data.Enums;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Utility;
+using CinemaSystem.Web;
 using CinemaSystem.Web.Controllers;
 using CinemaSystem.Web.Models;
 using FluentAssertions;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Localization;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -26,6 +28,7 @@ namespace CinemaSystem.Tests.Controllers
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IOllamaService> _mockOllamaService;
         private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
         private readonly HomeController _controller;
         private readonly DateTime _today;
 
@@ -33,6 +36,7 @@ namespace CinemaSystem.Tests.Controllers
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockOllamaService = new Mock<IOllamaService>();
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
             _today = DateTime.Now.Date;
 
             var store = new Mock<IUserStore<ApplicationUser>>();
@@ -41,8 +45,9 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Movie.GetAll(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>())).Returns(new List<Movie>());
             _mockUnitOfWork.Setup(u => u.Review.Add(It.IsAny<Review>()));
             _mockUnitOfWork.Setup(u => u.Review.Update(It.IsAny<Review>()));
+            _mockLocalizer.Setup(_ => _[It.IsAny<string>()]).Returns((string key) => new LocalizedString(key, key));
 
-            _controller = new HomeController(_mockUnitOfWork.Object, _mockOllamaService.Object, _mockUserManager.Object);
+            _controller = new HomeController(_mockUnitOfWork.Object, _mockOllamaService.Object, _mockUserManager.Object, _mockLocalizer.Object);
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -72,33 +77,6 @@ namespace CinemaSystem.Tests.Controllers
             var model = viewResult.Model.Should().BeOfType<HomeVM>().Subject;
             model.NowPlaying.Should().HaveCount(1);
             model.NowPlaying.First().Movie.Title.Should().Be("Batman");
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(6)]
-        public void AddReview_RejectsInvalidRatings(int invalidRating)
-        {
-            var result = _controller.AddReview(1, invalidRating, "Test");
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Details");
-            _controller.TempData["error"].Should().Be("Invalid rating value.");
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
-        }
-
-        [Fact]
-        public void AddReview_CreatesNewReview_WhenUserHasNotReviewed()
-        {
-            _mockUnitOfWork.Setup(u => u.Review.Get(It.IsAny<Expression<Func<Review, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).Returns((Review)null);
-
-            var result = _controller.AddReview(1, 5, "Great!");
-
-            _mockUnitOfWork.Verify(u => u.Review.Add(It.Is<Review>(r => r.Rating == 5 && r.ApplicationUserId == "test-user-123")), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            _controller.TempData["success"].Should().Be("Thank you for your review!");
         }
 
         [Fact]
@@ -221,6 +199,37 @@ namespace CinemaSystem.Tests.Controllers
             model.ComingSoon.Should().HaveCount(2);
 
             model.HeroMovies.First().Movie.Title.Should().Be("Active 1");
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(6)]
+        public void AddReview_RejectsInvalidRatings(int invalidRating)
+        {
+            var result = _controller.AddReview(1, invalidRating, "Test");
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Details");
+
+            _controller.TempData["error"].Should().Be("Error_InvalidRating");
+
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
+        }
+
+        [Fact]
+        public void AddReview_CreatesNewReview_WhenUserHasNotReviewed()
+        {
+            _mockUnitOfWork.Setup(u => u.Review.Get(It.IsAny<Expression<Func<Review, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns((Review)null);
+
+            var result = _controller.AddReview(1, 5, "Great!");
+
+            _mockUnitOfWork.Verify(u => u.Review.Add(It.Is<Review>(r => r.Rating == 5 && r.ApplicationUserId == "test-user-123")), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+
+            _controller.TempData["success"].Should().Be("Success_ReviewAdded");
         }
     }
 }

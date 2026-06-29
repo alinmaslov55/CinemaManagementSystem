@@ -1,11 +1,12 @@
-﻿@model CinemaSystem.Models.Entities.Equipment
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.Entities.Equipment
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Delete Asset";
-    // ATENȚIE: Legăm pagina de layout-ul central de Admin
+    ViewData["Title"] = Localizer["Equipment_DeleteAssetTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
-    // Determinare logică a iconiței în funcție de tipul echipamentului
     string typeStr = Model.Type.ToString().ToLower();
     string icon = "developer_board";
     if (typeStr.Contains("visual") || typeStr.Contains("projector") || typeStr.Contains("screen")) icon = "videocam";
@@ -13,11 +14,10 @@
     else if (typeStr.Contains("seat") || typeStr.Contains("chair")) icon = "chair";
     else if (typeStr.Contains("hvac") || typeStr.Contains("ac")) icon = "ac_unit";
 
-    // Determinare culori pentru status
     string statusColor = "text-error";
     string statusBg = "bg-error/10 border-error/20";
     string statusDot = "bg-error";
-    
+
     if (Model.Status.ToString() == "Operational")
     {
         statusColor = "text-emerald-700";
@@ -31,15 +31,14 @@
         statusDot = "bg-amber-500";
     }
 }
-
 <main class="flex-1 p-8 flex justify-center items-start">
-    
+
     <div class="w-full max-w-3xl mt-8">
-        
+
         <nav class="flex text-sm text-on-surface-variant mb-6 gap-2 font-label items-center uppercase tracking-wider font-bold">
-            <a asp-action="Index" class="hover:text-primary transition-colors">Equipment</a>
+            <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["Equipment_BreadcrumbEquipment"]</a>
             <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span class="text-error font-semibold">Delete Asset</span>
+            <span class="text-error font-semibold">@Localizer["Equipment_DeleteAssetTitle"]</span>
         </nav>
 
         <div class="bg-[#f97386]/10 border border-[#f97386]/30 p-6 rounded-2xl mb-8 flex items-start gap-4 shadow-sm">
@@ -47,15 +46,15 @@
                 <span class="material-symbols-outlined text-3xl">warning</span>
             </div>
             <div>
-                <h2 class="text-xl font-extrabold text-[#a8364b] font-headline mb-1">Confirm Permanent Deletion</h2>
+                <h2 class="text-xl font-extrabold text-[#a8364b] font-headline mb-1">@Localizer["Equipment_ConfirmPermanentDeletion"]</h2>
                 <p class="text-[#a8364b]/80 text-sm font-medium leading-relaxed">
-                    You are about to permanently delete the asset <strong>"@Model.Name"</strong> from the equipment inventory. This will erase all its associated maintenance logs and tracking history. This cannot be undone.
+                    @Localizer["Equipment_DeleteWarningDesc1"] <strong>"@Model.Name"</strong> @Localizer["Equipment_DeleteWarningDesc2"]
                 </p>
             </div>
         </div>
 
         <div class="bg-white rounded-3xl shadow-lg border border-outline-variant/20 p-8 flex flex-col md:flex-row gap-8 items-center md:items-start relative overflow-hidden">
-            
+
             <div class="absolute -right-12 -top-12 opacity-5 pointer-events-none">
                 <span class="material-symbols-outlined text-[250px]">@icon</span>
             </div>
@@ -73,23 +72,23 @@
                         <span class="w-1.5 h-1.5 rounded-full @statusDot"></span> @Model.Status.ToString()
                     </span>
                 </div>
-                
+
                 <h3 class="text-3xl font-extrabold text-on-surface font-headline mb-1">@Model.Name</h3>
                 <p class="text-sm font-bold text-outline font-mono mb-6">SN: @(Model.SerialNumber ?? "Not Registered")</p>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Installed Location</p>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@Localizer["Equipment_LocationLabel"]</p>
                         <p class="text-sm font-semibold text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">location_on</span>
-                            @(Model.CinemaHall?.Name ?? "Unassigned")
+                            @(Model.CinemaHall?.Name ?? Localizer["Equipment_Unassigned"].Value)
                         </p>
                     </div>
                     <div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Last Maintenance</p>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@Localizer["Equipment_LastMaintenanceLabel"]</p>
                         <p class="text-sm font-semibold text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">build</span>
-                            @(Model.LastMaintenanceDate?.ToString("MMM dd, yyyy") ?? "No Record")
+                            @(Model.LastMaintenanceDate?.ToString("MMM dd, yyyy") ?? Localizer["Equipment_NoRecord"].Value)
                         </p>
                     </div>
                 </div>
@@ -98,14 +97,14 @@
 
         <form method="post" class="mt-8 flex items-center justify-end gap-4 border-t border-outline-variant/30 pt-6">
             <input asp-for="Id" hidden />
-            
+
             <a asp-action="Index" class="px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
-                Cancel & Keep Asset
+                @Localizer["Equipment_CancelKeepAsset"]
             </a>
-            
+
             <button type="submit" class="px-10 py-3 rounded-xl bg-[#a8364b] hover:bg-[#8b2b3d] text-white font-bold shadow-lg shadow-[#a8364b]/20 active:scale-95 transition-all font-label flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">delete_forever</span>
-                Yes, Delete Asset
+                @Localizer["Equipment_ConfirmDeleteAsset"]
             </button>
         </form>
 

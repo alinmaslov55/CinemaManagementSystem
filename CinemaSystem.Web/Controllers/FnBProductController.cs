@@ -1,7 +1,9 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
+using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CinemaSystem.Web.Areas.Admin.Controllers
 {
@@ -11,11 +13,13 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public FnBProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public FnBProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _localizer = localizer;
         }
 
         public IActionResult Index()
@@ -24,41 +28,25 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             return View(objFnBProductList);
         }
 
-        // UPSERT: GET
         public IActionResult Upsert(int? id)
         {
-            if (id == null || id == 0)
-            {
-                // Create Mode
-                return View(new FnBProduct());
-            }
-            else
-            {
-                // Edit Mode
-                var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
-                if (concession == null) return NotFound();
-                return View(concession);
-            }
+            if (id == null || id == 0) return View(new FnBProduct());
+
+            var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
+            if (concession == null) return NotFound();
+            return View(concession);
         }
 
-        // UPSERT: POST
         [HttpPost]
-        [ValidateAntiForgeryToken] // Securitate adaugata: Prevenire CSRF
+        [ValidateAntiForgeryToken]
         public IActionResult Upsert(FnBProduct concession, IFormFile? file)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(concession); // Early return pe invaliditate
-            }
+            if (!ModelState.IsValid) return View(concession);
 
             string wwwRootPath = _webHostEnvironment.WebRootPath;
             FnBProduct concessionToSave;
 
-            // 1. ENTITY TRACKING PROTECTION
-            if (concession.Id == 0)
-            {
-                concessionToSave = new FnBProduct();
-            }
+            if (concession.Id == 0) concessionToSave = new FnBProduct();
             else
             {
                 concessionToSave = _unitOfWork.FnBProduct.Get(u => u.Id == concession.Id);
@@ -71,7 +59,6 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             concessionToSave.Category = concession.Category;
             concessionToSave.IsActive = concession.IsActive;
 
-            // 2. FILE MANAGEMENT (Cross-Platform Safe)
             if (file != null)
             {
                 string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
@@ -79,13 +66,12 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
 
                 if (!allowedExtensions.Contains(extension))
                 {
-                    TempData["error"] = "Invalid file type. Only JPG, PNG, and WEBP are allowed.";
+                    TempData["error"] = _localizer["FnB_InvalidFileType"].Value;
                     return View(concession);
                 }
 
                 string fileName = Guid.NewGuid().ToString() + extension;
                 string concessionPath = Path.Combine(wwwRootPath, "images", "concessions");
-
                 if (!Directory.Exists(concessionPath)) Directory.CreateDirectory(concessionPath);
 
                 if (!string.IsNullOrEmpty(concessionToSave.ImageUrl))
@@ -98,40 +84,33 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
                 {
                     file.CopyTo(fileStream);
                 }
-
                 concessionToSave.ImageUrl = "/images/concessions/" + fileName;
             }
 
-            // 3. DATABASE SAVE
             if (concession.Id == 0)
             {
                 _unitOfWork.FnBProduct.Add(concessionToSave);
-                TempData["success"] = "Food & Beverage item created successfully.";
+                TempData["success"] = _localizer["FnB_CreatedSuccess"].Value;
             }
             else
             {
                 _unitOfWork.FnBProduct.Update(concessionToSave);
-                TempData["success"] = "Food & Beverage item updated successfully.";
+                TempData["success"] = _localizer["FnB_UpdatedSuccess"].Value;
             }
 
             _unitOfWork.Save();
             return RedirectToAction(nameof(Index));
         }
 
-        // DELETE: GET
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0) return NotFound();
-
             var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
-            if (concession == null) return NotFound();
-
-            return View(concession);
+            return concession == null ? NotFound() : View(concession);
         }
 
-        // DELETE: POST
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken] // Securitate adaugata: Prevenire CSRF
+        [ValidateAntiForgeryToken]
         public IActionResult DeletePOST(int? id)
         {
             var concession = _unitOfWork.FnBProduct.Get(u => u.Id == id);
@@ -141,7 +120,7 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             _unitOfWork.FnBProduct.Update(concession);
             _unitOfWork.Save();
 
-            TempData["success"] = "Food & Beverage item archived successfully.";
+            TempData["success"] = _localizer["FnB_ArchivedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
     }

@@ -7,49 +7,63 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@ViewData["Title"] - CineAdmin</title>
-    
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#665788",
-                        "primary-container": "#d8c6ff",
-                        "primary-fixed": "#eaddff",
-                        "secondary": "#645b71",
-                        "tertiary": "#7d516e",
-                        "surface": "#fdf8fd",
-                        "surface-container-low": "#f7f2f9",
-                        "surface-container": "#f1ecf4",
-                        "surface-container-lowest": "#ffffff",
-                        "on-surface": "#343139",
-                        "on-surface-variant": "#615e67",
-                        "outline": "#7d7982",
-                        "outline-variant": "#cbc4cf",
-                        "error": "#a8364b"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                        "label": ["Inter", "sans-serif"]
-                    }
-                }
-            }
+        darkMode: "class",
+        theme: {
+        extend: {
+        colors: {
+        "primary": "#665788",
+        "primary-container": "#d8c6ff",
+        "primary-fixed": "#eaddff",
+        "secondary": "#645b71",
+        "tertiary": "#7d516e",
+        "surface": "#fdf8fd",
+        "surface-container-low": "#f7f2f9",
+        "surface-container": "#f1ecf4",
+        "surface-container-lowest": "#ffffff",
+        "on-surface": "#343139",
+        "on-surface-variant": "#615e67",
+        "outline": "#7d7982",
+        "outline-variant": "#cbc4cf",
+        "error": "#a8364b"
+        },
+        fontFamily: {
+        "headline": ["Manrope", "sans-serif"],
+        "body": ["Inter", "sans-serif"],
+        "label": ["Inter", "sans-serif"]
+        }
+        }
+        }
         }
     </script>
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        ::-webkit-scrollbar { height: 6px; width: 6px; }
-        ::-webkit-scrollbar-track { background: #f7f2f9; }
-        ::-webkit-scrollbar-thumb { background: #cbc4cf; border-radius: 10px; }
+        .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+        }
+
+        ::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+        background: #f7f2f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+        background: #cbc4cf;
+        border-radius: 10px;
+        }
     </style>
 </head>
 <body class="bg-surface text-on-surface antialiased font-body flex min-h-screen overflow-x-hidden">
@@ -70,23 +84,23 @@
             <a asp-controller="Dashboard" asp-action="Index" class="@(currentController == "Dashboard" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">dashboard</span> Dashboard
             </a>
-            
+
             <a asp-controller="Cinema" asp-action="Index" class="@(currentController == "Cinema" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">theater_comedy</span> Cinemas
             </a>
-            
+
             <a asp-controller="CinemaHall" asp-action="Index" class="@(currentController == "CinemaHall" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">meeting_room</span> Halls
             </a>
-            
+
             <a asp-controller="Movie" asp-action="Index" class="@(currentController == "Movie" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">movie</span> Movies
             </a>
-            
+
             <a asp-controller="Showtime" asp-action="Index" class="@(currentController == "Showtime" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">schedule</span> Showtimes
             </a>
-            
+
             <a asp-controller="Equipment" asp-action="Index" class="@(currentController == "Equipment" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">settings_input_component</span> Equipment
             </a>
@@ -102,14 +116,31 @@
     </aside>
 
     <div class="flex-1 ml-64 flex flex-col h-screen overflow-y-auto">
+
         <header class="flex justify-between items-center px-8 h-16 w-full shrink-0 z-40 bg-[#8675A9] text-white border-b border-white/10 shadow-sm sticky top-0">
             <span class="text-xl font-bold tracking-tight font-headline">@ViewData["Title"]</span>
+
             <div class="flex items-center gap-4">
                 <div class="relative hidden md:block">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
-                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search operations..." type="text"/>
+                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search operations..." type="text" />
                 </div>
+
+                <div class="h-6 w-px bg-white/20 mx-2 hidden md:block"></div>
+
+                <form id="selectLanguageAdmin" asp-area="" asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 flex items-center">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <div class="flex items-center group cursor-pointer">
+                        <span class="material-symbols-outlined text-white/70 text-[18px] group-hover:text-white transition-colors">language</span>
+                        <select name="culture" onchange="this.form.submit();" class="bg-transparent text-xs font-bold uppercase tracking-widest text-white/70 group-hover:text-white transition-colors border-none focus:ring-0 cursor-pointer py-0 pl-1 pr-6 m-0 shadow-none outline-none appearance-none bg-no-repeat" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\' fill=\'%23ffffff\'><path fill-rule=\'evenodd\' d=\'M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z\' clip-rule=\'evenodd\'/></svg>'); background-position: right 0.2rem center; background-size: 1.2em 1.2em;">
+                            <!option value="en-US" class="text-black bg-white" @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "en-US" ? "selected" : "")>EN</!option>
+                            <!option value="ro-RO" class="text-black bg-white" @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "ro-RO" ? "selected" : "")>RO</!option>
+                        </select>
+                    </div>
+                </form>
+
                 <div class="h-6 w-px bg-white/20 mx-2"></div>
+
                 <div class="w-8 h-8 rounded-full border border-white/20 bg-white/20 flex items-center justify-center text-white font-bold text-xs">AD</div>
             </div>
         </header>

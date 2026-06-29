@@ -1,7 +1,12 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -10,10 +15,12 @@ namespace CinemaSystem.Web.Controllers
     public class DashboardController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public DashboardController(IUnitOfWork unitOfWork)
+        public DashboardController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
         }
 
         public IActionResult Index()
@@ -22,7 +29,6 @@ namespace CinemaSystem.Web.Controllers
             var thirtyDaysAgo = today.AddDays(-30);
             var sevenDaysAgo = today.AddDays(-6);
 
-            // REFACTORIZARE CRITICĂ: Filtrare la nivel de Bază de Date (SQL Server), NU în RAM
             var validBookings = _unitOfWork.Booking.GetAll(
                 filter: b => !b.IsDeleted,
                 includeProperties: "User,Tickets"
@@ -99,7 +105,7 @@ namespace CinemaSystem.Web.Controllers
                 .Select(b => new RecentBookingDTO
                 {
                     ConfirmationCode = b.ConfirmationCode,
-                    CustomerName = b.User?.FullName ?? "Guest",
+                    CustomerName = b.User?.FullName ?? _localizer["Dashboard_Guest"].Value,
                     Amount = b.TotalAmount,
                     Date = b.CreatedDate
                 })

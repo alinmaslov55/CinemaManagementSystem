@@ -1,14 +1,17 @@
 ﻿@model CinemaSystem.Models.ViewModels.DashboardVM
+@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = Localizer["Dashboard_Title"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
-    
+
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
             <div class="flex justify-between items-start mb-4">
                 <div class="p-2.5 bg-secondary-container rounded-xl text-primary shadow-inner">
@@ -16,24 +19,24 @@
                 </div>
             </div>
             <div>
-                <p class="text-on-surface-variant text-sm font-medium mb-1">Total Revenue</p>
+                <p class="text-on-surface-variant text-sm font-medium mb-1">@Localizer["Dashboard_TotalRevenue"]</p>
                 <h3 class="text-3xl font-extrabold text-on-surface font-headline">$@Model.TotalRevenue.ToString("N2")</h3>
             </div>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
             <div class="flex justify-between items-start mb-4">
                 <div class="p-2.5 bg-primary-fixed rounded-xl text-primary shadow-inner">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">trending_up</span>
                 </div>
-                <span class="text-[10px] font-bold text-primary bg-primary-fixed/50 px-2.5 py-1 rounded-full uppercase tracking-wider">Today</span>
+                <span class="text-[10px] font-bold text-primary bg-primary-fixed/50 px-2.5 py-1 rounded-full uppercase tracking-wider">@Localizer["Dashboard_Today"]</span>
             </div>
             <div>
-                <p class="text-on-surface-variant text-sm font-medium mb-1">Today's Revenue</p>
+                <p class="text-on-surface-variant text-sm font-medium mb-1">@Localizer["Dashboard_TodayRevenue"]</p>
                 <h3 class="text-3xl font-extrabold text-on-surface font-headline">$@Model.TodayRevenue.ToString("N2")</h3>
             </div>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
             <div class="flex justify-between items-start mb-4">
                 <div class="p-2.5 bg-tertiary-fixed rounded-xl text-tertiary shadow-inner">
@@ -41,11 +44,11 @@
                 </div>
             </div>
             <div>
-                <p class="text-on-surface-variant text-sm font-medium mb-1">Total Tickets Sold</p>
+                <p class="text-on-surface-variant text-sm font-medium mb-1">@Localizer["Dashboard_TotalTicketsSold"]</p>
                 <h3 class="text-3xl font-extrabold text-on-surface font-headline">@Model.TotalTicketsSold.ToString("N0")</h3>
             </div>
         </div>
-        
+
         <div class="bg-gradient-to-br from-primary to-primary-container p-6 rounded-2xl shadow-lg flex flex-col justify-between text-white relative overflow-hidden">
             <div class="absolute -right-6 -top-6 text-white/10">
                 <span class="material-symbols-outlined text-9xl">analytics</span>
@@ -54,29 +57,29 @@
                 <div class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm shadow-inner">
                     <span class="material-symbols-outlined">group</span>
                 </div>
-                <span class="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider">30 Days</span>
+                <span class="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider">@Localizer["Dashboard_30Days"]</span>
             </div>
             <div class="relative z-10">
-                <p class="text-white/80 text-sm font-medium mb-1">Average Occupancy</p>
+                <p class="text-white/80 text-sm font-medium mb-1">@Localizer["Dashboard_AverageOccupancy"]</p>
                 <h3 class="text-4xl font-extrabold font-headline">@Model.OccupancyRate%</h3>
             </div>
         </div>
     </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         <div class="lg:col-span-2 space-y-8">
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                    <h2 class="text-lg font-bold font-headline mb-4">7-Day Revenue Trend</h2>
+                    <h2 class="text-lg font-bold font-headline mb-4">@Localizer["Dashboard_RevenueTrendTitle"]</h2>
                     <div class="relative w-full h-[250px]">
                         <canvas id="revenueLineChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                    <h2 class="text-lg font-bold font-headline mb-4">Top 5 Movies (Tickets)</h2>
+                    <h2 class="text-lg font-bold font-headline mb-4">@Localizer["Dashboard_TopMoviesTitle"]</h2>
                     <div class="relative w-full h-[250px]">
                         <canvas id="movieBarChart"></canvas>
                     </div>
@@ -86,23 +89,23 @@
             <section class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden">
                 <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-lowest">
                     <h2 class="text-lg font-bold font-headline flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary">receipt_long</span> Recent Transactions
+                        <span class="material-symbols-outlined text-primary">receipt_long</span> @Localizer["Dashboard_RecentTransactions"]
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
                     @if (!Model.RecentBookings.Any())
                     {
-                        <div class="p-8 text-center text-on-surface-variant font-medium">No recent bookings found.</div>
+                        <div class="p-8 text-center text-on-surface-variant font-medium">@Localizer["Dashboard_NoRecentBookings"]</div>
                     }
                     else
                     {
                         <table class="w-full text-left font-body">
                             <thead>
                                 <tr class="bg-surface-container-low text-on-surface-variant text-[10px] uppercase tracking-widest font-bold">
-                                    <th class="px-6 py-4 rounded-tl-lg">Order ID</th>
-                                    <th class="px-6 py-4">Customer</th>
-                                    <th class="px-6 py-4">Amount</th>
-                                    <th class="px-6 py-4 text-right rounded-tr-lg">Time</th>
+                                    <th class="px-6 py-4 rounded-tl-lg">@Localizer["Dashboard_OrderID"]</th>
+                                    <th class="px-6 py-4">@Localizer["Dashboard_Customer"]</th>
+                                    <th class="px-6 py-4">@Localizer["Dashboard_Amount"]</th>
+                                    <th class="px-6 py-4 text-right rounded-tr-lg">@Localizer["Dashboard_Time"]</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-outline-variant/10">
@@ -123,19 +126,19 @@
         </div>
 
         <aside class="space-y-8">
-            
+
             <section class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
                 <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-error text-lg">error</span> Actionable Alerts
+                    <span class="material-symbols-outlined text-error text-lg">error</span> @Localizer["Dashboard_ActionableAlerts"]
                 </h2>
-                <p class="text-xs text-on-surface-variant mb-4">Empty Showtimes (Next 24 Hours)</p>
-                
+                <p class="text-xs text-on-surface-variant mb-4">@Localizer["Dashboard_EmptyShowtimesDesc"]</p>
+
                 <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                     @if (!Model.EmptyShowtimes.Any())
                     {
                         <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex gap-3 text-emerald-700">
                             <span class="material-symbols-outlined">check_circle</span>
-                            <p class="text-sm font-bold mt-0.5">All upcoming showtimes have tickets sold.</p>
+                            <p class="text-sm font-bold mt-0.5">@Localizer["Dashboard_AllClearMessage"]</p>
                         </div>
                     }
                     else
@@ -155,28 +158,28 @@
             </section>
 
             <section class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4">Quick Actions</h2>
+                <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4">@Localizer["Dashboard_QuickActions"]</h2>
                 <div class="grid grid-cols-2 gap-3">
                     <a asp-controller="Movie" asp-action="Upsert" class="flex flex-col items-center justify-center p-4 bg-surface-container-low rounded-xl hover:bg-primary hover:text-white transition-all group border border-transparent hover:border-primary/20 shadow-sm cursor-pointer">
                         <span class="material-symbols-outlined text-primary text-2xl mb-2 group-hover:text-white transition-colors">add_circle</span>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-center">New Movie</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-center">@Localizer["Dashboard_NewMovieBtn"]</span>
                     </a>
                     <a asp-controller="Equipment" asp-action="Upsert" class="flex flex-col items-center justify-center p-4 bg-surface-container-low rounded-xl hover:bg-tertiary hover:text-white transition-all group border border-transparent hover:border-tertiary/20 shadow-sm">
                         <span class="material-symbols-outlined text-tertiary text-2xl mb-2 group-hover:text-white transition-colors">construction</span>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Add Asset</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-center">@Localizer["Dashboard_AddAssetBtn"]</span>
                     </a>
                 </div>
             </section>
 
             <section class="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">System Health</h2>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">@Localizer["Dashboard_SystemHealth"]</h2>
                     <span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
                 </div>
                 <div class="space-y-4">
                     <div>
                         <div class="flex justify-between text-xs font-bold mb-2">
-                            <span>Projector Status</span>
+                            <span>@Localizer["Dashboard_ProjectorStatus"]</span>
                             <span class="text-primary">98%</span>
                         </div>
                         <div class="w-full bg-outline-variant/30 h-1.5 rounded-full">
@@ -185,7 +188,7 @@
                     </div>
                     <div>
                         <div class="flex justify-between text-xs font-bold mb-2">
-                            <span>Audio Systems</span>
+                            <span>@Localizer["Dashboard_AudioSystems"]</span>
                             <span class="text-secondary">92%</span>
                         </div>
                         <div class="w-full bg-outline-variant/30 h-1.5 rounded-full">
@@ -194,14 +197,13 @@
                     </div>
                 </div>
             </section>
-            
+
         </aside>
     </div>
 </main>
 
 @section Scripts {
     <script>
-        // Data binding din C# direct in JS
         const dateLabels = @Html.Raw(Json.Serialize(Model.DateLabels));
         const revenueTrendData = @Html.Raw(Json.Serialize(Model.RevenueTrendData));
 
@@ -215,9 +217,9 @@
             data: {
                 labels: dateLabels,
                 datasets: [{
-                    label: 'Revenue ($)',
+                    label: '@Localizer["Dashboard_ChartRevenue"]',
                     data: revenueTrendData,
-                    borderColor: '#645485', // Tailwind Primary
+                    borderColor: '#645485',
                     backgroundColor: 'rgba(100, 84, 133, 0.15)',
                     borderWidth: 3,
                     fill: true,
@@ -246,14 +248,14 @@
             data: {
                 labels: movieLabels,
                 datasets: [{
-                    label: 'Tickets Sold',
+                    label: '@Localizer["Dashboard_ChartTickets"]',
                     data: movieSalesData,
                     backgroundColor: [
-                        '#645485', // primary
-                        '#795061', // tertiary
-                        '#69577a', // secondary
-                        '#7d6c9f', // primary-container
-                        '#cbc4cf'  // outline-variant
+                        '#645485',
+                        '#795061',
+                        '#69577a',
+                        '#7d6c9f',
+                        '#cbc4cf'
                     ],
                     borderRadius: 6,
                     borderSkipped: false

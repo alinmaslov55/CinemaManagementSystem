@@ -1,7 +1,10 @@
-﻿@model CinemaSystem.Models.ViewModels.CinemaVM
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.ViewModels.CinemaVM
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = Model.Id != 0 ? "Update Cinema" : "Add New Cinema";
+    ViewData["Title"] = Model.Id != 0 ? Localizer["Cinema_UpdateTitle"] : Localizer["Cinema_AddTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -21,7 +24,7 @@
 </style>
 
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-20">
-            
+
     <form method="post" enctype="multipart/form-data">
         <input asp-for="Id" hidden />
         <input asp-for="Logo" hidden />
@@ -29,43 +32,43 @@
         <div class="mb-8 flex justify-between items-end">
             <div>
                 <nav class="flex text-sm text-on-surface-variant mb-2 gap-2 items-center font-label font-bold uppercase tracking-wider">
-                    <a asp-action="Index" class="hover:text-primary transition-colors">Cinemas</a>
+                    <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["Cinema_BreadcrumbCinemas"]</a>
                     <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                    <span class="text-primary font-medium">@(Model.Id != 0 ? "Update" : "Add New") Cinema</span>
+                    <span class="text-primary font-medium">@(Model.Id != 0 ? Localizer["Cinema_Update"] : Localizer["Cinema_AddNew"])</span>
                 </nav>
-                <h2 class="text-3xl font-extrabold text-on-surface tracking-tight font-headline">Manage Location</h2>
+                <h2 class="text-3xl font-extrabold text-on-surface tracking-tight font-headline">@Localizer["Cinema_ManageLocation"]</h2>
             </div>
             <div class="flex gap-3">
-                <a asp-action="Index" class="px-6 py-2.5 rounded-xl border border-outline-variant/50 bg-white text-on-surface hover:bg-surface-container-low transition-colors font-bold font-label text-sm shadow-sm">Cancel</a>
+                <a asp-action="Index" class="px-6 py-2.5 rounded-xl border border-outline-variant/50 bg-white text-on-surface hover:bg-surface-container-low transition-colors font-bold font-label text-sm shadow-sm">@Localizer["Cinema_CancelBtn"]</a>
                 <button type="submit" class="px-8 py-2.5 rounded-xl bg-primary text-white hover:bg-[#5a4b7b] shadow-lg shadow-primary/20 transition-all font-bold font-label flex items-center gap-2 text-sm hover:-translate-y-0.5 active:scale-95">
                     <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">save</span>
-                    Save Cinema
+                    @Localizer["Cinema_SaveBtn"]
                 </button>
             </div>
         </div>
 
         <div class="grid grid-cols-12 gap-8">
-            
+
             <div class="col-span-12 lg:col-span-8 space-y-8">
-                
+
                 <section class="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/20">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="p-2 bg-primary-fixed text-primary rounded-xl">
                             <span class="material-symbols-outlined">info</span>
                         </div>
-                        <h3 class="text-xl font-bold font-headline text-on-surface">General Information</h3>
+                        <h3 class="text-xl font-bold font-headline text-on-surface">@Localizer["Cinema_GeneralInfo"]</h3>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-6">
                         <div class="col-span-2">
-                            <label asp-for="Name" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Cinema Name <span class="text-error">*</span></label>
-                            <input asp-for="Name" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="e.g. Grand Plaza Multiplex" />
+                            <label asp-for="Name" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Cinema_InputName"] <span class="text-error">*</span></label>
+                            <input asp-for="Name" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="@Localizer["Cinema_InputNamePlaceholder"]" />
                             <span asp-validation-for="Name" class="text-error text-xs mt-1 block"></span>
                         </div>
-                        
+
                         <div class="col-span-2">
-                            <label asp-for="Description" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Description</label>
-                            <textarea asp-for="Description" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none leading-relaxed" placeholder="Brief history or unique selling points..." rows="4"></textarea>
+                            <label asp-for="Description" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Cinema_InputDesc"]</label>
+                            <textarea asp-for="Description" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none leading-relaxed" placeholder="@Localizer["Cinema_InputDescPlaceholder"]" rows="4"></textarea>
                             <span asp-validation-for="Description" class="text-error text-xs mt-1 block"></span>
                         </div>
                     </div>
@@ -76,24 +79,24 @@
                         <div class="p-2 bg-secondary-container text-secondary rounded-xl">
                             <span class="material-symbols-outlined">location_on</span>
                         </div>
-                        <h3 class="text-xl font-bold font-headline text-on-surface">Location Details</h3>
+                        <h3 class="text-xl font-bold font-headline text-on-surface">@Localizer["Cinema_LocationDetails"]</h3>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-6">
                         <div class="col-span-2 md:col-span-1">
-                            <label asp-for="City" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">City / Region <span class="text-error">*</span></label>
+                            <label asp-for="City" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Cinema_InputCity"] <span class="text-error">*</span></label>
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-sm">location_city</span>
-                                <input asp-for="City" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest pl-10 pr-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="e.g. Los Angeles" />
+                                <input asp-for="City" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest pl-10 pr-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="@Localizer["Cinema_InputCityPlaceholder"]" />
                             </div>
                             <span asp-validation-for="City" class="text-error text-xs mt-1 block"></span>
                         </div>
 
                         <div class="col-span-2">
-                            <label asp-for="Address" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Full Address <span class="text-error">*</span></label>
+                            <label asp-for="Address" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Cinema_InputAddress"] <span class="text-error">*</span></label>
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-3 top-4 text-outline-variant text-sm">map</span>
-                                <textarea asp-for="Address" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest pl-10 pr-4 py-3 text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Enter the complete street address..." rows="2"></textarea>
+                                <textarea asp-for="Address" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest pl-10 pr-4 py-3 text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="@Localizer["Cinema_InputAddressPlaceholder"]" rows="2"></textarea>
                             </div>
                             <span asp-validation-for="Address" class="text-error text-xs mt-1 block"></span>
                         </div>
@@ -103,44 +106,44 @@
             </div>
 
             <div class="col-span-12 lg:col-span-4 space-y-8">
-                
+
                 <section class="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/20 sticky top-24">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="p-2 bg-tertiary-fixed text-tertiary rounded-xl">
                             <span class="material-symbols-outlined">photo_camera</span>
                         </div>
-                        <h3 class="text-xl font-bold font-headline text-on-surface">Media & Branding</h3>
+                        <h3 class="text-xl font-bold font-headline text-on-surface">@Localizer["Cinema_MediaBranding"]</h3>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-[10px] font-bold text-outline mb-3 uppercase tracking-widest font-label">Cinema Logo / Exterior</label>
-                        
+                        <label class="block text-[10px] font-bold text-outline mb-3 uppercase tracking-widest font-label">@Localizer["Cinema_InputImage"]</label>
+
                         <div class="relative group aspect-[4/3] rounded-2xl overflow-hidden bg-surface-container border-2 border-dashed border-outline-variant/50 flex flex-col items-center justify-center transition-all hover:bg-surface-container-low hover:border-primary file-upload-wrapper shadow-inner">
                             <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp" />
-                            
+
                             @if (!string.IsNullOrEmpty(Model.Logo))
                             {
                                 <img src="@Model.Logo" class="absolute inset-0 w-full h-full object-cover z-0" alt="Cinema Logo" />
                                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center text-white backdrop-blur-sm">
                                     <span class="material-symbols-outlined text-4xl mb-2">cloud_upload</span>
-                                    <span class="text-sm font-bold tracking-widest uppercase">Change Image</span>
+                                    <span class="text-sm font-bold tracking-widest uppercase">@Localizer["Cinema_ChangeImage"]</span>
                                 </div>
                             }
                             else
                             {
                                 <div class="relative z-10 flex flex-col items-center text-outline-variant group-hover:text-primary transition-colors">
                                     <span class="material-symbols-outlined text-5xl mb-2 opacity-50">storefront</span>
-                                    <span class="text-sm font-bold uppercase tracking-widest">Upload Image</span>
+                                    <span class="text-sm font-bold uppercase tracking-widest">@Localizer["Cinema_UploadImage"]</span>
                                     <span class="text-[10px] uppercase tracking-widest mt-1 opacity-70">JPG, PNG, WEBP</span>
                                 </div>
                             }
                         </div>
                     </div>
-                    
+
                     <div class="mt-8 bg-surface-container-low p-5 rounded-2xl border border-outline-variant/20 flex gap-4">
                         <span class="material-symbols-outlined text-primary mt-0.5">lightbulb</span>
                         <p class="text-xs text-on-surface-variant font-medium leading-relaxed">
-                            A high-quality image helps customers recognize your cinema branch on the public booking site. Recommended ratio: <span class="font-bold text-on-surface">4:3</span>.
+                            @Localizer["Cinema_ImageHelperText"] <span class="font-bold text-on-surface">4:3</span>.
                         </p>
                     </div>
                 </section>

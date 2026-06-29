@@ -678,4 +678,805 @@
   <data name="Label_ExpiryDate" xml:space="preserve">
     <value>Data Expirării</value>
   </data>
+	<data name="Dashboard_Guest" xml:space="preserve">
+    <value>Vizitator</value>
+  </data>
+	<data name="Dashboard_Title" xml:space="preserve">
+    <value>Panou de Administrare</value>
+  </data>
+	<data name="Dashboard_TotalRevenue" xml:space="preserve">
+    <value>Venit Total</value>
+  </data>
+	<data name="Dashboard_Today" xml:space="preserve">
+    <value>Astăzi</value>
+  </data>
+	<data name="Dashboard_TodayRevenue" xml:space="preserve">
+    <value>Venitul de Astăzi</value>
+  </data>
+	<data name="Dashboard_TotalTicketsSold" xml:space="preserve">
+    <value>Total Bilete Vândute</value>
+  </data>
+	<data name="Dashboard_30Days" xml:space="preserve">
+    <value>30 Zile</value>
+  </data>
+	<data name="Dashboard_AverageOccupancy" xml:space="preserve">
+    <value>Ocupare Medie</value>
+  </data>
+	<data name="Dashboard_RevenueTrendTitle" xml:space="preserve">
+    <value>Evoluție Venituri (7 Zile)</value>
+  </data>
+	<data name="Dashboard_TopMoviesTitle" xml:space="preserve">
+    <value>Top 5 Filme (Bilete)</value>
+  </data>
+	<data name="Dashboard_RecentTransactions" xml:space="preserve">
+    <value>Tranzacții Recente</value>
+  </data>
+	<data name="Dashboard_NoRecentBookings" xml:space="preserve">
+    <value>Nu au fost găsite rezervări recente.</value>
+  </data>
+	<data name="Dashboard_OrderID" xml:space="preserve">
+    <value>ID Comandă</value>
+  </data>
+	<data name="Dashboard_Customer" xml:space="preserve">
+    <value>Client</value>
+  </data>
+	<data name="Dashboard_Amount" xml:space="preserve">
+    <value>Sumă</value>
+  </data>
+	<data name="Dashboard_Time" xml:space="preserve">
+    <value>Oră</value>
+  </data>
+	<data name="Dashboard_ActionableAlerts" xml:space="preserve">
+    <value>Alerte Active</value>
+  </data>
+	<data name="Dashboard_EmptyShowtimesDesc" xml:space="preserve">
+    <value>Proiecții fără spectatori (Următoarele 24 Ore)</value>
+  </data>
+	<data name="Dashboard_AllClearMessage" xml:space="preserve">
+    <value>Toate proiecțiile viitoare au bilete vândute.</value>
+  </data>
+	<data name="Dashboard_QuickActions" xml:space="preserve">
+    <value>Acțiuni Rapide</value>
+  </data>
+	<data name="Dashboard_NewMovieBtn" xml:space="preserve">
+    <value>Film Nou</value>
+  </data>
+	<data name="Dashboard_AddAssetBtn" xml:space="preserve">
+    <value>Adaugă Echipament</value>
+  </data>
+	<data name="Dashboard_SystemHealth" xml:space="preserve">
+    <value>Stare Sistem</value>
+  </data>
+	<data name="Dashboard_ProjectorStatus" xml:space="preserve">
+    <value>Status Proiectoare</value>
+  </data>
+	<data name="Dashboard_AudioSystems" xml:space="preserve">
+    <value>Sisteme Audio</value>
+  </data>
+	<data name="Dashboard_ChartRevenue" xml:space="preserve">
+    <value>Venit ($)</value>
+  </data>
+	<data name="Dashboard_ChartTickets" xml:space="preserve">
+    <value>Bilete Vândute</value>
+  </data>
+	<data name="Cinema_InvalidFileType" xml:space="preserve">
+    <value>Tip de fișier invalid. Sunt permise doar JPG, PNG și WEBP.</value>
+  </data>
+	<data name="Cinema_CreatedSuccess" xml:space="preserve">
+    <value>Cinematograf creat cu succes.</value>
+  </data>
+	<data name="Cinema_UpdatedSuccess" xml:space="preserve">
+    <value>Cinematograf actualizat cu succes.</value>
+  </data>
+	<data name="Cinema_ArchivedSuccess" xml:space="preserve">
+    <value>Cinematograf arhivat cu succes.</value>
+  </data>
+	<data name="Cinema_IndexTitle" xml:space="preserve">
+    <value>Index Cinematografe</value>
+  </data>
+	<data name="Cinema_IndexSubtitle" xml:space="preserve">
+    <value>Gestionează și monitorizează locațiile cinematografelor</value>
+  </data>
+	<data name="Cinema_AddNewBtn" xml:space="preserve">
+    <value>Adaugă Cinema Nou</value>
+  </data>
+	<data name="Cinema_TotalLocations" xml:space="preserve">
+    <value>Total Locații</value>
+  </data>
+	<data name="Cinema_OperationalSites" xml:space="preserve">
+    <value>Locații operaționale</value>
+  </data>
+	<data name="Cinema_ActiveNow" xml:space="preserve">
+    <value>Active Acum</value>
+  </data>
+	<data name="Cinema_FullCapacity" xml:space="preserve">
+    <value>Capacitate 100%</value>
+  </data>
+	<data name="Cinema_Maintenance" xml:space="preserve">
+    <value>Mentenanță</value>
+  </data>
+	<data name="Cinema_ScheduledUpgrades" xml:space="preserve">
+    <value>Upgrade-uri programate</value>
+  </data>
+	<data name="Cinema_TotalHalls" xml:space="preserve">
+    <value>Total Săli</value>
+  </data>
+	<data name="Cinema_AcrossAllSites" xml:space="preserve">
+    <value>În toate locațiile</value>
+  </data>
+	<data name="Cinema_TableDetails" xml:space="preserve">
+    <value>Detalii Cinema</value>
+  </data>
+	<data name="Cinema_TableLocation" xml:space="preserve">
+    <value>Locație</value>
+  </data>
+	<data name="Cinema_TableStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+	<data name="Cinema_TableActions" xml:space="preserve">
+    <value>Acțiuni</value>
+  </data>
+	<data name="Cinema_NetworkLabel" xml:space="preserve">
+    <value>Rețeaua CinemaSystem</value>
+  </data>
+	<data name="Cinema_StatusActive" xml:space="preserve">
+    <value>Activ</value>
+  </data>
+	<data name="Cinema_EditTitle" xml:space="preserve">
+    <value>Editează Cinema</value>
+  </data>
+	<data name="Cinema_DeleteTitle" xml:space="preserve">
+    <value>Șterge Cinema</value>
+  </data>
+	<data name="Cinema_NoLocations" xml:space="preserve">
+    <value>Nu există locații înregistrate încă.</value>
+  </data>
+	<data name="Cinema_ShowingTotal" xml:space="preserve">
+    <value>Afișare total de</value>
+  </data>
+	<data name="Cinema_UpdateTitle" xml:space="preserve">
+    <value>Actualizează Cinema</value>
+  </data>
+	<data name="Cinema_AddTitle" xml:space="preserve">
+    <value>Adaugă Cinema Nou</value>
+  </data>
+	<data name="Cinema_BreadcrumbCinemas" xml:space="preserve">
+    <value>Cinematografe</value>
+  </data>
+	<data name="Cinema_Update" xml:space="preserve">
+    <value>Actualizare</value>
+  </data>
+	<data name="Cinema_AddNew" xml:space="preserve">
+    <value>Adăugare</value>
+  </data>
+	<data name="Cinema_ManageLocation" xml:space="preserve">
+    <value>Gestionează Locația</value>
+  </data>
+	<data name="Cinema_CancelBtn" xml:space="preserve">
+    <value>Anulează</value>
+  </data>
+	<data name="Cinema_SaveBtn" xml:space="preserve">
+    <value>Salvează Cinema</value>
+  </data>
+	<data name="Cinema_GeneralInfo" xml:space="preserve">
+    <value>Informații Generale</value>
+  </data>
+	<data name="Cinema_InputName" xml:space="preserve">
+    <value>Nume Cinema</value>
+  </data>
+	<data name="Cinema_InputNamePlaceholder" xml:space="preserve">
+    <value>ex. Grand Plaza Multiplex</value>
+  </data>
+	<data name="Cinema_InputDesc" xml:space="preserve">
+    <value>Descriere</value>
+  </data>
+	<data name="Cinema_InputDescPlaceholder" xml:space="preserve">
+    <value>Scurt istoric sau puncte forte...</value>
+  </data>
+	<data name="Cinema_LocationDetails" xml:space="preserve">
+    <value>Detalii Locație</value>
+  </data>
+	<data name="Cinema_InputCity" xml:space="preserve">
+    <value>Oraș / Regiune</value>
+  </data>
+	<data name="Cinema_InputCityPlaceholder" xml:space="preserve">
+    <value>ex. București</value>
+  </data>
+	<data name="Cinema_InputAddress" xml:space="preserve">
+    <value>Adresă Completă</value>
+  </data>
+	<data name="Cinema_InputAddressPlaceholder" xml:space="preserve">
+    <value>Introduceți adresa completă a străzii...</value>
+  </data>
+	<data name="Cinema_MediaBranding" xml:space="preserve">
+    <value>Media &amp; Branding</value>
+  </data>
+	<data name="Cinema_InputImage" xml:space="preserve">
+    <value>Logo Cinema / Exterior</value>
+  </data>
+	<data name="Cinema_ChangeImage" xml:space="preserve">
+    <value>Schimbă Imaginea</value>
+  </data>
+	<data name="Cinema_UploadImage" xml:space="preserve">
+    <value>Încarcă Imagine</value>
+  </data>
+	<data name="Cinema_ImageHelperText" xml:space="preserve">
+    <value>O imagine de înaltă calitate ajută clienții să recunoască această sucursală. Raport recomandat:</value>
+  </data>
+	<data name="Cinema_DeleteLocation" xml:space="preserve">
+    <value>Șterge Locația</value>
+  </data>
+	<data name="Cinema_DeleteWarningTitle" xml:space="preserve">
+    <value>Confirmă Ștergerea Definitivă</value>
+  </data>
+	<data name="Cinema_DeleteWarningDesc1" xml:space="preserve">
+    <value>Ești pe cale să ștergi definitiv cinematograful</value>
+  </data>
+	<data name="Cinema_DeleteWarningDesc2" xml:space="preserve">
+    <value>din baza de date. Această acțiune poate atrage ștergerea sălilor și proiecțiilor asociate. Acțiunea este ireversibilă.</value>
+  </data>
+	<data name="Cinema_CancelDeleteBtn" xml:space="preserve">
+    <value>Anulează &amp; Păstrează</value>
+  </data>
+	<data name="Cinema_ConfirmDeleteBtn" xml:space="preserve">
+    <value>Da, Șterge Locația</value>
+  </data>
+	<data name="Showtime_Error_InvalidData" xml:space="preserve">
+    <value>Date invalide transmise.</value>
+  </data>
+	<data name="Showtime_Error_InvalidMovie" xml:space="preserve">
+    <value>Selecție invalidă a filmului.</value>
+  </data>
+	<data name="Showtime_Error_DateConflict" xml:space="preserve">
+    <value>Conflict: Filmul este disponibil doar între {0} și {1}.</value>
+  </data>
+	<data name="Showtime_Error_TimeConflict" xml:space="preserve">
+    <value>Conflict de timp: Există un alt film programat sau se încalcă pauza de curățenie de 20 minute.</value>
+  </data>
+	<data name="Showtime_Error_NotFound" xml:space="preserve">
+    <value>Proiecția nu a fost găsită.</value>
+  </data>
+	<data name="Showtime_Error_TicketsSold" xml:space="preserve">
+    <value>Operațiune refuzată: S-au vândut deja bilete pentru această sesiune. Nu poți modifica ora sau filmul.</value>
+  </data>
+	<data name="Showtime_Error_DeleteHasBookings" xml:space="preserve">
+    <value>Nu se poate șterge această proiecție deoarece există rezervări active. Te rugăm să anulezi biletele mai întâi.</value>
+  </data>
+	<data name="Showtime_ManagerTitle" xml:space="preserve">
+    <value>Manager Proiecții</value>
+  </data>
+	<data name="Showtime_IndexTitle" xml:space="preserve">
+    <value>Index Proiecții</value>
+  </data>
+	<data name="Showtime_IndexSubtitle" xml:space="preserve">
+    <value>Gestionează programul zilnic și monitorizează alocarea sălilor în complexul tău.</value>
+  </data>
+	<data name="Showtime_TodaysScreenings" xml:space="preserve">
+    <value>Proiecțiile de Astăzi</value>
+  </data>
+	<data name="Showtime_Sessions" xml:space="preserve">
+    <value>Sesiuni</value>
+  </data>
+	<data name="Showtime_RegisteredHalls" xml:space="preserve">
+    <value>Săli Înregistrate</value>
+  </data>
+	<data name="Showtime_TotalRooms" xml:space="preserve">
+    <value>Săli Total</value>
+  </data>
+	<data name="Showtime_TotalCapacity" xml:space="preserve">
+    <value>Capacitate Totală</value>
+  </data>
+	<data name="Showtime_Seats" xml:space="preserve">
+    <value>Locuri</value>
+  </data>
+	<data name="Showtime_GlobalNetwork" xml:space="preserve">
+    <value>Rețeaua Globală (Toate Sălile)</value>
+  </data>
+	<data name="Showtime_NoHallsAvailable" xml:space="preserve">
+    <value>Nicio Sală Disponibilă</value>
+  </data>
+	<data name="Showtime_NoHallsDesc" xml:space="preserve">
+    <value>Trebuie să adaugi săli de cinema înainte de a gestiona proiecțiile.</value>
+  </data>
+	<data name="Showtime_Upcoming" xml:space="preserve">
+    <value>URMĂTORUL</value>
+  </data>
+	<data name="Showtime_NextScreening" xml:space="preserve">
+    <value>Următoarea Proiecție</value>
+  </data>
+	<data name="Showtime_Capacity" xml:space="preserve">
+    <value>Capacitate</value>
+  </data>
+	<data name="Showtime_NoSchedule" xml:space="preserve">
+    <value>Fără Program</value>
+  </data>
+	<data name="Showtime_NoUpcomingShows" xml:space="preserve">
+    <value>Nicio proiecție viitoare</value>
+  </data>
+	<data name="Showtime_NoShowsDesc" xml:space="preserve">
+    <value>Selectează "Gestionează Program" pentru a adăuga filme în această sală.</value>
+  </data>
+	<data name="Showtime_ScheduleTitle" xml:space="preserve">
+    <value>Programează Proiecții</value>
+  </data>
+	<data name="Showtime_BreadcrumbShowtimes" xml:space="preserve">
+    <value>Proiecții</value>
+  </data>
+	<data name="Showtime_BreadcrumbWeekly" xml:space="preserve">
+    <value>Program Săptămânal</value>
+  </data>
+	<data name="Showtime_ModalScheduleMovie" xml:space="preserve">
+    <value>Programează Film</value>
+  </data>
+	<data name="Showtime_ModalEditShowtime" xml:space="preserve">
+    <value>Editează Proiecția</value>
+  </data>
+	<data name="Showtime_SearchSelectMovie" xml:space="preserve">
+    <value>Caută &amp; Selectează Filmul</value>
+  </data>
+	<data name="Showtime_ClickToSearch" xml:space="preserve">
+    <value>-- Click pentru a căuta în librărie --</value>
+  </data>
+	<data name="Showtime_TypeMovieTitle" xml:space="preserve">
+    <value>Introdu titlul unui film...</value>
+  </data>
+	<data name="Showtime_StartTime" xml:space="preserve">
+    <value>Ora de Începere</value>
+  </data>
+	<data name="Showtime_AudioSubtitles" xml:space="preserve">
+    <value>Audio / Subtitrări</value>
+  </data>
+	<data name="Showtime_AudioPlaceholder" xml:space="preserve">
+    <value>ex. EN Sub, RO Dub</value>
+  </data>
+	<data name="Showtime_PriceOverride" xml:space="preserve">
+    <value>Suprascriere Preț (Lei)</value>
+  </data>
+	<data name="Showtime_PriceDefault" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+	<data name="Showtime_DeleteBtn" xml:space="preserve">
+    <value>Șterge</value>
+  </data>
+	<data name="Showtime_CancelBtn" xml:space="preserve">
+    <value>Anulează</value>
+  </data>
+	<data name="Showtime_SaveSessionBtn" xml:space="preserve">
+    <value>Salvează Sesiunea</value>
+  </data>
+	<data name="Showtime_JS_SelectMovieTime" xml:space="preserve">
+    <value>Te rugăm să selectezi un film și o oră de începere.</value>
+  </data>
+	<data name="Showtime_JS_ErrorSaving" xml:space="preserve">
+    <value>Eroare la salvarea proiecției.</value>
+  </data>
+	<data name="Showtime_JS_ConfirmDelete" xml:space="preserve">
+    <value>Ești sigur că vrei să ștergi această proiecție din program?</value>
+  </data>
+	<data name="Showtime_JS_ErrorDeleting" xml:space="preserve">
+    <value>Eroare la ștergerea proiecției.</value>
+  </data>
+	<data name="Movie_InvalidFileType" xml:space="preserve">
+    <value>Tip de fișier invalid. Sunt permise doar JPG, PNG și WEBP.</value>
+  </data>
+	<data name="Movie_CreatedSuccess" xml:space="preserve">
+    <value>Film creat cu succes.</value>
+  </data>
+	<data name="Movie_UpdatedSuccess" xml:space="preserve">
+    <value>Film actualizat cu succes.</value>
+  </data>
+	<data name="Movie_ArchivedSuccess" xml:space="preserve">
+    <value>Film arhivat cu succes.</value>
+  </data>
+	<data name="Movie_ManagementTitle" xml:space="preserve">
+    <value>Management Filme</value>
+  </data>
+	<data name="Movie_ManagementSubtitle" xml:space="preserve">
+    <value>Cataloghează și programează filmele în rețeaua globală.</value>
+  </data>
+	<data name="Movie_AddNewBtn" xml:space="preserve">
+    <value>Adaugă Film Nou</value>
+  </data>
+	<data name="Movie_FilterByGenre" xml:space="preserve">
+    <value>Filtrează după Gen</value>
+  </data>
+	<data name="Movie_AllGenres" xml:space="preserve">
+    <value>Toate Genurile</value>
+  </data>
+	<data name="Movie_ReleaseStatus" xml:space="preserve">
+    <value>Status Lansare</value>
+  </data>
+	<data name="Movie_AllMovies" xml:space="preserve">
+    <value>Toate Filmele</value>
+  </data>
+	<data name="Movie_NowShowing" xml:space="preserve">
+    <value>Acum în Cinema</value>
+  </data>
+	<data name="Movie_Upcoming" xml:space="preserve">
+    <value>În Curând</value>
+  </data>
+	<data name="Movie_TotalFilms" xml:space="preserve">
+    <value>Total Filme</value>
+  </data>
+	<data name="Movie_ActiveShowing" xml:space="preserve">
+    <value>Active (Rulează)</value>
+  </data>
+	<data name="Movie_FilmPoster" xml:space="preserve">
+    <value>Poster Film</value>
+  </data>
+	<data name="Movie_TitleAndID" xml:space="preserve">
+    <value>Titlu &amp; ID</value>
+  </data>
+	<data name="Movie_Genre" xml:space="preserve">
+    <value>Gen</value>
+  </data>
+	<data name="Movie_Price" xml:space="preserve">
+    <value>Preț</value>
+  </data>
+	<data name="Movie_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+	<data name="Movie_Actions" xml:space="preserve">
+    <value>Acțiuni</value>
+  </data>
+	<data name="Movie_Available" xml:space="preserve">
+    <value>Disponibil</value>
+  </data>
+	<data name="Movie_UpcomingStatus" xml:space="preserve">
+    <value>În curând</value>
+  </data>
+	<data name="Movie_EditTitle" xml:space="preserve">
+    <value>Editează Film</value>
+  </data>
+	<data name="Movie_DeleteTitle" xml:space="preserve">
+    <value>Șterge Film</value>
+  </data>
+	<data name="Movie_TotalCatalog" xml:space="preserve">
+    <value>Total catalog:</value>
+  </data>
+	<data name="Movie_UpdateTitle" xml:space="preserve">
+    <value>Actualizare Film</value>
+  </data>
+	<data name="Movie_AddTitle" xml:space="preserve">
+    <value>Adăugare Film Nou</value>
+  </data>
+	<data name="Movie_UpdateMovie" xml:space="preserve">
+    <value>Actualizează Film</value>
+  </data>
+	<data name="Movie_Update" xml:space="preserve">
+    <value>Actualizare</value>
+  </data>
+	<data name="Movie_AddNew" xml:space="preserve">
+    <value>Adăugare</value>
+  </data>
+	<data name="Movie_UpsertSubtitle" xml:space="preserve">
+    <value>Configurează detaliile, media și categoriile filmului.</value>
+  </data>
+	<data name="Movie_GeneralInfo" xml:space="preserve">
+    <value>Informații Generale</value>
+  </data>
+	<data name="Movie_InputTitle" xml:space="preserve">
+    <value>Titlu Film</value>
+  </data>
+	<data name="Movie_InputTitlePlaceholder" xml:space="preserve">
+    <value>ex. Inception</value>
+  </data>
+	<data name="Movie_InputSynopsis" xml:space="preserve">
+    <value>Sinopsis</value>
+  </data>
+	<data name="Movie_InputSynopsisPlaceholder" xml:space="preserve">
+    <value>Introdu un sinopsis captivant...</value>
+  </data>
+	<data name="Movie_InputDuration" xml:space="preserve">
+    <value>Durată (Min)</value>
+  </data>
+	<data name="Movie_InputPrice" xml:space="preserve">
+    <value>Preț Bilet</value>
+  </data>
+	<data name="Movie_InputStartDate" xml:space="preserve">
+    <value>Data Lansării</value>
+  </data>
+	<data name="Movie_InputEndDate" xml:space="preserve">
+    <value>Data Încheierii</value>
+  </data>
+	<data name="Movie_Categorization" xml:space="preserve">
+    <value>Categorizare</value>
+  </data>
+	<data name="Movie_InputGenre" xml:space="preserve">
+    <value>Gen</value>
+  </data>
+	<data name="Movie_SelectGenre" xml:space="preserve">
+    <value>-- Selectează Gen --</value>
+  </data>
+	<data name="Movie_InputContentRating" xml:space="preserve">
+    <value>Rating Conținut</value>
+  </data>
+	<data name="Movie_SelectRating" xml:space="preserve">
+    <value>-- Selectează Rating --</value>
+  </data>
+	<data name="Movie_MediaAssets" xml:space="preserve">
+    <value>Media</value>
+  </data>
+	<data name="Movie_InputPoster" xml:space="preserve">
+    <value>Imagine Poster</value>
+  </data>
+	<data name="Movie_NoPoster" xml:space="preserve">
+    <value>Niciun Poster Disponibil</value>
+  </data>
+	<data name="Movie_ClickToUpload" xml:space="preserve">
+    <value>Click pentru Încărcare</value>
+  </data>
+	<data name="Movie_InputTrailer" xml:space="preserve">
+    <value>Link Trailer (YouTube)</value>
+  </data>
+	<data name="Movie_AdminQuickActions" xml:space="preserve">
+    <value>Acțiuni Rapide Admin</value>
+  </data>
+	<data name="Movie_VisibleInGallery" xml:space="preserve">
+    <value>Vizibil în Galerie (Lansat)</value>
+  </data>
+	<data name="Movie_VisibilityDisclaimer" xml:space="preserve">
+    <value>Modificările se vor reflecta imediat pe platforma publică.</value>
+  </data>
+	<data name="Button_Cancel" xml:space="preserve">
+    <value>Anulează</value>
+  </data>
+	<data name="Movie_SaveChanges" xml:space="preserve">
+    <value>Salvează Modificările</value>
+  </data>
+	<data name="Movie_PublishMovie" xml:space="preserve">
+    <value>Publică Filmul</value>
+  </data>
+	<data name="Movie_ArchiveTitle" xml:space="preserve">
+    <value>Arhivare Film</value>
+  </data>
+	<data name="Movie_ArchiveRecord" xml:space="preserve">
+    <value>Arhivare Înregistrare</value>
+  </data>
+	<data name="Movie_ArchiveWarningTitle" xml:space="preserve">
+    <value>Arhivare Catalog Filme</value>
+  </data>
+	<data name="Movie_ArchiveWarningDesc1" xml:space="preserve">
+    <value>Ești pe cale să arhivezi filmul</value>
+  </data>
+	<data name="Movie_ArchiveWarningDesc2" xml:space="preserve">
+    <value>Acest lucru va ascunde filmul și proiecțiile din catalogul public. Istoricul și biletele trecute vor rămâne în siguranță.</value>
+  </data>
+	<data name="Movie_ConfirmArchive" xml:space="preserve">
+    <value>Confirmă Arhivarea</value>
+  </data>
+	<data name="Equipment_Error_NotFound" xml:space="preserve">
+    <value>Eroare: Echipamentul nu a putut fi găsit.</value>
+  </data>
+	<data name="Equipment_CreatedSuccess" xml:space="preserve">
+    <value>Echipament înregistrat cu succes.</value>
+  </data>
+	<data name="Equipment_UpdatedSuccess" xml:space="preserve">
+    <value>Echipament actualizat cu succes.</value>
+  </data>
+	<data name="Equipment_ArchivedSuccess" xml:space="preserve">
+    <value>Echipament arhivat cu succes.</value>
+  </data>
+	<data name="Equipment_Error_NotFoundAjax" xml:space="preserve">
+    <value>Eroare: Echipament negăsit.</value>
+  </data>
+	<data name="Equipment_DeleteSuccessAjax" xml:space="preserve">
+    <value>Ștergere finalizată cu succes.</value>
+  </data>
+	<data name="Equipment_IndexTitle" xml:space="preserve">
+    <value>Inventar Echipamente</value>
+  </data>
+	<data name="Equipment_IndexSubtitle" xml:space="preserve">
+    <value>Monitorizează și gestionează flota tehnologică din toate sălile de cinema.</value>
+  </data>
+	<data name="Equipment_ExportReportBtn" xml:space="preserve">
+    <value>Exportă Raport</value>
+  </data>
+	<data name="Equipment_RegisterAssetBtn" xml:space="preserve">
+    <value>Înregistrează Echipament</value>
+  </data>
+	<data name="Equipment_GlobalAssets" xml:space="preserve">
+    <value>Echipamente Globale</value>
+  </data>
+	<data name="Equipment_RegisteredInFleet" xml:space="preserve">
+    <value>Înregistrate în flotă</value>
+  </data>
+	<data name="Equipment_OperationalStatus" xml:space="preserve">
+    <value>Operațional</value>
+  </data>
+	<data name="Equipment_ActiveUnits" xml:space="preserve">
+    <value>unități active</value>
+  </data>
+	<data name="Equipment_MaintenanceStatus" xml:space="preserve">
+    <value>Mentenanță</value>
+  </data>
+	<data name="Equipment_RequireAttention" xml:space="preserve">
+    <value>Necesită atenție</value>
+  </data>
+	<data name="Equipment_AllTypes" xml:space="preserve">
+    <value>Toate Tipurile</value>
+  </data>
+	<data name="Equipment_AllStatuses" xml:space="preserve">
+    <value>Toate Statusurile</value>
+  </data>
+	<data name="Equipment_TableAssetSN" xml:space="preserve">
+    <value>Nume Echipament &amp; SN</value>
+  </data>
+	<data name="Equipment_TableCategory" xml:space="preserve">
+    <value>Categorie</value>
+  </data>
+	<data name="Equipment_TableLocation" xml:space="preserve">
+    <value>Locație</value>
+  </data>
+	<data name="Equipment_TableStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+	<data name="Equipment_TableNextMaintenance" xml:space="preserve">
+    <value>Următoarea Mentenanță</value>
+  </data>
+	<data name="Equipment_TableActions" xml:space="preserve">
+    <value>Acțiuni</value>
+  </data>
+	<data name="Equipment_NoAssets" xml:space="preserve">
+    <value>Niciun echipament înregistrat încă în flotă.</value>
+  </data>
+	<data name="Equipment_InstalledLabel" xml:space="preserve">
+    <value>Instalat</value>
+  </data>
+	<data name="Equipment_Unscheduled" xml:space="preserve">
+    <value>Neprogramat</value>
+  </data>
+	<data name="Equipment_ShowingFleetOf" xml:space="preserve">
+    <value>Se afișează flota de</value>
+  </data>
+	<data name="Equipment_AssetsCountLabel" xml:space="preserve">
+    <value>echipamente</value>
+  </data>
+	<data name="Equipment_UpdateTitle" xml:space="preserve">
+    <value>Actualizare Echipament</value>
+  </data>
+	<data name="Equipment_RegisterTitle" xml:space="preserve">
+    <value>Înregistrare Echipament</value>
+  </data>
+	<data name="Equipment_BreadcrumbInventory" xml:space="preserve">
+    <value>Inventar Echipamente</value>
+  </data>
+	<data name="Equipment_RegisterNew" xml:space="preserve">
+    <value>Înregistrare Echipament Nou</value>
+  </data>
+	<data name="Equipment_GeneralInfo" xml:space="preserve">
+    <value>Informații Generale</value>
+  </data>
+	<data name="Equipment_AssetName" xml:space="preserve">
+    <value>Nume Echipament</value>
+  </data>
+	<data name="Equipment_Category" xml:space="preserve">
+    <value>Categorie</value>
+  </data>
+	<data name="Equipment_SelectType" xml:space="preserve">
+    <value>-- Selectează Tip --</value>
+  </data>
+	<data name="Equipment_SerialNumber" xml:space="preserve">
+    <value>Număr de Serie (SN)</value>
+  </data>
+	<data name="Equipment_Assignment" xml:space="preserve">
+    <value>Atribuire</value>
+  </data>
+	<data name="Equipment_InstalledLocation" xml:space="preserve">
+    <value>Locație Instalare (Sală)</value>
+  </data>
+	<data name="Equipment_SelectHall" xml:space="preserve">
+    <value>-- Selectează Sală --</value>
+  </data>
+	<data name="Equipment_CurrentStatus" xml:space="preserve">
+    <value>Status Curent</value>
+  </data>
+	<data name="Equipment_Desc_Operational" xml:space="preserve">
+    <value>Echipamentul funcționează normal.</value>
+  </data>
+	<data name="Equipment_Desc_Maintenance" xml:space="preserve">
+    <value>Echipamentul necesită revizie tehnică.</value>
+  </data>
+	<data name="Equipment_Desc_Faulty" xml:space="preserve">
+    <value>Echipamentul este offline sau defect.</value>
+  </data>
+	<data name="Equipment_TechnicalTimeline" xml:space="preserve">
+    <value>Istoric Tehnic</value>
+  </data>
+	<data name="Equipment_PurchaseDate" xml:space="preserve">
+    <value>Data Achiziției</value>
+  </data>
+	<data name="Equipment_LastService" xml:space="preserve">
+    <value>Ultima Mentenanță</value>
+  </data>
+	<data name="Equipment_NextService" xml:space="preserve">
+    <value>Următoarea Mentenanță</value>
+  </data>
+	<data name="Equipment_ServicingLog" xml:space="preserve">
+    <value>Jurnal Service</value>
+  </data>
+	<data name="Equipment_TechnicalNotes" xml:space="preserve">
+    <value>Note Tehnice &amp; Istoric</value>
+  </data>
+	<data name="Equipment_SaveDataBtn" xml:space="preserve">
+    <value>Salvează Date</value>
+  </data>
+	<data name="Equipment_RegisterNewBtn" xml:space="preserve">
+    <value>Înregistrează Nou</value>
+  </data>
+	<data name="Equipment_DeleteAssetBtn" xml:space="preserve">
+    <value>Șterge Echipament</value>
+  </data>
+	<data name="Equipment_DeleteAssetTitle" xml:space="preserve">
+    <value>Șterge Echipament</value>
+  </data>
+	<data name="Equipment_BreadcrumbEquipment" xml:space="preserve">
+    <value>Echipamente</value>
+  </data>
+	<data name="Equipment_ConfirmPermanentDeletion" xml:space="preserve">
+    <value>Confirmă Ștergerea Definitivă</value>
+  </data>
+	<data name="Equipment_DeleteWarningDesc1" xml:space="preserve">
+    <value>Ești pe cale să ștergi definitiv echipamentul</value>
+  </data>
+	<data name="Equipment_DeleteWarningDesc2" xml:space="preserve">
+    <value>din inventar. Aceasta va șterge toate jurnalele de mentenanță și istoricul. Acțiunea nu poate fi anulată.</value>
+  </data>
+	<data name="Equipment_ActiveSite" xml:space="preserve">
+    <value>Activ</value>
+  </data>
+	<data name="Equipment_LocationLabel" xml:space="preserve">
+    <value>Locație Instalare</value>
+  </data>
+	<data name="Equipment_LastMaintenanceLabel" xml:space="preserve">
+    <value>Ultima Mentenanță</value>
+  </data>
+	<data name="Equipment_NoRecord" xml:space="preserve">
+    <value>Niciun Istoric</value>
+  </data>
+	<data name="Equipment_Unassigned" xml:space="preserve">
+    <value>Neatribuit</value>
+  </data>
+	<data name="Equipment_CancelKeepAsset" xml:space="preserve">
+    <value>Anulează &amp; Păstrează</value>
+  </data>
+	<data name="Equipment_ConfirmDeleteAsset" xml:space="preserve">
+    <value>Da, Șterge Echipamentul</value>
+  </data>
+	<data name="Equipment_JS_ConfirmDeleteTitle" xml:space="preserve">
+    <value>Ștergi acest Echipament?</value>
+  </data>
+	<data name="Equipment_JS_ConfirmDeleteText" xml:space="preserve">
+    <value>Această acțiune va șterge definitiv echipamentul din baza de date.</value>
+  </data>
+	<data name="Equipment_JS_ConfirmDeleteBtn" xml:space="preserve">
+    <value>Da, șterge-l</value>
+  </data>
+	<data name="Equipment_JS_Error" xml:space="preserve">
+    <value>Eroare</value>
+  </data>
+	<data name="Equipment_JS_NetworkError" xml:space="preserve">
+    <value>Eroare de rețea. Cererea nu a putut fi procesată.</value>
+  </data>
+	<data name="FnB_InvalidFileType" xml:space="preserve"><value>Tip de fișier invalid. Sunt permise doar JPG, PNG și WEBP.</value></data>
+	<data name="FnB_CreatedSuccess" xml:space="preserve"><value>Articolul alimentar a fost creat cu succes.</value></data>
+	<data name="FnB_UpdatedSuccess" xml:space="preserve"><value>Articolul alimentar a fost actualizat cu succes.</value></data>
+	<data name="FnB_ArchivedSuccess" xml:space="preserve"><value>Articolul alimentar a fost arhivat cu succes.</value></data>
+	<data name="FnB_IndexTitle" xml:space="preserve"><value>Meniu Gustări &amp; Băuturi</value></data>
+	<data name="FnB_IndexSubtitle" xml:space="preserve"><value>Gestionează produsele disponibile în cinematografe.</value></data>
+	<data name="FnB_AddProductBtn" xml:space="preserve"><value>Adaugă Produs</value></data>
+	<data name="FnB_TotalItems" xml:space="preserve"><value>Total Produse</value></data>
+	<data name="FnB_ActiveInStock" xml:space="preserve"><value>Active (Stoc)</value></data>
+	<data name="FnB_Combos" xml:space="preserve"><value>Combo-uri Disponibile</value></data>
+	<data name="FnB_AvgPrice" xml:space="preserve"><value>Preț Mediu</value></data>
+	<data name="FnB_Product" xml:space="preserve"><value>Produs</value></data>
+	<data name="FnB_Category" xml:space="preserve"><value>Categorie</value></data>
+	<data name="FnB_Price" xml:space="preserve"><value>Preț</value></data>
+	<data name="FnB_Status" xml:space="preserve"><value>Status</value></data>
+	<data name="FnB_Actions" xml:space="preserve"><value>Acțiuni</value></data>
+	<data name="FnB_NoItems" xml:space="preserve"><value>Niciun produs găsit în meniu.</value></data>
+	<data name="FnB_InStock" xml:space="preserve"><value>În Stoc</value></data>
+	<data name="FnB_SoldOut" xml:space="preserve"><value>Indisponibil</value></data>
+	<data name="FnB_ShowingMenuOf" xml:space="preserve"><value>Afișare meniu de</value></data>
+	<data name="FnB_ItemsLabel" xml:space="preserve"><value>produse</value></data>
 </root>

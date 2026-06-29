@@ -1,9 +1,12 @@
-﻿@model CinemaSystem.Models.ViewModels.EquipmentVM
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.ViewModels.EquipmentVM
 @using CinemaSystem.Models.Data.Enums
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = Model.Equipment.Id != 0 ? "Update Asset" : "Register Asset";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml"; 
+    ViewData["Title"] = Model.Equipment.Id != 0 ? Localizer["Equipment_UpdateTitle"] : Localizer["Equipment_RegisterTitle"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <style>
@@ -11,10 +14,12 @@
         border-color: #665788;
         background-color: #eaddff40;
     }
-    .status-radio:checked + div .radio-icon {
-        opacity: 1;
-        transform: scale(1);
-    }
+
+        .status-radio:checked + div .radio-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
     .radio-icon {
         opacity: 0;
         transform: scale(0.5);
@@ -23,40 +28,40 @@
 </style>
 
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-20">
-            
+
     <nav class="flex text-sm text-on-surface-variant mb-8 gap-2 font-label items-center font-semibold">
-        <a asp-action="Index" class="hover:text-primary transition-colors">Equipment Inventory</a>
+        <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["Equipment_BreadcrumbInventory"]</a>
         <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-        <span class="text-primary font-bold">@(Model.Equipment.Id != 0 ? "Update Asset" : "Register New Asset")</span>
+        <span class="text-primary font-bold">@(Model.Equipment.Id != 0 ? Localizer["Equipment_UpdateTitle"] : Localizer["Equipment_RegisterNew"])</span>
     </nav>
 
     <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <input asp-for="Equipment.Id" hidden />
 
         <div class="lg:col-span-8 space-y-6">
-            
+
             <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/30">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 rounded-lg bg-primary-fixed text-primary">
                         <span class="material-symbols-outlined">info</span>
                     </div>
-                    <h3 class="text-lg font-bold font-headline text-on-surface">General Information</h3>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">@Localizer["Equipment_GeneralInfo"]</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
-                        <label asp-for="Equipment.Name" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Asset Name <span class="text-error">*</span></label>
+                        <label asp-for="Equipment.Name" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_AssetName"] <span class="text-error">*</span></label>
                         <input asp-for="Equipment.Name" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" placeholder="e.g., Sony 4K Laser Projector" />
                         <span asp-validation-for="Equipment.Name" class="text-error text-xs mt-1 block"></span>
                     </div>
                     <div>
-                        <label asp-for="Equipment.Type" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Category <span class="text-error">*</span></label>
+                        <label asp-for="Equipment.Type" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_Category"] <span class="text-error">*</span></label>
                         <select asp-for="Equipment.Type" asp-items="Html.GetEnumSelectList<EquipmentType>()" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
-                            <option disabled selected value="">-- Select Type --</option>
+                            <option disabled selected value="">@Localizer["Equipment_SelectType"]</option>
                         </select>
                         <span asp-validation-for="Equipment.Type" class="text-error text-xs mt-1 block"></span>
                     </div>
                     <div>
-                        <label asp-for="Equipment.SerialNumber" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Serial Number</label>
+                        <label asp-for="Equipment.SerialNumber" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_SerialNumber"]</label>
                         <input asp-for="Equipment.SerialNumber" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" placeholder="e.g., SN-8829-XJ-001" />
                         <span asp-validation-for="Equipment.SerialNumber" class="text-error text-xs mt-1 block"></span>
                     </div>
@@ -68,12 +73,12 @@
                     <div class="p-2 rounded-lg bg-secondary-container text-secondary">
                         <span class="material-symbols-outlined">location_on</span>
                     </div>
-                    <h3 class="text-lg font-bold font-headline text-on-surface">Assignment</h3>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">@Localizer["Equipment_Assignment"]</h3>
                 </div>
                 <div>
-                    <label asp-for="Equipment.CinemaHallId" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Installed Location (Hall) <span class="text-error">*</span></label>
+                    <label asp-for="Equipment.CinemaHallId" class="block text-xs font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_InstalledLocation"] <span class="text-error">*</span></label>
                     <select asp-for="Equipment.CinemaHallId" asp-items="@Model.HallList" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold cursor-pointer appearance-none">
-                        <option disabled selected value="">-- Select Hall / Room --</option>
+                        <option disabled selected value="">@Localizer["Equipment_SelectHall"]</option>
                     </select>
                     <span asp-validation-for="Equipment.CinemaHallId" class="text-error text-xs mt-1 block"></span>
                 </div>
@@ -84,27 +89,27 @@
                     <div class="p-2 rounded-lg bg-[#ffd8e6] text-[#7d516e]">
                         <span class="material-symbols-outlined">vibration</span>
                     </div>
-                    <h3 class="text-lg font-bold font-headline text-on-surface">Current Status</h3>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">@Localizer["Equipment_CurrentStatus"]</h3>
                 </div>
-                
+
                 <div class="space-y-3">
                     @foreach (var item in Html.GetEnumSelectList<EquipmentStatus>())
                     {
                         string iconName = "check_circle";
                         string iconColor = "text-emerald-500";
-                        string desc = "Asset is functioning normally.";
+                        string desc = Localizer["Equipment_Desc_Operational"].Value;
 
                         if (item.Text.Contains("Maintenance"))
                         {
                             iconName = "warning";
                             iconColor = "text-amber-500";
-                            desc = "Asset requires scheduled technical review.";
+                            desc = Localizer["Equipment_Desc_Maintenance"].Value;
                         }
-                        else if (item.Text.Contains("Out") || item.Text.Contains("Faulty"))
+                        else if (item.Text.Contains("Out") || item.Text.Contains("Broken") || item.Text.Contains("Retired") || item.Text.Contains("Faulty"))
                         {
                             iconName = "error";
                             iconColor = "text-error";
-                            desc = "Asset is currently offline or broken.";
+                            desc = Localizer["Equipment_Desc_Faulty"].Value;
                         }
 
                         <label class="relative block cursor-pointer group">
@@ -127,21 +132,21 @@
                     <div class="p-2 rounded-lg bg-[#433c50] text-white">
                         <span class="material-symbols-outlined">engineering</span>
                     </div>
-                    <h3 class="text-lg font-bold font-headline text-on-surface">Technical Timeline</h3>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">@Localizer["Equipment_TechnicalTimeline"]</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label asp-for="Equipment.PurchaseDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Purchase Date <span class="text-error">*</span></label>
+                        <label asp-for="Equipment.PurchaseDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_PurchaseDate"] <span class="text-error">*</span></label>
                         <input asp-for="Equipment.PurchaseDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
                         <span asp-validation-for="Equipment.PurchaseDate" class="text-error text-xs mt-1 block"></span>
                     </div>
                     <div>
-                        <label asp-for="Equipment.LastMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Last Service</label>
+                        <label asp-for="Equipment.LastMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_LastService"]</label>
                         <input asp-for="Equipment.LastMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
                         <span asp-validation-for="Equipment.LastMaintenanceDate" class="text-error text-xs mt-1 block"></span>
                     </div>
                     <div>
-                        <label asp-for="Equipment.NextMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Next Service</label>
+                        <label asp-for="Equipment.NextMaintenanceDate" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["Equipment_NextService"]</label>
                         <input asp-for="Equipment.NextMaintenanceDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-surface border border-outline-variant/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-semibold" />
                         <span asp-validation-for="Equipment.NextMaintenanceDate" class="text-error text-xs mt-1 block"></span>
                     </div>
@@ -151,15 +156,15 @@
         </div>
 
         <div class="lg:col-span-4 flex flex-col gap-6">
-            
+
             <div class="bg-surface-container-lowest rounded-2xl flex flex-col shadow-sm border border-outline-variant/30 flex-1">
                 <div class="p-6 border-b border-outline-variant/20 flex items-center justify-between">
-                    <h3 class="text-lg font-bold font-headline text-on-surface">Servicing Log</h3>
+                    <h3 class="text-lg font-bold font-headline text-on-surface">@Localizer["Equipment_ServicingLog"]</h3>
                     <span class="material-symbols-outlined text-outline">history_edu</span>
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <label asp-for="Equipment.MaintenanceNotes" class="block text-xs font-bold text-outline mb-2 uppercase tracking-widest font-label">Technical Notes & History</label>
-                    <textarea asp-for="Equipment.MaintenanceNotes" class="w-full flex-1 min-h-[300px] bg-[#fdf8fd] border border-outline-variant/50 rounded-xl p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-medium leading-relaxed resize-none placeholder-outline/50" placeholder="Document installation details, firmware updates, or repair logs here..."></textarea>
+                    <label asp-for="Equipment.MaintenanceNotes" class="block text-xs font-bold text-outline mb-2 uppercase tracking-widest font-label">@Localizer["Equipment_TechnicalNotes"]</label>
+                    <textarea asp-for="Equipment.MaintenanceNotes" class="w-full flex-1 min-h-[300px] bg-[#fdf8fd] border border-outline-variant/50 rounded-xl p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm font-medium leading-relaxed resize-none placeholder-outline/50" placeholder="..."></textarea>
                     <span asp-validation-for="Equipment.MaintenanceNotes" class="text-error text-xs mt-1 block"></span>
                 </div>
             </div>
@@ -167,17 +172,17 @@
             <div class="space-y-3">
                 <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold font-headline shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">save</span>
-                    @(Model.Equipment.Id != 0 ? "Save Equipment Data" : "Register New Equipment")
+                    @(Model.Equipment.Id != 0 ? Localizer["Equipment_SaveDataBtn"] : Localizer["Equipment_RegisterNewBtn"])
                 </button>
-                
+
                 <div class="grid grid-cols-2 gap-3">
                     <a asp-action="Index" class="py-3 bg-white border border-outline-variant/50 text-on-surface text-center rounded-xl font-bold font-label text-sm hover:bg-surface-container-low transition-colors">
-                        Cancel
+                        @Localizer["Button_Cancel"]
                     </a>
-                    @if(Model.Equipment.Id != 0)
+                    @if (Model.Equipment.Id != 0)
                     {
                         <button type="button" onClick="confirmDelete()" class="py-3 bg-[#f97386]/10 border border-[#a8364b]/30 text-[#a8364b] rounded-xl font-bold font-label text-sm hover:bg-[#f97386]/20 transition-colors">
-                            Delete Asset
+                            @Localizer["Equipment_DeleteAssetBtn"]
                         </button>
                     }
                 </div>
@@ -189,15 +194,21 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        const titleText = '@Localizer["Equipment_JS_ConfirmDeleteTitle"]';
+        const bodyText = '@Localizer["Equipment_JS_ConfirmDeleteText"]';
+        const confirmBtn = '@Localizer["Equipment_JS_ConfirmDeleteBtn"]';
+        const errorText = '@Localizer["Equipment_JS_Error"]';
+        const networkErrorText = '@Localizer["Equipment_JS_NetworkError"]';
+
         function confirmDelete() {
             Swal.fire({
-                title: 'Delete this Asset?',
-                text: "This action will permanently remove the equipment from the database.",
+                title: titleText,
+                text: bodyText,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#a8364b',
                 cancelButtonColor: '#615e67',
-                confirmButtonText: 'Yes, delete it',
+                confirmButtonText: confirmBtn,
                 customClass: {
                     title: 'font-headline font-bold text-[#1a1c1c]',
                     popup: 'rounded-2xl shadow-2xl border border-[#cbc4cf]/30'
@@ -212,6 +223,8 @@
                         } else {
                             Swal.fire('Error', data.message, 'error');
                         }
+                    }).catch(error => {
+                        Swal.fire('Network Error', networkErrorText, 'error');
                     });
                 }
             });

@@ -1,18 +1,20 @@
-﻿@model CinemaSystem.Models.Entities.Movie
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.Entities.Movie
 @using CinemaSystem.Models.Data.Enums
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Archive Movie";
+    ViewData["Title"] = Localizer["Movie_ArchiveTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-
 <main class="flex-1 p-8 flex justify-center items-start">
     <div class="w-full max-w-3xl mt-8">
 
         <nav class="flex text-sm text-on-surface-variant mb-6 gap-2 font-label items-center uppercase tracking-wider font-bold">
-            <a asp-action="Index" class="hover:text-primary transition-colors">Movie Management</a>
+            <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["Movie_ManagementTitle"]</a>
             <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span class="text-amber-600 font-semibold">Archive Record</span>
+            <span class="text-amber-600 font-semibold">@Localizer["Movie_ArchiveRecord"]</span>
         </nav>
 
         <div class="bg-amber-50 border border-amber-200 p-6 rounded-2xl mb-8 flex items-start gap-4 shadow-sm">
@@ -20,9 +22,9 @@
                 <span class="material-symbols-outlined text-3xl">archive</span>
             </div>
             <div>
-                <h2 class="text-xl font-extrabold text-amber-800 font-headline mb-1">Archive Movie Catalog</h2>
+                <h2 class="text-xl font-extrabold text-amber-800 font-headline mb-1">@Localizer["Movie_ArchiveWarningTitle"]</h2>
                 <p class="text-amber-800/80 text-sm font-medium leading-relaxed">
-                    You are about to archive the movie <strong>"@Model.Title"</strong>. This will hide the movie and its upcoming showtimes from the public catalog. <strong>Historical data, revenue, and past tickets will remain safely stored for reporting.</strong>
+                    @Localizer["Movie_ArchiveWarningDesc1"] <strong>"@Model.Title"</strong>. @Localizer["Movie_ArchiveWarningDesc2"]
                 </p>
             </div>
         </div>
@@ -60,14 +62,14 @@
 
                 <div class="grid grid-cols-2 gap-y-4 gap-x-8 mt-6">
                     <div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Duration</p>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@Localizer["Movie_InputDuration"]</p>
                         <p class="text-sm font-semibold text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">schedule</span>
-                            @Model.DurationInMinutes Minutes
+                            @Model.DurationInMinutes @Localizer["Label_Min"]
                         </p>
                     </div>
                     <div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Ticket Price</p>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@Localizer["Movie_InputPrice"]</p>
                         <p class="text-sm font-semibold text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">payments</span>
                             $@Model.Price.ToString("F2")
@@ -81,12 +83,12 @@
             <input asp-for="Id" hidden />
 
             <a asp-action="Index" class="px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
-                Cancel
+                @Localizer["Button_Cancel"]
             </a>
 
             <button type="submit" class="px-10 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-lg shadow-amber-600/20 active:scale-95 transition-all font-label flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">archive</span>
-                Confirm Archive
+                @Localizer["Movie_ConfirmArchive"]
             </button>
         </form>
 

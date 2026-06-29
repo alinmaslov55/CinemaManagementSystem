@@ -4,6 +4,7 @@ using CinemaSystem.Models.Entities;
 using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -14,12 +15,14 @@ namespace CinemaSystem.Web.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMovieSyncService _movieSyncService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public MovieController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IMovieSyncService movieSyncService)
+        public MovieController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IMovieSyncService movieSyncService, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
             _movieSyncService = movieSyncService;
+            _localizer = localizer;
         }
 
         public IActionResult Index(MovieCategory? category, string? releaseStatus)
@@ -115,7 +118,7 @@ namespace CinemaSystem.Web.Controllers
 
                 if (!allowedExtensions.Contains(extension))
                 {
-                    TempData["error"] = "Invalid file type. Only JPG, PNG, and WEBP are allowed.";
+                    TempData["error"] = _localizer["Movie_InvalidFileType"].Value;
                     return View(obj);
                 }
 
@@ -142,12 +145,12 @@ namespace CinemaSystem.Web.Controllers
             if (obj.Id == 0)
             {
                 _unitOfWork.Movie.Add(movieToSave);
-                TempData["success"] = "Movie created successfully";
+                TempData["success"] = _localizer["Movie_CreatedSuccess"].Value;
             }
             else
             {
                 _unitOfWork.Movie.Update(movieToSave);
-                TempData["success"] = "Movie updated successfully";
+                TempData["success"] = _localizer["Movie_UpdatedSuccess"].Value;
             }
 
             _unitOfWork.Save();
@@ -175,7 +178,7 @@ namespace CinemaSystem.Web.Controllers
             _unitOfWork.Movie.Update(obj);
             _unitOfWork.Save();
 
-            TempData["success"] = "Movie archived successfully";
+            TempData["success"] = _localizer["Movie_ArchivedSuccess"].Value;
             return RedirectToAction("Index");
         }
     }

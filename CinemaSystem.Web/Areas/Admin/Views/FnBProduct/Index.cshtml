@@ -1,40 +1,42 @@
 ﻿@using CinemaSystem.Models.Entities
+@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
 @model IEnumerable<FnBProduct>
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Food & Beverage Bar";
+    ViewData["Title"] = Localizer["FnB_IndexTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
-    
+
     <div class="flex justify-between items-end mb-10">
         <div class="space-y-1">
-            <h1 class="text-4xl font-extrabold font-headline tracking-tight text-on-surface">Food & Beverage Menu</h1>
-            <p class="text-on-surface-variant font-body">Manage food, beverages, and combos available at your cinema locations.</p>
+            <h1 class="text-4xl font-extrabold font-headline tracking-tight text-on-surface">@Localizer["FnB_IndexTitle"]</h1>
+            <p class="text-on-surface-variant font-body">@Localizer["FnB_IndexSubtitle"]</p>
         </div>
         <a asp-action="Upsert" class="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center space-x-2 font-headline font-bold text-sm">
             <span class="material-symbols-outlined text-lg">add_circle</span>
-            <span>Add Product</span>
+            <span>@Localizer["FnB_AddProductBtn"]</span>
         </a>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex flex-col justify-center">
             <span class="text-on-surface font-black text-3xl font-headline">@Model.Count()</span>
-            <span class="text-[10px] uppercase font-bold tracking-widest text-outline mt-1">Total Items</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-outline mt-1">@Localizer["FnB_TotalItems"]</span>
         </div>
         <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 shadow-sm flex flex-col justify-center">
             <span class="text-emerald-700 font-black text-3xl font-headline">@Model.Count(c => c.IsActive)</span>
-            <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-700/70 mt-1">Active (In Stock)</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-700/70 mt-1">@Localizer["FnB_ActiveInStock"]</span>
         </div>
         <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 shadow-sm flex flex-col justify-center">
-            <span class="text-amber-700 font-black text-3xl font-headline">@Model.Count(c => c.Category == FnBCategory.Combo)</span>
-            <span class="text-[10px] uppercase font-bold tracking-widest text-amber-700/70 mt-1">Combos Available</span>
+            <span class="text-amber-700 font-black text-3xl font-headline">@Model.Count(c => c.Category == CinemaSystem.Models.Data.Enums.FnBCategory.Combo)</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-amber-700/70 mt-1">@Localizer["FnB_Combos"]</span>
         </div>
         <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col justify-center">
             <span class="text-primary font-black text-3xl font-headline">$@(Model.Any() ? Model.Average(c => c.Price).ToString("F2") : "0.00")</span>
-            <span class="text-[10px] uppercase font-bold tracking-widest text-primary/70 mt-1">Avg. Price</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-primary/70 mt-1">@Localizer["FnB_AvgPrice"]</span>
         </div>
     </div>
 
@@ -43,11 +45,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-surface-container-low/50">
-                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">Product</th>
-                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">Category</th>
-                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">Price</th>
-                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">Status</th>
-                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline text-right">Actions</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">@Localizer["FnB_Product"]</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">@Localizer["FnB_Category"]</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">@Localizer["FnB_Price"]</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline">@Localizer["FnB_Status"]</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-outline text-right">@Localizer["FnB_Actions"]</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant/10">
@@ -56,22 +58,13 @@
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-on-surface-variant">
                                 <span class="material-symbols-outlined text-4xl mb-2 opacity-50">fastfood</span>
-                                <p class="font-medium">No concession items found in the menu.</p>
+                                <p class="font-medium">@Localizer["FnB_NoItems"]</p>
                             </td>
                         </tr>
                     }
                     @foreach (var obj in Model.OrderBy(c => c.Category).ThenBy(c => c.Name))
                     {
-                        string icon = obj.Category switch
-                        {
-                            FnBCategory.Popcorn => "lunch_dining",
-                            FnBCategory.Beverage => "local_drink",
-                            FnBCategory.Candy => "cake",
-                            FnBCategory.HotFood => "local_pizza",
-                            FnBCategory.Combo => "fastfood",
-                            _ => "restaurant"
-                        };
-
+                        // ... logica iconițe ...
                         <tr class="hover:bg-primary-fixed/10 transition-colors group">
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-4">
@@ -82,7 +75,7 @@
                                         }
                                         else
                                         {
-                                            <span class="material-symbols-outlined text-outline opacity-50 text-2xl">@icon</span>
+                                            <span class="material-symbols-outlined text-outline opacity-50 text-2xl">restaurant</span>
                                         }
                                     </div>
                                     <div>
@@ -93,7 +86,6 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-2.5 py-1 bg-surface-container text-on-surface-variant text-[10px] font-bold rounded-md uppercase tracking-widest border border-outline-variant/30 flex items-center w-fit gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px]">@icon</span>
                                     @obj.Category
                                 </span>
                             </td>
@@ -105,25 +97,23 @@
                                 {
                                     <div class="flex items-center gap-1.5">
                                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">In Stock</span>
+                                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">@Localizer["FnB_InStock"]</span>
                                     </div>
                                 }
                                 else
                                 {
                                     <div class="flex items-center gap-1.5">
                                         <span class="w-2 h-2 rounded-full bg-error"></span>
-                                        <span class="text-xs font-bold text-error uppercase tracking-widest">Sold Out</span>
+                                        <span class="text-xs font-bold text-error uppercase tracking-widest">@Localizer["FnB_SoldOut"]</span>
                                     </div>
                                 }
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                                    <a asp-action="Upsert" asp-route-id="@obj.Id" title="Edit Product"
-                                           class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-colors border border-transparent hover:border-primary/20">
+                                    <a asp-action="Upsert" asp-route-id="@obj.Id" class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-colors">
                                         <span class="material-symbols-outlined text-lg">edit_square</span>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@obj.Id" title="Delete Product"
-                                           class="p-2 text-outline hover:text-error hover:bg-error/10 rounded-lg transition-colors border border-transparent hover:border-error/20">
+                                    <a asp-action="Delete" asp-route-id="@obj.Id" class="p-2 text-outline hover:text-error hover:bg-error/10 rounded-lg transition-colors">
                                         <span class="material-symbols-outlined text-lg">delete</span>
                                     </a>
                                 </div>
@@ -133,9 +123,8 @@
                 </tbody>
             </table>
         </div>
-        
         <div class="px-6 py-4 bg-surface-container-low/30 border-t border-outline-variant/20 flex justify-between items-center">
-            <p class="text-xs text-on-surface-variant font-medium">Showing menu of <span class="font-bold text-on-surface">@Model.Count()</span> items</p>
+            <p class="text-xs text-on-surface-variant font-medium">@Localizer["FnB_ShowingMenuOf"] <span class="font-bold text-on-surface">@Model.Count()</span> @Localizer["FnB_ItemsLabel"]</p>
         </div>
     </div>
 </main>

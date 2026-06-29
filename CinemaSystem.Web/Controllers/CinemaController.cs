@@ -4,6 +4,7 @@ using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CinemaSystem.Web.Controllers
 {
@@ -13,11 +14,13 @@ namespace CinemaSystem.Web.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public CinemaController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public CinemaController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _localizer = localizer;
         }
 
         public IActionResult Index()
@@ -86,12 +89,12 @@ namespace CinemaSystem.Web.Controllers
 
                 if (!allowedExtensions.Contains(extension))
                 {
-                    TempData["error"] = "Invalid file type. Only JPG, PNG, and WEBP are allowed.";
+                    TempData["error"] = _localizer["Cinema_InvalidFileType"].Value;
                     return View(vm);
                 }
 
                 string fileName = Guid.NewGuid().ToString() + extension;
-                string cinemaPath = Path.Combine(wwwRootPath, "images", "cinema"); // Cross-platform safe
+                string cinemaPath = Path.Combine(wwwRootPath, "images", "cinema");
 
                 if (!Directory.Exists(cinemaPath)) Directory.CreateDirectory(cinemaPath);
 
@@ -112,12 +115,12 @@ namespace CinemaSystem.Web.Controllers
             if (vm.Id == 0)
             {
                 _unitOfWork.Cinema.Add(cinemaToSave);
-                TempData["success"] = "Cinema created successfully";
+                TempData["success"] = _localizer["Cinema_CreatedSuccess"].Value;
             }
             else
             {
                 _unitOfWork.Cinema.Update(cinemaToSave);
-                TempData["success"] = "Cinema updated successfully";
+                TempData["success"] = _localizer["Cinema_UpdatedSuccess"].Value;
             }
 
             _unitOfWork.Save();
@@ -143,12 +146,11 @@ namespace CinemaSystem.Web.Controllers
             Cinema? obj = _unitOfWork.Cinema.Get(u => u.Id == id);
             if (obj == null) return NotFound();
 
-            // Soft Delete respectat
             obj.IsDeleted = true;
             _unitOfWork.Cinema.Update(obj);
             _unitOfWork.Save();
 
-            TempData["success"] = "Cinema archived successfully";
+            TempData["success"] = _localizer["Cinema_ArchivedSuccess"].Value;
             return RedirectToAction("Index");
         }
     }

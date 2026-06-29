@@ -6,6 +6,7 @@ using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Linq;
 
@@ -16,10 +17,12 @@ namespace CinemaSystem.Web.Controllers
     public class ShowtimeController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ShowtimeController(IUnitOfWork unitOfWork)
+        public ShowtimeController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
         }
 
         public IActionResult Index()
@@ -68,17 +71,17 @@ namespace CinemaSystem.Web.Controllers
         [HttpPost]
         public IActionResult UpsertAjax([FromBody] Showtime showtime)
         {
-            if (showtime == null) return Json(new { success = false, message = "Invalid data payload." });
+            if (showtime == null) return Json(new { success = false, message = _localizer["Showtime_Error_InvalidData"].Value });
 
             var movie = _unitOfWork.Movie.Get(u => u.Id == showtime.MovieId);
-            if (movie == null) return Json(new { success = false, message = "Invalid Movie selection." });
+            if (movie == null) return Json(new { success = false, message = _localizer["Showtime_Error_InvalidMovie"].Value });
 
             if (showtime.StartTime.Date < movie.StartDate.Date || showtime.StartTime.Date > movie.EndDate.Date)
             {
                 return Json(new
                 {
                     success = false,
-                    message = $"Conflict: Movie is only available between {movie.StartDate.ToShortDateString()} and {movie.EndDate.ToShortDateString()}."
+                    message = string.Format(_localizer["Showtime_Error_DateConflict"].Value, movie.StartDate.ToShortDateString(), movie.EndDate.ToShortDateString())
                 });
             }
 
@@ -98,7 +101,7 @@ namespace CinemaSystem.Web.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "Time Conflict: There is another movie scheduled or the 20-minute cleaning buffer is being violated."
+                    message = _localizer["Showtime_Error_TimeConflict"].Value
                 });
             }
 
@@ -118,12 +121,12 @@ namespace CinemaSystem.Web.Controllers
             else
             {
                 var showtimeToUpdate = _unitOfWork.Showtime.Get(u => u.Id == showtime.Id);
-                if (showtimeToUpdate == null) return Json(new { success = false, message = "Showtime not found." });
+                if (showtimeToUpdate == null) return Json(new { success = false, message = _localizer["Showtime_Error_NotFound"].Value });
 
                 bool hasBookings = _unitOfWork.Booking?.GetAll(b => b.ShowtimeId == showtime.Id).Any() ?? false;
                 if (hasBookings && (showtimeToUpdate.StartTime != showtime.StartTime || showtimeToUpdate.MovieId != showtime.MovieId))
                 {
-                    return Json(new { success = false, message = "Operation Denied: Tickets have already been sold for this session. You cannot alter the time or movie." });
+                    return Json(new { success = false, message = _localizer["Showtime_Error_TicketsSold"].Value });
                 }
 
                 showtimeToUpdate.MovieId = showtime.MovieId;
@@ -143,12 +146,12 @@ namespace CinemaSystem.Web.Controllers
         public IActionResult DeleteAjax(int id)
         {
             var obj = _unitOfWork.Showtime.Get(u => u.Id == id);
-            if (obj == null) return Json(new { success = false, message = "Showtime not found." });
+            if (obj == null) return Json(new { success = false, message = _localizer["Showtime_Error_NotFound"].Value });
 
             bool hasBookings = _unitOfWork.Booking?.GetAll(b => b.ShowtimeId == id && b.Status == BookingStatus.Confirmed).Any() ?? false;
             if (hasBookings)
             {
-                return Json(new { success = false, message = "Cannot delete this showtime as active bookings (tickets) exist. Please cancel the bookings first." });
+                return Json(new { success = false, message = _localizer["Showtime_Error_DeleteHasBookings"].Value });
             }
 
             obj.IsDeleted = true;

@@ -1,9 +1,11 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
 
 namespace CinemaSystem.Web.Areas.Admin.Controllers
 {
@@ -12,10 +14,12 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
     public class EquipmentController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public EquipmentController(IUnitOfWork unitOfWork)
+        public EquipmentController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
         }
 
         public IActionResult Index()
@@ -50,7 +54,7 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
 
                 if (equipmentVM.Equipment == null)
                 {
-                    TempData["error"] = "Error: Asset could not be found.";
+                    TempData["error"] = _localizer["Equipment_Error_NotFound"].Value;
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -97,12 +101,12 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             if (equipmentVM.Equipment.Id == 0)
             {
                 _unitOfWork.Equipment.Add(equipmentToSave);
-                TempData["success"] = "Equipment registered successfully";
+                TempData["success"] = _localizer["Equipment_CreatedSuccess"].Value;
             }
             else
             {
                 _unitOfWork.Equipment.Update(equipmentToSave);
-                TempData["success"] = "Equipment updated successfully";
+                TempData["success"] = _localizer["Equipment_UpdatedSuccess"].Value;
             }
 
             _unitOfWork.Save();
@@ -131,7 +135,7 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             _unitOfWork.Equipment.Update(obj);
             _unitOfWork.Save();
 
-            TempData["success"] = "Asset archived successfully.";
+            TempData["success"] = _localizer["Equipment_ArchivedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -141,14 +145,14 @@ namespace CinemaSystem.Web.Areas.Admin.Controllers
             var objToBeDeleted = _unitOfWork.Equipment.Get(u => u.Id == id);
             if (objToBeDeleted == null)
             {
-                return Json(new { success = false, message = "Error: Asset not found." });
+                return Json(new { success = false, message = _localizer["Equipment_Error_NotFoundAjax"].Value });
             }
 
             objToBeDeleted.IsDeleted = true;
             _unitOfWork.Equipment.Update(objToBeDeleted);
             _unitOfWork.Save();
 
-            return Json(new { success = true, message = "Delete Successful" });
+            return Json(new { success = true, message = _localizer["Equipment_DeleteSuccessAjax"].Value });
         }
     }
 }

@@ -1,21 +1,22 @@
 ﻿@using CinemaSystem.Models.Entities
+@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
 @model IEnumerable<CinemaHall>
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Showtime Manager";
+    ViewData["Title"] = Localizer["Showtime_ManagerTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
-    // Calculăm statisticile de bază
     var allShowsToday = Model.SelectMany(h => h.Showtimes ?? new List<Showtime>())
                              .Where(s => s.StartTime.Date == DateTime.Today).ToList();
 }
-
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
-    
+
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight">Showtime Index</h1>
-            <p class="text-on-surface-variant mt-2 max-w-xl font-body">Manage daily schedules and monitor hall assignments across your cinema complex.</p>
+            <h1 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight">@Localizer["Showtime_IndexTitle"]</h1>
+            <p class="text-on-surface-variant mt-2 max-w-xl font-body">@Localizer["Showtime_IndexSubtitle"]</p>
         </div>
     </div>
 
@@ -25,28 +26,28 @@
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
             </div>
             <div>
-                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Today's Screenings</p>
-                <h3 class="text-2xl font-bold text-on-surface font-headline">@allShowsToday.Count() <span class="text-sm font-normal text-outline">Sessions</span></h3>
+                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">@Localizer["Showtime_TodaysScreenings"]</p>
+                <h3 class="text-2xl font-bold text-on-surface font-headline">@allShowsToday.Count() <span class="text-sm font-normal text-outline">@Localizer["Showtime_Sessions"]</span></h3>
             </div>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shadow-inner">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
             </div>
             <div>
-                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Registered Halls</p>
-                <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Count() <span class="text-sm font-normal text-outline">Total Rooms</span></h3>
+                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">@Localizer["Showtime_RegisteredHalls"]</p>
+                <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Count() <span class="text-sm font-normal text-outline">@Localizer["Showtime_TotalRooms"]</span></h3>
             </div>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 shadow-inner">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_seat</span>
             </div>
             <div>
-                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">Total Capacity</p>
-                <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Sum(h => h.TotalSeats).ToString("N0") <span class="text-sm font-normal text-outline">Seats</span></h3>
+                <p class="text-sm text-on-surface-variant font-medium font-label uppercase tracking-widest">@Localizer["Showtime_TotalCapacity"]</p>
+                <h3 class="text-2xl font-bold text-on-surface font-headline">@Model.Sum(h => h.TotalSeats).ToString("N0") <span class="text-sm font-normal text-outline">@Localizer["Showtime_Seats"]</span></h3>
             </div>
         </div>
     </div>
@@ -54,7 +55,7 @@
     <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-outline-variant/30 mb-8">
         <div class="flex items-center gap-2 px-2">
             <span class="material-symbols-outlined text-outline text-sm">location_on</span>
-            <span class="text-sm font-bold text-on-surface">Global Network (All Cinemas)</span>
+            <span class="text-sm font-bold text-on-surface">@Localizer["Showtime_GlobalNetwork"]</span>
         </div>
         <div class="h-6 w-px bg-outline-variant/30 hidden md:block"></div>
         <div class="flex items-center gap-2 px-2">
@@ -68,8 +69,8 @@
         {
             <div class="col-span-1 lg:col-span-2 p-12 text-center text-on-surface-variant bg-white rounded-3xl border border-outline-variant/30 shadow-sm">
                 <span class="material-symbols-outlined text-5xl mb-3 opacity-50">videocam_off</span>
-                <h3 class="text-xl font-bold font-headline text-on-surface mb-2">No Halls Available</h3>
-                <p class="font-body text-sm">You need to add Cinema Halls to the system before managing showtimes.</p>
+                <h3 class="text-xl font-bold font-headline text-on-surface mb-2">@Localizer["Showtime_NoHallsAvailable"]</h3>
+                <p class="font-body text-sm">@Localizer["Showtime_NoHallsDesc"]</p>
             </div>
         }
 
@@ -99,7 +100,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <div class="flex gap-5 flex-1 bg-surface-container-low p-4 rounded-2xl border border-outline-variant/20">
                     @if (nextShow != null)
                     {
@@ -107,14 +108,14 @@
                             <img class="w-full h-full object-cover" alt="@nextShow.Movie?.Title"
                                  src="@(string.IsNullOrEmpty(nextShow.Movie?.ImageUrl) ? "https://via.placeholder.com/200x300" : nextShow.Movie?.ImageUrl)" />
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                            <div class="absolute bottom-2 left-0 right-0 text-[9px] text-white font-bold text-center tracking-widest uppercase">UPCOMING</div>
+                            <div class="absolute bottom-2 left-0 right-0 text-[9px] text-white font-bold text-center tracking-widest uppercase">@Localizer["Showtime_Upcoming"]</div>
                         </div>
-                        
+
                         <div class="flex-1 flex flex-col justify-between py-1">
                             <div>
-                                <p class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1 font-label">Next Screening</p>
+                                <p class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1 font-label">@Localizer["Showtime_NextScreening"]</p>
                                 <h4 class="text-lg font-extrabold text-on-surface font-headline leading-tight line-clamp-2">@nextShow.Movie?.Title</h4>
-                                
+
                                 <div class="flex items-center gap-2 mt-3 bg-white p-2 rounded-lg border border-outline-variant/30 w-fit">
                                     <span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
                                     <span class="text-sm font-bold text-on-surface">@nextShow.StartTime.ToString("hh:mm tt")</span>
@@ -122,8 +123,8 @@
                                 </div>
                             </div>
                             <div class="mt-4 flex items-center justify-between border-t border-outline-variant/30 pt-3">
-                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Capacity</span>
-                                <span class="text-sm font-bold text-on-surface">@hall.TotalSeats Seats</span>
+                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">@Localizer["Showtime_Capacity"]</span>
+                                <span class="text-sm font-bold text-on-surface">@hall.TotalSeats @Localizer["Showtime_Seats"]</span>
                             </div>
                         </div>
                     }
@@ -133,12 +134,12 @@
                             <span class="material-symbols-outlined text-4xl text-outline-variant opacity-50">movie_filter</span>
                         </div>
                         <div class="flex-1 flex flex-col justify-center items-start py-1">
-                            <p class="text-[10px] font-bold text-error uppercase tracking-widest mb-1 font-label">No Schedule</p>
-                            <h4 class="text-lg font-bold text-on-surface font-headline leading-tight">No upcoming shows</h4>
-                            <p class="text-xs text-on-surface-variant mt-2 max-w-[200px] leading-relaxed">Select "Manage Schedule" to assign movies to this hall.</p>
+                            <p class="text-[10px] font-bold text-error uppercase tracking-widest mb-1 font-label">@Localizer["Showtime_NoSchedule"]</p>
+                            <h4 class="text-lg font-bold text-on-surface font-headline leading-tight">@Localizer["Showtime_NoUpcomingShows"]</h4>
+                            <p class="text-xs text-on-surface-variant mt-2 max-w-[200px] leading-relaxed">@Localizer["Showtime_NoShowsDesc"]</p>
                             <div class="mt-auto w-full flex items-center justify-between border-t border-outline-variant/30 pt-3">
-                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Capacity</span>
-                                <span class="text-sm font-bold text-on-surface">@hall.TotalSeats Seats</span>
+                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">@Localizer["Showtime_Capacity"]</span>
+                                <span class="text-sm font-bold text-on-surface">@hall.TotalSeats @Localizer["Showtime_Seats"]</span>
                             </div>
                         </div>
                     }

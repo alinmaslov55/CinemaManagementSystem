@@ -1,13 +1,15 @@
-﻿@model CinemaSystem.Models.Entities.Movie
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.Entities.Movie
 @using CinemaSystem.Models.Data.Enums
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = Model.Id != 0 ? "Update Movie" : "Add New Movie";
+    ViewData["Title"] = Model.Id != 0 ? Localizer["Movie_UpdateTitle"] : Localizer["Movie_AddTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <style>
-    /* CSS pentru ascunderea input-ului file peste imagine */
     .file-upload-wrapper input[type="file"] {
         position: absolute;
         top: 0;
@@ -23,63 +25,63 @@
 </style>
 
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-20">
-    
+
     <div class="mb-8">
         <nav class="flex text-sm text-on-surface-variant mb-2 gap-2 font-label items-center">
-            <a asp-action="Index" class="hover:text-primary transition-colors">Movie Management</a>
+            <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["Movie_ManagementTitle"]</a>
             <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span class="text-primary font-semibold">@(Model.Id != 0 ? "Update Movie" : "Add New Movie")</span>
+            <span class="text-primary font-semibold">@(Model.Id != 0 ? Localizer["Movie_UpdateMovie"] : Localizer["Movie_AddNewBtn"])</span>
         </nav>
-        <h2 class="text-3xl font-extrabold text-on-surface font-headline">@(Model.Id != 0 ? "Update" : "Add New") Movie</h2>
-        <p class="text-on-surface-variant mt-1">Configure theatrical details, media assets, and categorization.</p>
+        <h2 class="text-3xl font-extrabold text-on-surface font-headline">@(Model.Id != 0 ? Localizer["Movie_Update"] : Localizer["Movie_AddNew"])</h2>
+        <p class="text-on-surface-variant mt-1">@Localizer["Movie_UpsertSubtitle"]</p>
     </div>
 
     <form method="post" enctype="multipart/form-data" class="grid grid-cols-12 gap-8">
-        
+
         <input asp-for="Id" hidden />
         <input asp-for="ImageUrl" hidden />
 
         <div class="col-span-12 lg:col-span-8 space-y-8">
-            
+
             <section class="bg-surface-container rounded-xl p-6 shadow-sm border border-outline-variant/20">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary">info</span>
-                    <h3 class="text-lg font-bold font-headline">General Information</h3>
+                    <h3 class="text-lg font-bold font-headline">@Localizer["Movie_GeneralInfo"]</h3>
                 </div>
-                
+
                 <div class="grid grid-cols-2 gap-6">
                     <div class="col-span-2">
-                        <label asp-for="Title" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Movie Title <span class="text-error">*</span></label>
-                        <input asp-for="Title" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g. The Celestial Echo" />
+                        <label asp-for="Title" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputTitle"] <span class="text-error">*</span></label>
+                        <input asp-for="Title" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="@Localizer["Movie_InputTitlePlaceholder"]" />
                         <span asp-validation-for="Title" class="text-error text-xs mt-1 block"></span>
                     </div>
-                    
+
                     <div class="col-span-2">
-                        <label asp-for="Description" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Synopsis <span class="text-error">*</span></label>
-                        <textarea asp-for="Description" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter a compelling synopsis..." rows="4"></textarea>
+                        <label asp-for="Description" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputSynopsis"] <span class="text-error">*</span></label>
+                        <textarea asp-for="Description" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="@Localizer["Movie_InputSynopsisPlaceholder"]" rows="4"></textarea>
                         <span asp-validation-for="Description" class="text-error text-xs mt-1 block"></span>
                     </div>
 
                     <div>
-                        <label asp-for="DurationInMinutes" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Duration (Min) <span class="text-error">*</span></label>
+                        <label asp-for="DurationInMinutes" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputDuration"] <span class="text-error">*</span></label>
                         <input asp-for="DurationInMinutes" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" type="number" />
                         <span asp-validation-for="DurationInMinutes" class="text-error text-xs mt-1 block"></span>
                     </div>
 
                     <div>
-                        <label asp-for="Price" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Ticket Price ($) <span class="text-error">*</span></label>
+                        <label asp-for="Price" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputPrice"] <span class="text-error">*</span></label>
                         <input asp-for="Price" type="number" step="0.01" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="0.00" />
                         <span asp-validation-for="Price" class="text-error text-xs mt-1 block"></span>
                     </div>
 
                     <div>
-                        <label asp-for="StartDate" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Release Date <span class="text-error">*</span></label>
+                        <label asp-for="StartDate" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputStartDate"] <span class="text-error">*</span></label>
                         <input asp-for="StartDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" />
                         <span asp-validation-for="StartDate" class="text-error text-xs mt-1 block"></span>
                     </div>
 
                     <div>
-                        <label asp-for="EndDate" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">End Date <span class="text-error">*</span></label>
+                        <label asp-for="EndDate" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputEndDate"] <span class="text-error">*</span></label>
                         <input asp-for="EndDate" type="date" asp-format="{0:yyyy-MM-dd}" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" />
                         <span asp-validation-for="EndDate" class="text-error text-xs mt-1 block"></span>
                     </div>
@@ -89,20 +91,20 @@
             <section class="bg-surface-container rounded-xl p-6 shadow-sm border border-outline-variant/20">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary">category</span>
-                    <h3 class="text-lg font-bold font-headline">Categorization</h3>
+                    <h3 class="text-lg font-bold font-headline">@Localizer["Movie_Categorization"]</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <label asp-for="MovieCategory" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Genre <span class="text-error">*</span></label>
+                        <label asp-for="MovieCategory" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputGenre"] <span class="text-error">*</span></label>
                         <select asp-for="MovieCategory" asp-items="Html.GetEnumSelectList<MovieCategory>()" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none cursor-pointer">
-                            <option disabled selected value="">-- Select Genre --</option>
+                            <option disabled selected value="">@Localizer["Movie_SelectGenre"]</option>
                         </select>
                         <span asp-validation-for="MovieCategory" class="text-error text-xs mt-1 block"></span>
                     </div>
                     <div>
-                        <label asp-for="AgeRating" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Content Rating <span class="text-error">*</span></label>
+                        <label asp-for="AgeRating" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputContentRating"] <span class="text-error">*</span></label>
                         <select asp-for="AgeRating" asp-items="Html.GetEnumSelectList<AgeRating>()" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none cursor-pointer">
-                            <option disabled selected value="">-- Select Rating --</option>
+                            <option disabled selected value="">@Localizer["Movie_SelectRating"]</option>
                         </select>
                         <span asp-validation-for="AgeRating" class="text-error text-xs mt-1 block"></span>
                     </div>
@@ -112,20 +114,20 @@
         </div>
 
         <div class="col-span-12 lg:col-span-4 space-y-8">
-            
+
             <section class="bg-surface-container rounded-xl p-6 shadow-sm border border-outline-variant/20">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary">image</span>
-                    <h3 class="text-lg font-bold font-headline">Media Assets</h3>
+                    <h3 class="text-lg font-bold font-headline">@Localizer["Movie_MediaAssets"]</h3>
                 </div>
-                
+
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Poster Image</label>
-                        
+                        <label class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputPoster"]</label>
+
                         <div class="relative group rounded-xl overflow-hidden aspect-[2/3] shadow-lg bg-surface-variant border border-outline-variant/50 file-upload-wrapper">
                             <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp" />
-                            
+
                             @if (!string.IsNullOrEmpty(Model.ImageUrl))
                             {
                                 <img src="@Model.ImageUrl" class="w-full h-full object-cover" alt="Movie Poster" />
@@ -134,19 +136,19 @@
                             {
                                 <div class="w-full h-full flex flex-col items-center justify-center text-outline">
                                     <span class="material-symbols-outlined text-4xl mb-2">hide_image</span>
-                                    <span class="text-sm font-medium">No Poster Available</span>
+                                    <span class="text-sm font-medium">@Localizer["Movie_NoPoster"]</span>
                                 </div>
                             }
-                            
+
                             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-white">
                                 <span class="material-symbols-outlined text-4xl mb-2">upload</span>
-                                <span class="text-sm font-bold">Click to Upload</span>
+                                <span class="text-sm font-bold">@Localizer["Movie_ClickToUpload"]</span>
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label asp-for="TrailerUrl" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">Trailer Link (YouTube)</label>
+                        <label asp-for="TrailerUrl" class="block text-sm font-semibold text-on-surface-variant mb-2 font-label">@Localizer["Movie_InputTrailer"]</label>
                         <div class="relative">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline/60">link</span>
                             <input asp-for="TrailerUrl" class="w-full bg-white border border-outline-variant rounded-lg pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="https://youtube.com/watch?v=..." />
@@ -160,23 +162,23 @@
                 <div class="absolute inset-0 opacity-10 pointer-events-none">
                     <svg height="100%" width="100%"><pattern height="20" id="grid" patternunits="userSpaceOnUse" width="20"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5"></path></pattern><rect fill="url(#grid)" height="100%" width="100%"></rect></svg>
                 </div>
-                
-                <h3 class="text-lg font-bold font-headline mb-4 relative z-10">Admin Quick Actions</h3>
-                
+
+                <h3 class="text-lg font-bold font-headline mb-4 relative z-10">@Localizer["Movie_AdminQuickActions"]</h3>
+
                 <div class="space-y-4 relative z-10">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium">Visible in Gallery (Released)</span>
-                        
+                        <span class="text-sm font-medium">@Localizer["Movie_VisibleInGallery"]</span>
+
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" asp-for="IsReleased" class="sr-only peer">
                             <div class="w-11 h-6 bg-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white/60"></div>
                         </label>
                     </div>
-                
+
                     <hr class="border-white/20 my-4" />
-                
+
                     <p class="text-[10px] text-white/70 italic leading-relaxed">
-                        Changes will be reflected immediately across the public application network.
+                        @Localizer["Movie_VisibilityDisclaimer"]
                     </p>
                 </div>
             </section>
@@ -185,11 +187,11 @@
 
         <div class="col-span-12 mt-6 flex items-center justify-end gap-4 border-t border-outline-variant/30 pt-8 pb-4">
             <a asp-action="Index" class="px-8 py-2.5 rounded-lg font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
-                Cancel
+                @Localizer["Button_Cancel"]
             </a>
             <button type="submit" class="px-10 py-2.5 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-[#5a4b7b] active:scale-95 transition-all font-label flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">save</span>
-                @(Model.Id != 0 ? "Save Changes" : "Publish Movie")
+                @(Model.Id != 0 ? Localizer["Movie_SaveChanges"] : Localizer["Movie_PublishMovie"])
             </button>
         </div>
     </form>

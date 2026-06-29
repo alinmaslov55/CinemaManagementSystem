@@ -1,26 +1,28 @@
 ﻿@using CinemaSystem.Models.Entities
+@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
 @model IEnumerable<Cinema>
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Cinema Index";
+    ViewData["Title"] = Localizer["Cinema_IndexTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-12">
-    
+
     <div class="flex items-end justify-between mb-10">
         <div>
-            <h2 class="text-4xl font-extrabold text-primary tracking-tight font-headline">Cinema Index</h2>
-            <p class="text-on-surface-variant text-sm mt-1 font-body">Manage and monitor global theatre locations</p>
+            <h2 class="text-4xl font-extrabold text-primary tracking-tight font-headline">@Localizer["Cinema_IndexTitle"]</h2>
+            <p class="text-on-surface-variant text-sm mt-1 font-body">@Localizer["Cinema_IndexSubtitle"]</p>
         </div>
         <div class="flex gap-3">
             <button class="bg-white border border-outline-variant/30 text-on-surface-variant px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-surface-container-low transition-colors shadow-sm">
                 <span class="material-symbols-outlined text-lg">filter_list</span>
-                Filter
+                @Localizer["Button_Filter"]
             </button>
             <a asp-controller="Cinema" asp-action="Upsert" class="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md hover:bg-[#564777] hover:-translate-y-0.5 transition-all">
                 <span class="material-symbols-outlined text-lg">add_circle</span>
-                Add New Cinema
+                @Localizer["Cinema_AddNewBtn"]
             </a>
         </div>
     </div>
@@ -31,85 +33,85 @@
                 <div class="p-2 bg-primary-fixed text-primary rounded-lg">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">theater_comedy</span>
                 </div>
-                <span class="text-[10px] font-bold text-tertiary uppercase tracking-widest">Total Locations</span>
+                <span class="text-[10px] font-bold text-tertiary uppercase tracking-widest">@Localizer["Cinema_TotalLocations"]</span>
             </div>
             <p class="text-3xl font-extrabold text-on-surface font-headline">@Model.Count()</p>
-            <p class="text-xs text-on-surface-variant mt-1">Operational sites</p>
+            <p class="text-xs text-on-surface-variant mt-1">@Localizer["Cinema_OperationalSites"]</p>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
                 </div>
-                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Active Now</span>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">@Localizer["Cinema_ActiveNow"]</span>
             </div>
             <p class="text-3xl font-extrabold text-on-surface font-headline">@Model.Count()</p>
-            <p class="text-xs text-on-surface-variant mt-1">100% capacity</p>
+            <p class="text-xs text-on-surface-variant mt-1">@Localizer["Cinema_FullCapacity"]</p>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
                 </div>
-                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Maintenance</span>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">@Localizer["Cinema_Maintenance"]</span>
             </div>
             <p class="text-3xl font-extrabold text-on-surface font-headline">0</p>
-            <p class="text-xs text-on-surface-variant mt-1">Scheduled upgrades</p>
+            <p class="text-xs text-on-surface-variant mt-1">@Localizer["Cinema_ScheduledUpgrades"]</p>
         </div>
-        
+
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/20">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-2 bg-primary-fixed text-primary rounded-lg">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
                 </div>
-                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Total Halls</span>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">@Localizer["Cinema_TotalHalls"]</span>
             </div>
             <p class="text-3xl font-extrabold text-on-surface font-headline">--</p>
-            <p class="text-xs text-on-surface-variant mt-1">Across all sites</p>
+            <p class="text-xs text-on-surface-variant mt-1">@Localizer["Cinema_AcrossAllSites"]</p>
         </div>
     </div>
 
     <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-outline-variant/20">
         <div class="grid grid-cols-12 px-8 py-5 border-b border-outline-variant/20 bg-surface-container-low/50">
-            <div class="col-span-5 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Cinema Details</div>
-            <div class="col-span-3 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Location</div>
-            <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">Status</div>
-            <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em] text-right">Actions</div>
+            <div class="col-span-5 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">@Localizer["Cinema_TableDetails"]</div>
+            <div class="col-span-3 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">@Localizer["Cinema_TableLocation"]</div>
+            <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em]">@Localizer["Cinema_TableStatus"]</div>
+            <div class="col-span-2 text-[10px] font-bold text-outline uppercase tracking-[0.2em] text-right">@Localizer["Cinema_TableActions"]</div>
         </div>
 
         @foreach (var obj in Model)
         {
             <div class="grid grid-cols-12 px-8 py-6 items-center hover:bg-primary-fixed/10 transition-colors border-b border-outline-variant/10 group">
-                
+
                 <div class="col-span-5 flex items-center gap-4">
                     <div class="h-14 w-14 rounded-xl overflow-hidden bg-surface-container flex-shrink-0 border border-outline-variant/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
                         <span class="material-symbols-outlined text-3xl opacity-50">theaters</span>
                     </div>
                     <div>
                         <h4 class="font-bold text-on-surface text-base font-headline">@obj.Name</h4>
-                        <p class="text-[11px] text-on-surface-variant uppercase tracking-widest mt-0.5">CinemaSystem Network</p>
+                        <p class="text-[11px] text-on-surface-variant uppercase tracking-widest mt-0.5">@Localizer["Cinema_NetworkLabel"]</p>
                     </div>
                 </div>
-                
+
                 <div class="col-span-3 pr-4">
                     <p class="text-sm font-medium text-on-surface-variant line-clamp-2">@obj.Address</p>
                 </div>
-                
+
                 <div class="col-span-2">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Active
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> @Localizer["Cinema_StatusActive"]
                     </span>
                 </div>
-                
+
                 <div class="col-span-2 flex justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <a asp-controller="Cinema" asp-action="Upsert" asp-route-id="@obj.Id" title="Edit Cinema"
-                           class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-all flex items-center justify-center">
+                    <a asp-controller="Cinema" asp-action="Upsert" asp-route-id="@obj.Id" title="@Localizer["Cinema_EditTitle"]"
+                       class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-all flex items-center justify-center">
                         <span class="material-symbols-outlined text-xl">edit_square</span>
                     </a>
-                    <a asp-controller="Cinema" asp-action="Delete" asp-route-id="@obj.Id" title="Delete Cinema"
-                           class="p-2 text-outline hover:text-error hover:bg-error/10 rounded-lg transition-all flex items-center justify-center">
+                    <a asp-controller="Cinema" asp-action="Delete" asp-route-id="@obj.Id" title="@Localizer["Cinema_DeleteTitle"]"
+                       class="p-2 text-outline hover:text-error hover:bg-error/10 rounded-lg transition-all flex items-center justify-center">
                         <span class="material-symbols-outlined text-xl">delete</span>
                     </a>
                 </div>
@@ -120,12 +122,12 @@
         {
             <div class="p-12 text-center text-on-surface-variant">
                 <span class="material-symbols-outlined text-4xl mb-2 opacity-50">domain_disabled</span>
-                <p class="font-medium">No cinema locations registered yet.</p>
+                <p class="font-medium">@Localizer["Cinema_NoLocations"]</p>
             </div>
         }
 
         <div class="flex items-center justify-between px-8 py-4 bg-surface-container-low/30 border-t border-outline-variant/20">
-            <p class="text-xs text-on-surface-variant font-medium">Showing total of @Model.Count() cinemas</p>
+            <p class="text-xs text-on-surface-variant font-medium">@Localizer["Cinema_ShowingTotal"] @Model.Count()</p>
         </div>
     </div>
 </main>

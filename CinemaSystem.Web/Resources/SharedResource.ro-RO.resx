@@ -1580,4 +1580,23 @@
 	<data name="CinemaHall_GridActive" xml:space="preserve"><value>Grilă Interactivă Activă</value></data>
 	<data name="CinemaHall_CancelBtn" xml:space="preserve"><value>Anulează &amp; Păstrează Sala</value></data>
 	<data name="CinemaHall_DeleteBtn" xml:space="preserve"><value>Da, Șterge Sala</value></data>
+	<data name="Layout_ManagementPortal" xml:space="preserve"><value>Portal Management</value></data>
+	<data name="Layout_Dashboard" xml:space="preserve"><value>Panou Principal</value></data>
+	<data name="Layout_Cinemas" xml:space="preserve"><value>Cinematografe</value></data>
+	<data name="Layout_Halls" xml:space="preserve"><value>Săli</value></data>
+	<data name="Layout_Movies" xml:space="preserve"><value>Filme</value></data>
+	<data name="Layout_Showtimes" xml:space="preserve"><value>Proiecții</value></data>
+	<data name="Layout_Equipment" xml:space="preserve"><value>Echipamente</value></data>
+	<data name="Layout_FnB" xml:space="preserve"><value>Meniu Gustări</value></data>
+	<data name="Layout_PublicSite" xml:space="preserve"><value>Site Public</value></data>
+	<data name="Layout_SearchOperations" xml:space="preserve"><value>Caută operațiuni...</value></data>
+	<data name="Layout_Tickets" xml:space="preserve"><value>Bilete</value></data>
+	<data name="Layout_Profile" xml:space="preserve"><value>Profil</value></data>
+	<data name="Layout_Logout" xml:space="preserve"><value>Deconectare</value></data>
+	<data name="Layout_Register" xml:space="preserve"><value>Înregistrare</value></data>
+	<data name="Layout_Login" xml:space="preserve"><value>Autentificare</value></data>
+	<data name="Layout_Language" xml:space="preserve"><value>Limbă</value></data>
+	<data name="Layout_MyTickets" xml:space="preserve"><value>Biletele Mele</value></data>
+	<data name="Layout_ManageProfile" xml:space="preserve"><value>Gestionare Profil</value></data>
+	<data name="Layout_AllRightsReserved" xml:space="preserve"><value>TOATE DREPTURILE REZERVATE.</value></data>
 </root>

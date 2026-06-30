@@ -81,7 +81,7 @@
 
                         <div>
                             <label asp-for="Category" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["FnB_InputCategory"] <span class="text-error">*</span></label>
-                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<CinemaSystem.Models.Data.Enums.FnBCategory>()" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
+                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<FnBCategory>()" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
                                 <option disabled selected value="">@Localizer["FnB_SelectCategory"]</option>
                             </select>
                             <span asp-validation-for="Category" class="text-error text-xs mt-1 block"></span>

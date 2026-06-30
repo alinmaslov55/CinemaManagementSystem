@@ -1,8 +1,11 @@
-﻿@{
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@inject IStringLocalizer<SharedResource> Localizer
+@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -76,41 +79,42 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black text-white leading-none">CineAdmin</h1>
-                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">Management Portal</p>
+                    <p class="text-white/60 text-[10px] uppercase tracking-wider mt-1">@Localizer["Layout_ManagementPortal"]</p>
                 </div>
             </div>
         </div>
         <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
             <a asp-controller="Dashboard" asp-action="Index" class="@(currentController == "Dashboard" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">dashboard</span> Dashboard
+                <span class="material-symbols-outlined">dashboard</span> @Localizer["Layout_Dashboard"]
             </a>
 
             <a asp-controller="Cinema" asp-action="Index" class="@(currentController == "Cinema" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">theater_comedy</span> Cinemas
+                <span class="material-symbols-outlined">theater_comedy</span> @Localizer["Layout_Cinemas"]
             </a>
 
             <a asp-controller="CinemaHall" asp-action="Index" class="@(currentController == "CinemaHall" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">meeting_room</span> Halls
+                <span class="material-symbols-outlined">meeting_room</span> @Localizer["Layout_Halls"]
             </a>
 
             <a asp-controller="Movie" asp-action="Index" class="@(currentController == "Movie" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">movie</span> Movies
+                <span class="material-symbols-outlined">movie</span> @Localizer["Layout_Movies"]
             </a>
 
             <a asp-controller="Showtime" asp-action="Index" class="@(currentController == "Showtime" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">schedule</span> Showtimes
+                <span class="material-symbols-outlined">schedule</span> @Localizer["Layout_Showtimes"]
             </a>
 
             <a asp-controller="Equipment" asp-action="Index" class="@(currentController == "Equipment" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">settings_input_component</span> Equipment
+                <span class="material-symbols-outlined">settings_input_component</span> @Localizer["Layout_Equipment"]
             </a>
+
             <a asp-controller="FnBProduct" asp-action="Index" class="@(currentController == "FnBProduct" ? "bg-white/20 text-white font-semibold shadow-md" : "text-white/60 hover:text-white hover:bg-white/10") mx-2 px-4 py-3 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">fastfood</span> Food & Beverages
+                <span class="material-symbols-outlined">fastfood</span> @Localizer["Layout_FnB"]
             </a>
         </nav>
         <div class="p-4 border-t border-white/10">
             <a asp-area="" asp-controller="Home" asp-action="Index" class="text-white/60 hover:text-white mx-2 px-4 py-3 hover:bg-white/10 rounded-lg transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">public</span> Public Site
+                <span class="material-symbols-outlined">public</span> @Localizer["Layout_PublicSite"]
             </a>
         </div>
     </aside>
@@ -123,7 +127,7 @@
             <div class="flex items-center gap-4">
                 <div class="relative hidden md:block">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
-                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="Search operations..." type="text" />
+                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="@Localizer["Layout_SearchOperations"]" type="text" />
                 </div>
 
                 <div class="h-6 w-px bg-white/20 mx-2 hidden md:block"></div>

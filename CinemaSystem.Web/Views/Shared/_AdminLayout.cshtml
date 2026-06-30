@@ -125,9 +125,15 @@
             <span class="text-xl font-bold tracking-tight font-headline">@ViewData["Title"]</span>
 
             <div class="flex items-center gap-4">
-                <div class="relative hidden md:block">
+                <div class="relative hidden md:block" id="quickSearchContainer">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">search</span>
-                    <input class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm placeholder-white/50 focus:ring-2 focus:ring-white/50 w-64 outline-none" placeholder="@Localizer["Layout_SearchOperations"]" type="text" />
+
+                    <input id="quickSearchInput" autocomplete="off"
+                           class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-sm text-white placeholder-white/50 focus:ring-2 focus:ring-white/50 focus:bg-white/20 w-64 focus:w-80 transition-all outline-none"
+                           placeholder="@Localizer["Layout_SearchOperations"]" type="text" />
+
+                    <div id="quickSearchResults" class="absolute left-0 top-full mt-2 w-full bg-surface-container-lowest rounded-xl shadow-2xl border border-outline-variant/30 hidden flex-col overflow-hidden z-[100] max-h-80 overflow-y-auto">
+                    </div>
                 </div>
 
                 <div class="h-6 w-px bg-white/20 mx-2 hidden md:block"></div>
@@ -152,7 +158,91 @@
         @RenderBody()
 
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const quickActions = [
+        { title: '@Localizer["Layout_Dashboard"]', url: '/Admin/Dashboard/Index', icon: 'dashboard', keywords: ['home', 'stats', 'revenue', 'grafice', 'acasa'] },
 
+        { title: '@Localizer["Layout_Movies"]', url: '/Admin/Movie/Index', icon: 'movie', keywords: ['film', 'list', 'catalog'] },
+        { title: '@Localizer["Movie_AddNewBtn"]', url: '/Admin/Movie/Upsert', icon: 'add_circle', keywords: ['create', 'new', 'add', 'film', 'adauga'] },
+
+        { title: '@Localizer["Layout_Cinemas"]', url: '/Admin/Cinema/Index', icon: 'theater_comedy', keywords: ['location', 'branch', 'theaters', 'locatii'] },
+        { title: '@Localizer["Cinema_AddNewBtn"]', url: '/Admin/Cinema/Upsert', icon: 'add_location', keywords: ['create', 'new', 'add', 'location', 'adauga'] },
+
+        { title: '@Localizer["Layout_Halls"]', url: '/Admin/CinemaHall/Index', icon: 'meeting_room', keywords: ['room', 'screen', 'capacity', 'sali', 'ecran'] },
+        { title: '@Localizer["CinemaHall_AddNewHallBtn"]', url: '/Admin/CinemaHall/Upsert', icon: 'add_box', keywords: ['create', 'new', 'add', 'room', 'adauga'] },
+
+        { title: '@Localizer["Layout_Showtimes"]', url: '/Admin/Showtime/Index', icon: 'schedule', keywords: ['schedule', 'time', 'calendar', 'program', 'ore'] },
+
+        { title: '@Localizer["Layout_Equipment"]', url: '/Admin/Equipment/Index', icon: 'settings_input_component', keywords: ['assets', 'inventory', 'projector', 'inventar'] },
+        { title: '@Localizer["Equipment_RegisterAssetBtn"]', url: '/Admin/Equipment/Upsert', icon: 'build', keywords: ['add', 'new', 'hardware', 'adauga'] },
+
+        { title: '@Localizer["Layout_FnB"]', url: '/Admin/FnBProduct/Index', icon: 'fastfood', keywords: ['food', 'drink', 'menu', 'snack', 'mancare', 'bauturi'] },
+        { title: '@Localizer["FnB_AddProductBtn"]', url: '/Admin/FnBProduct/Upsert', icon: 'add_shopping_cart', keywords: ['create', 'new', 'add', 'food', 'adauga'] }
+        ];
+
+        const searchInput = document.getElementById('quickSearchInput');
+        const searchResults = document.getElementById('quickSearchResults');
+        const searchContainer = document.getElementById('quickSearchContainer');
+
+        searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        searchResults.innerHTML = '';
+
+        if (query.length === 0) {
+        searchResults.classList.add('hidden');
+        searchResults.classList.remove('flex');
+        return;
+        }
+
+        const filtered = quickActions.filter(action =>
+        action.title.toLowerCase().includes(query) ||
+        action.keywords.some(k => k.toLowerCase().includes(query))
+        );
+
+        if (filtered.length > 0) {
+        filtered.forEach(action => {
+        const a = document.createElement('a');
+        a.href = action.url;
+        a.className = 'px-4 py-3 flex items-center gap-3 hover:bg-primary-fixed/30 transition-colors text-on-surface border-b border-outline-variant/10 last:border-0 cursor-pointer';
+        a.innerHTML = `
+        <div class="p-1.5 bg-surface-container rounded-lg text-primary flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">${action.icon}</span>
+        </div>
+        <span class="text-sm font-semibold font-headline">${action.title}</span>
+        <span class="material-symbols-outlined ml-auto text-outline-variant text-sm opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+        `;
+        a.tabIndex = 0;
+        searchResults.appendChild(a);
+        });
+        } else {
+        searchResults.innerHTML = `
+        <div class="px-6 py-6 text-center flex flex-col items-center justify-center text-outline-variant">
+        <span class="material-symbols-outlined text-3xl mb-2 opacity-50">search_off</span>
+        <span class="text-xs font-bold uppercase tracking-widest">No actions found</span>
+        </div>
+        `;
+        }
+
+        searchResults.classList.remove('hidden');
+        searchResults.classList.add('flex');
+        });
+
+        document.addEventListener('click', function (e) {
+        if (!searchContainer.contains(e.target)) {
+        searchResults.classList.add('hidden');
+        searchResults.classList.remove('flex');
+        }
+        });
+
+        searchInput.addEventListener('focus', function () {
+        if (this.value.trim().length > 0 && searchResults.children.length > 0) {
+        searchResults.classList.remove('hidden');
+        searchResults.classList.add('flex');
+        }
+        });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

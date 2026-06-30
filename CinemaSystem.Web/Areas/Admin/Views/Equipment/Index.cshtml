@@ -21,7 +21,7 @@
             <p class="text-on-surface-variant font-body mt-1">@Localizer["Equipment_IndexSubtitle"]</p>
         </div>
         <div class="flex space-x-3">
-            <button class="hidden md:flex items-center space-x-2 px-5 py-2.5 bg-white text-primary border border-outline-variant/30 rounded-xl font-headline font-bold text-sm hover:bg-surface-container transition-all shadow-sm">
+            <button id="exportReportBtn" class="hidden md:flex items-center space-x-2 px-5 py-2.5 bg-white text-primary border border-outline-variant/30 rounded-xl font-headline font-bold text-sm hover:bg-surface-container transition-all shadow-sm">
                 <span class="material-symbols-outlined text-sm">file_download</span>
                 <span>@Localizer["Equipment_ExportReportBtn"]</span>
             </button>
@@ -91,7 +91,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table id="equipmentTable" class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-surface-container-low/30">
                         <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">@Localizer["Equipment_TableAssetSN"]</th>
@@ -99,7 +99,7 @@
                         <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">@Localizer["Equipment_TableLocation"]</th>
                         <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">@Localizer["Equipment_TableStatus"]</th>
                         <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label">@Localizer["Equipment_TableNextMaintenance"]</th>
-                        <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label text-right">@Localizer["Equipment_TableActions"]</th>
+                        <th class="px-6 py-5 text-[10px] font-black tracking-widest uppercase text-outline font-label text-right no-export">@Localizer["Equipment_TableActions"]</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant/10">
@@ -130,52 +130,52 @@
                                         <span class="material-symbols-outlined">@icon</span>
                                     </div>
                                     <div>
-                                        <p class="font-headline font-bold text-on-surface text-sm">@obj.Name</p>
-                                        <p class="text-[11px] text-outline font-mono mt-0.5">SN: @(obj.SerialNumber ?? "N/A")</p>
+                                        <p class="font-headline font-bold text-on-surface text-sm asset-name-cell">@obj.Name</p>
+                                        <p class="text-[11px] text-outline font-mono mt-0.5 asset-sn-cell">SN: @(obj.SerialNumber ?? "N/A")</p>
                                     </div>
                                 </div>
                             </td>
 
                             <td class="px-6 py-5">
-                                <span class="px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant text-[10px] font-extrabold rounded-md uppercase tracking-widest">
+                                <span class="px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant text-[10px] font-extrabold rounded-md uppercase tracking-widest category-cell">
                                     @obj.Type.ToString()
                                 </span>
                             </td>
 
                             <td class="px-6 py-5">
-                                <p class="text-sm font-bold font-headline text-on-surface">@(obj.CinemaHall?.Name ?? Localizer["Equipment_Unassigned"].Value)</p>
+                                <p class="text-sm font-bold font-headline text-on-surface location-cell">@(obj.CinemaHall?.Name ?? Localizer["Equipment_Unassigned"].Value)</p>
                                 <p class="text-[10px] text-outline font-bold uppercase tracking-widest mt-0.5">@Localizer["Equipment_InstalledLabel"]</p>
                             </td>
 
                             <td class="px-6 py-5">
                                 @if (obj.Status.ToString() == "Operational")
                                 {
-                                    <div class="flex items-center space-x-2 text-emerald-600">
+                                    <div class="flex items-center space-x-2 text-emerald-600 status-cell" data-status="Operational">
                                         <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                                         <span class="text-xs font-bold uppercase tracking-wider">@Localizer["Equipment_OperationalStatus"]</span>
                                     </div>
                                 }
                                 else if (obj.Status.ToString() == "NeedsMaintenance")
                                 {
-                                    <div class="flex items-center space-x-2 text-amber-600">
+                                    <div class="flex items-center space-x-2 text-amber-600 status-cell" data-status="Needs Maintenance">
                                         <span class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse"></span>
                                         <span class="text-xs font-bold uppercase tracking-wider">@Localizer["Equipment_MaintenanceStatus"]</span>
                                     </div>
                                 }
                                 else
                                 {
-                                    <div class="flex items-center space-x-2 text-error">
+                                    <div class="flex items-center space-x-2 text-error status-cell" data-status="@obj.Status.ToString()">
                                         <span class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(186,26,26,0.5)]"></span>
                                         <span class="text-xs font-bold uppercase tracking-wider">@obj.Status.ToString()</span>
                                     </div>
                                 }
                             </td>
 
-                            <td class="px-6 py-5 text-sm text-on-surface-variant font-medium">
+                            <td class="px-6 py-5 text-sm text-on-surface-variant font-medium next-maint-cell">
                                 @(obj.NextMaintenanceDate.HasValue ? obj.NextMaintenanceDate.Value.ToString("MMM dd, yyyy") : Localizer["Equipment_Unscheduled"].Value)
                             </td>
 
-                            <td class="px-6 py-5 text-right">
+                            <td class="px-6 py-5 text-right no-export">
                                 <div class="flex items-center justify-end space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
                                     <a asp-controller="Equipment" asp-action="Upsert" asp-route-id="@obj.Id" class="p-2 text-outline hover:text-primary hover:bg-primary-fixed/50 rounded-lg transition-colors border border-transparent hover:border-primary/20" title="Edit">
                                         <span class="material-symbols-outlined text-lg">edit_square</span>
@@ -199,7 +199,6 @@
 
 @section Scripts {
     <script>
-        // JS i18n
         const titleText = '@Localizer["Equipment_JS_ConfirmDeleteTitle"]';
         const bodyText = '@Localizer["Equipment_JS_ConfirmDeleteText"]';
         const confirmBtn = '@Localizer["Equipment_JS_ConfirmDeleteBtn"]';
@@ -244,5 +243,43 @@
                 }
             });
         }
+
+        document.getElementById('exportReportBtn').addEventListener('click', function () {
+
+            let csvContent = "Asset Name,Serial Number,Category,Location,Status,Next Maintenance\n";
+
+            let rows = document.querySelectorAll("#equipmentTable tbody tr.group");
+
+            rows.forEach(function (row) {
+                let name = row.querySelector('.asset-name-cell').innerText.trim();
+                let snRaw = row.querySelector('.asset-sn-cell').innerText.trim();
+                let sn = snRaw.replace('SN: ', '');
+                let category = row.querySelector('.category-cell').innerText.trim();
+                let location = row.querySelector('.location-cell').innerText.trim();
+
+                let statusCell = row.querySelector('.status-cell');
+                let status = statusCell ? statusCell.getAttribute('data-status') : "Unknown";
+
+                let nextMaint = row.querySelector('.next-maint-cell').innerText.trim();
+
+                let rowData = `"${name}","${sn}","${category}","${location}","${status}","${nextMaint}"`;
+                csvContent += rowData + "\n";
+            });
+
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement("a");
+
+            let d = new Date();
+            let dateString = d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Equipment_Report_" + dateString + ".csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toastr.success('Report downloaded successfully!', 'Export Complete');
+        });
     </script>
 }

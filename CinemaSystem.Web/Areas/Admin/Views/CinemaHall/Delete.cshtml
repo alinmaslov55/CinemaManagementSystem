@@ -1,21 +1,22 @@
-﻿@model CinemaSystem.Models.Entities.CinemaHall
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.Entities.CinemaHall
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Delete Cinema Hall";
-    // ATENȚIE: Legăm pagina de layout-ul central de Admin
+    ViewData["Title"] = Localizer["CinemaHall_DeleteTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-
 <main class="flex-1 p-8 flex justify-center items-start">
-    
+
     <div class="w-full max-w-3xl mt-8">
-        
+
         <nav class="flex text-sm text-on-surface-variant mb-6 gap-2 font-label items-center uppercase tracking-wider font-bold">
-            <a asp-controller="Cinema" asp-action="Index" class="hover:text-primary transition-colors">Cinemas</a>
+            <a asp-controller="Cinema" asp-action="Index" class="hover:text-primary transition-colors">@Localizer["CinemaHall_BreadcrumbCinemas"]</a>
             <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <a asp-action="Index" class="hover:text-primary transition-colors">Halls</a>
+            <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["CinemaHall_BreadcrumbHalls"]</a>
             <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span class="text-error font-semibold">Delete Record</span>
+            <span class="text-error font-semibold">@Localizer["CinemaHall_DeleteRecord"]</span>
         </nav>
 
         <div class="bg-[#f97386]/10 border border-[#f97386]/30 p-6 rounded-2xl mb-8 flex items-start gap-4 shadow-sm">
@@ -23,15 +24,15 @@
                 <span class="material-symbols-outlined text-3xl">warning</span>
             </div>
             <div>
-                <h2 class="text-xl font-extrabold text-[#a8364b] font-headline mb-1">Confirm Permanent Deletion</h2>
+                <h2 class="text-xl font-extrabold text-[#a8364b] font-headline mb-1">@Localizer["CinemaHall_ConfirmDeletion"]</h2>
                 <p class="text-[#a8364b]/80 text-sm font-medium leading-relaxed">
-                    You are about to permanently delete <strong>"@Model.Name"</strong> from the database. This action will cascade and instantly destroy the interactive seat layout, seating configurations, and all upcoming showtimes associated with this hall. This cannot be undone.
+                    @Localizer["CinemaHall_DeleteWarningDesc1"] <strong>"@Model.Name"</strong> @Localizer["CinemaHall_DeleteWarningDesc2"]
                 </p>
             </div>
         </div>
 
         <div class="bg-white rounded-3xl shadow-lg border border-outline-variant/20 p-8 flex flex-col md:flex-row gap-8 items-center md:items-start relative overflow-hidden">
-            
+
             <div class="absolute -right-16 -top-16 opacity-5 pointer-events-none">
                 <span class="material-symbols-outlined text-[250px]">meeting_room</span>
             </div>
@@ -46,29 +47,29 @@
                         @Model.HallType
                     </span>
                     <span class="px-2.5 py-1 bg-error/10 text-error text-[10px] font-extrabold rounded uppercase tracking-widest border border-error/20 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-error"></span> Pending Deletion
+                        <span class="w-1.5 h-1.5 rounded-full bg-error"></span> @Localizer["CinemaHall_PendingDeletion"]
                     </span>
                 </div>
-                
+
                 <h3 class="text-3xl font-extrabold text-on-surface font-headline mb-1">@Model.Name</h3>
                 <p class="text-sm font-bold text-on-surface-variant flex items-center gap-1.5 mb-6">
                     <span class="material-symbols-outlined text-[16px]">location_on</span>
-                    @(Model.Cinema?.Name ?? "Unknown Location")
+                    @(Model.Cinema?.Name ?? Localizer["CinemaHall_UnknownLocation"].Value)
                 </p>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Seating Capacity</p>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@Localizer["CinemaHall_SeatingCapacityLabel"]</p>
                         <p class="text-sm font-semibold text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">event_seat</span>
-                            @Model.TotalSeats Seats Configured
+                            @Model.TotalSeats @Localizer["CinemaHall_SeatsConfigured"]
                         </p>
                     </div>
                     <div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Layout Data</p>
+                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">@Localizer["CinemaHall_LayoutData"]</p>
                         <p class="text-sm font-semibold text-on-surface-variant flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">data_object</span>
-                            Interactive Grid Active
+                            @Localizer["CinemaHall_GridActive"]
                         </p>
                     </div>
                 </div>
@@ -77,14 +78,14 @@
 
         <form method="post" class="mt-8 flex items-center justify-end gap-4 border-t border-outline-variant/30 pt-6">
             <input asp-for="Id" hidden />
-            
+
             <a asp-action="Index" class="px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors font-label">
-                Cancel & Keep Hall
+                @Localizer["CinemaHall_CancelBtn"]
             </a>
-            
+
             <button type="submit" class="px-10 py-3 rounded-xl bg-[#a8364b] hover:bg-[#8b2b3d] text-white font-bold shadow-lg shadow-[#a8364b]/20 active:scale-95 transition-all font-label flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">delete_forever</span>
-                Yes, Delete Hall
+                @Localizer["CinemaHall_DeleteBtn"]
             </button>
         </form>
 

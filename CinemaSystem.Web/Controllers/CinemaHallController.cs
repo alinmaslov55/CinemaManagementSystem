@@ -6,6 +6,7 @@ using CinemaSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
 using System.Text.Json;
 
 namespace CinemaSystem.Web.Controllers
@@ -15,10 +16,12 @@ namespace CinemaSystem.Web.Controllers
     public class CinemaHallController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public CinemaHallController(IUnitOfWork unitOfWork)
+        public CinemaHallController(IUnitOfWork unitOfWork, IStringLocalizer<SharedResource> localizer)
         {
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
         }
 
         public IActionResult Index()
@@ -80,7 +83,7 @@ namespace CinemaSystem.Web.Controllers
 
             if (string.IsNullOrEmpty(vm.SeatLayoutData))
             {
-                TempData["error"] = "Seat layout could not be generated. Please try again.";
+                TempData["error"] = _localizer["CinemaHall_Error_NoLayout"].Value;
                 vm.CinemaList = _unitOfWork.Cinema.GetAll().Select(u => new SelectListItem
                 {
                     Text = u.Name,
@@ -94,7 +97,7 @@ namespace CinemaSystem.Web.Controllers
 
             if (incomingSeats == null || !incomingSeats.Any())
             {
-                TempData["error"] = "No seat data found.";
+                TempData["error"] = _localizer["CinemaHall_Error_NoSeatData"].Value;
                 vm.CinemaList = _unitOfWork.Cinema.GetAll().Select(u => new SelectListItem { Text = u.Name, Value = u.Id.ToString() });
                 return View(vm);
             }
@@ -123,7 +126,7 @@ namespace CinemaSystem.Web.Controllers
                         CinemaHallId = newHall.Id
                     });
                 }
-                TempData["success"] = "Hall created successfully.";
+                TempData["success"] = _localizer["CinemaHall_CreatedSuccess"].Value;
             }
             else
             {
@@ -135,7 +138,7 @@ namespace CinemaSystem.Web.Controllers
 
                 if (hasActiveShows && dimensionsChanged)
                 {
-                    TempData["error"] = "Cannot change layout dimensions because showtimes are scheduled for this hall.";
+                    TempData["error"] = _localizer["CinemaHall_Error_HasShowtimes"].Value;
                     return RedirectToAction(nameof(Upsert), new { id = vm.CinemaHall.Id });
                 }
 
@@ -175,7 +178,7 @@ namespace CinemaSystem.Web.Controllers
                 hallFromDb.CinemaId = vm.CinemaHall.CinemaId;
 
                 _unitOfWork.CinemaHall.Update(hallFromDb);
-                TempData["success"] = "Hall configured safely.";
+                TempData["success"] = _localizer["CinemaHall_UpdatedSuccess"].Value;
             }
 
             _unitOfWork.Save();
@@ -203,7 +206,7 @@ namespace CinemaSystem.Web.Controllers
             _unitOfWork.CinemaHall.Update(obj);
             _unitOfWork.Save();
 
-            TempData["success"] = "Cinema Hall archived successfully.";
+            TempData["success"] = _localizer["CinemaHall_ArchivedSuccess"].Value;
             return RedirectToAction("Index");
         }
     }

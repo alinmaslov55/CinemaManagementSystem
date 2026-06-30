@@ -1479,4 +1479,105 @@
 	<data name="FnB_SoldOut" xml:space="preserve"><value>Indisponibil</value></data>
 	<data name="FnB_ShowingMenuOf" xml:space="preserve"><value>Afișare meniu de</value></data>
 	<data name="FnB_ItemsLabel" xml:space="preserve"><value>produse</value></data>
+	<data name="FnB_UpdateTitle" xml:space="preserve"><value>Actualizare Produs</value></data>
+	<data name="FnB_AddTitle" xml:space="preserve"><value>Adăugare Produs</value></data>
+	<data name="FnB_BreadcrumbMenu" xml:space="preserve"><value>Gustări &amp; Băuturi</value></data>
+	<data name="FnB_UpdateProduct" xml:space="preserve"><value>Actualizează Produs</value></data>
+	<data name="FnB_AddNewProduct" xml:space="preserve"><value>Adaugă Produs Nou</value></data>
+	<data name="FnB_ManageMenuItem" xml:space="preserve"><value>Gestionează Produs</value></data>
+	<data name="FnB_SaveProductBtn" xml:space="preserve"><value>Salvează Produs</value></data>
+	<data name="FnB_ProductDetails" xml:space="preserve"><value>Detalii Produs</value></data>
+	<data name="FnB_InputName" xml:space="preserve"><value>Nume Produs</value></data>
+	<data name="FnB_InputNamePlaceholder" xml:space="preserve"><value>ex. Popcorn Mare</value></data>
+	<data name="FnB_InputDesc" xml:space="preserve"><value>Descriere / Ingrediente</value></data>
+	<data name="FnB_InputDescPlaceholder" xml:space="preserve"><value>Descrie produsul...</value></data>
+	<data name="FnB_InputPrice" xml:space="preserve"><value>Preț</value></data>
+	<data name="FnB_InputCategory" xml:space="preserve"><value>Categorie</value></data>
+	<data name="FnB_SelectCategory" xml:space="preserve"><value>-- Selectează --</value></data>
+	<data name="FnB_ProductImage" xml:space="preserve"><value>Imagine Produs</value></data>
+	<data name="FnB_ChangeImage" xml:space="preserve"><value>Schimbă Imaginea</value></data>
+	<data name="FnB_UploadImage" xml:space="preserve"><value>Încarcă Imagine</value></data>
+	<data name="FnB_AvailabilityStatus" xml:space="preserve"><value>Status Disponibilitate</value></data>
+	<data name="FnB_ActiveInMenu" xml:space="preserve"><value>Activ în Meniu</value></data>
+	<data name="FnB_ActiveDisclaimer" xml:space="preserve"><value>Dezactivează pentru a ascunde din catalog dacă stocul e epuizat.</value></data>
+	<data name="FnB_DeleteTitle" xml:space="preserve"><value>Șterge Produs</value></data>
+	<data name="FnB_ConfirmPermanentDeletion" xml:space="preserve"><value>Confirmă Ștergerea Definitivă</value></data>
+	<data name="FnB_DeleteWarningDesc1" xml:space="preserve"><value>Ești pe cale să ștergi definitiv</value></data>
+	<data name="FnB_DeleteWarningDesc2" xml:space="preserve"><value>din meniu. Imaginea asociată va fi ștearsă de pe server. Acțiunea este ireversibilă. Dacă dorești doar să îl ascunzi, ia în calcul marcarea ca Inactiv.</value></data>
+	<data name="FnB_NoDescription" xml:space="preserve"><value>Nicio descriere furnizată.</value></data>
+	<data name="FnB_Active" xml:space="preserve"><value>Activ</value></data>
+	<data name="FnB_ConfirmDeleteBtn" xml:space="preserve"><value>Da, Șterge Produsul</value></data>
+	<data name="CinemaHall_Error_NoLayout" xml:space="preserve"><value>Aspectul scaunelor nu a putut fi generat. Te rugăm să încerci din nou.</value></data>
+	<data name="CinemaHall_Error_NoSeatData" xml:space="preserve"><value>Nu au fost găsite date despre scaune.</value></data>
+	<data name="CinemaHall_CreatedSuccess" xml:space="preserve"><value>Sala a fost creată cu succes.</value></data>
+	<data name="CinemaHall_Error_HasShowtimes" xml:space="preserve"><value>Nu se pot modifica dimensiunile sălii deoarece există proiecții programate aici.</value></data>
+	<data name="CinemaHall_UpdatedSuccess" xml:space="preserve"><value>Configurația sălii a fost salvată în siguranță.</value></data>
+	<data name="CinemaHall_ArchivedSuccess" xml:space="preserve"><value>Sala a fost arhivată cu succes.</value></data>
+	<data name="CinemaHall_BreadcrumbCinema" xml:space="preserve"><value>Management Cinematografe</value></data>
+	<data name="CinemaHall_BreadcrumbHalls" xml:space="preserve"><value>Săli</value></data>
+	<data name="CinemaHall_IndexTitle" xml:space="preserve"><value>Index Săli Cinema</value></data>
+	<data name="CinemaHall_IndexSubtitle" xml:space="preserve"><value>Monitorizează și configurează capacitățile, starea tehnică și mediul de proiecție.</value></data>
+	<data name="CinemaHall_AddNewHallBtn" xml:space="preserve"><value>Adaugă Sală Nouă</value></data>
+	<data name="CinemaHall_TotalCapacity" xml:space="preserve"><value>Capacitate Totală Rețea</value></data>
+	<data name="CinemaHall_Seats" xml:space="preserve"><value>Locuri</value></data>
+	<data name="CinemaHall_AcrossAllCinemas" xml:space="preserve"><value>În toate locațiile înregistrate</value></data>
+	<data name="CinemaHall_Operational" xml:space="preserve"><value>Operațional</value></data>
+	<data name="CinemaHall_HallsLabel" xml:space="preserve"><value>Săli</value></data>
+	<data name="CinemaHall_LocationsCovered" xml:space="preserve"><value>Locații Acoperite</value></data>
+	<data name="CinemaHall_CinemasLabel" xml:space="preserve"><value>Cinematografe</value></data>
+	<data name="CinemaHall_CurrentInventory" xml:space="preserve"><value>Inventar Curent</value></data>
+	<data name="CinemaHall_AllHalls" xml:space="preserve"><value>Toate Sălile</value></data>
+	<data name="CinemaHall_TableHallName" xml:space="preserve"><value>Nume Sală</value></data>
+	<data name="CinemaHall_TableType" xml:space="preserve"><value>Tip</value></data>
+	<data name="CinemaHall_TableCapacity" xml:space="preserve"><value>Capacitate</value></data>
+	<data name="CinemaHall_TableStatus" xml:space="preserve"><value>Status</value></data>
+	<data name="CinemaHall_TableActions" xml:space="preserve"><value>Acțiuni</value></data>
+	<data name="CinemaHall_NoHalls" xml:space="preserve"><value>Nicio sală nu a fost adăugată în rețea încă.</value></data>
+	<data name="CinemaHall_Active" xml:space="preserve"><value>Activ</value></data>
+	<data name="CinemaHall_ShowingRecords" xml:space="preserve"><value>Se afișează înregistrări:</value></data>
+	<data name="CinemaHall_SystemIntegration" xml:space="preserve"><value>Integrare de Sistem Activă</value></data>
+	<data name="CinemaHall_IntegrationDesc" xml:space="preserve"><value>Hărțile sălilor sunt sincronizate automat cu interfața publică de rezervări.</value></data>
+	<data name="CinemaHall_ManagementTip" xml:space="preserve"><value>Sfat Management</value></data>
+	<data name="CinemaHall_TipDesc" xml:space="preserve"><value>Asigură-te că valoarea "Total Locuri" reflectă cu precizie structura fizică înainte de a programa filme, pentru a preveni erorile de tip "overbooking".</value></data>
+	<data name="CinemaHall_UpdateTitle" xml:space="preserve"><value>Configurare Sală</value></data>
+	<data name="CinemaHall_AddTitle" xml:space="preserve"><value>Adaugă Sală Nouă</value></data>
+	<data name="CinemaHall_BreadcrumbCinemas" xml:space="preserve"><value>Cinematografe</value></data>
+	<data name="CinemaHall_Configure" xml:space="preserve"><value>Configurare</value></data>
+	<data name="CinemaHall_ConfigureTitle" xml:space="preserve"><value>Configurare Sală Cinema</value></data>
+	<data name="CinemaHall_HallName" xml:space="preserve"><value>Nume Sală</value></data>
+	<data name="CinemaHall_HallNamePlaceholder" xml:space="preserve"><value>ex. Sala 1, IMAX Theatre</value></data>
+	<data name="CinemaHall_CinemaLocation" xml:space="preserve"><value>Locație Cinema</value></data>
+	<data name="CinemaHall_Select" xml:space="preserve"><value>-- Selectează --</value></data>
+	<data name="CinemaHall_HallType" xml:space="preserve"><value>Tip Sală</value></data>
+	<data name="CinemaHall_GridDimensions" xml:space="preserve"><value>Dimensiuni Grilă</value></data>
+	<data name="CinemaHall_TotalRows" xml:space="preserve"><value>Total Rânduri (A-Z)</value></data>
+	<data name="CinemaHall_ColsPerRow" xml:space="preserve"><value>Coloane per Rând</value></data>
+	<data name="CinemaHall_SeatingLegend" xml:space="preserve"><value>Legendă Scaune</value></data>
+	<data name="CinemaHall_Standard" xml:space="preserve"><value>Standard</value></data>
+	<data name="CinemaHall_Premium" xml:space="preserve"><value>Premium</value></data>
+	<data name="CinemaHall_VIP" xml:space="preserve"><value>VIP</value></data>
+	<data name="CinemaHall_Handicap" xml:space="preserve"><value>Handicap</value></data>
+	<data name="CinemaHall_ClearCustomizations" xml:space="preserve"><value>Golește Toate Personalizările</value></data>
+	<data name="CinemaHall_SaveBtn" xml:space="preserve"><value>Salvează Sala &amp; Aspectul</value></data>
+	<data name="Button_Back" xml:space="preserve"><value>Înapoi</value></data>
+	<data name="CinemaHall_InteractiveEditor" xml:space="preserve"><value>Editor Interactiv Locuri</value></data>
+	<data name="CinemaHall_EditorSub" xml:space="preserve"><value>Dă click pe locuri individuale pentru a le schimba tipul</value></data>
+	<data name="CinemaHall_LivePreview" xml:space="preserve"><value>Previzualizare Live</value></data>
+	<data name="CinemaHall_Screen" xml:space="preserve"><value>ECRAN</value></data>
+	<data name="CinemaHall_TotalSeatsLabel" xml:space="preserve"><value>Total Locuri:</value></data>
+	<data name="CinemaHall_LeftClick" xml:space="preserve"><value>Click stânga pentru a schimba tipul</value></data>
+	<data name="CinemaHall_JS_ConfirmReset" xml:space="preserve"><value>Ești sigur că vrei să resetezi toate locurile la 'Standard'? Această acțiune nu poate fi anulată.</value></data>
+	<data name="CinemaHall_DeleteTitle" xml:space="preserve"><value>Șterge Sala</value></data>
+	<data name="CinemaHall_DeleteRecord" xml:space="preserve"><value>Șterge Înregistrare</value></data>
+	<data name="CinemaHall_ConfirmDeletion" xml:space="preserve"><value>Confirmă Ștergerea Definitivă</value></data>
+	<data name="CinemaHall_DeleteWarningDesc1" xml:space="preserve"><value>Ești pe cale să ștergi definitiv</value></data>
+	<data name="CinemaHall_DeleteWarningDesc2" xml:space="preserve"><value>din baza de date. Acțiunea va distruge automat aspectul interactiv al locurilor, configurațiile și proiecțiile viitoare asociate. Aceasta nu poate fi anulată.</value></data>
+	<data name="CinemaHall_PendingDeletion" xml:space="preserve"><value>Așteaptă Ștergerea</value></data>
+	<data name="CinemaHall_UnknownLocation" xml:space="preserve"><value>Locație Necunoscută</value></data>
+	<data name="CinemaHall_SeatingCapacityLabel" xml:space="preserve"><value>Capacitate</value></data>
+	<data name="CinemaHall_SeatsConfigured" xml:space="preserve"><value>Locuri Configurate</value></data>
+	<data name="CinemaHall_LayoutData" xml:space="preserve"><value>Date Layout</value></data>
+	<data name="CinemaHall_GridActive" xml:space="preserve"><value>Grilă Interactivă Activă</value></data>
+	<data name="CinemaHall_CancelBtn" xml:space="preserve"><value>Anulează &amp; Păstrează Sala</value></data>
+	<data name="CinemaHall_DeleteBtn" xml:space="preserve"><value>Da, Șterge Sala</value></data>
 </root>

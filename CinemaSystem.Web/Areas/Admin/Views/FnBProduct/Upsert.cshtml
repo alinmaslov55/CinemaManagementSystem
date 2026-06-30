@@ -1,8 +1,11 @@
-﻿@model CinemaSystem.Models.Entities.FnBProduct
+﻿@using Microsoft.Extensions.Localization
+@using CinemaSystem.Utility
+@model CinemaSystem.Models.Entities.FnBProduct
 @using CinemaSystem.Models.Entities
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
-    ViewData["Title"] = Model.Id != 0 ? "Update Product" : "Add Product";
+    ViewData["Title"] = Model.Id != 0 ? Localizer["FnB_UpdateTitle"] : Localizer["FnB_AddTitle"];
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -22,7 +25,7 @@
 </style>
 
 <main class="p-8 max-w-[1600px] mx-auto w-full pb-20">
-            
+
     <form method="post" enctype="multipart/form-data">
         <input asp-for="Id" hidden />
         <input asp-for="ImageUrl" hidden />
@@ -30,56 +33,56 @@
         <div class="mb-8 flex justify-between items-end">
             <div>
                 <nav class="flex text-sm text-on-surface-variant mb-2 gap-2 items-center font-label font-bold uppercase tracking-wider">
-                    <a asp-action="Index" class="hover:text-primary transition-colors">Food & Beverage</a>
+                    <a asp-action="Index" class="hover:text-primary transition-colors">@Localizer["FnB_BreadcrumbMenu"]</a>
                     <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                    <span class="text-primary font-medium">@(Model.Id != 0 ? "Update" : "Add New") Product</span>
+                    <span class="text-primary font-medium">@(Model.Id != 0 ? Localizer["FnB_UpdateProduct"] : Localizer["FnB_AddNewProduct"])</span>
                 </nav>
-                <h2 class="text-3xl font-extrabold text-on-surface tracking-tight font-headline">Manage Menu Item</h2>
+                <h2 class="text-3xl font-extrabold text-on-surface tracking-tight font-headline">@Localizer["FnB_ManageMenuItem"]</h2>
             </div>
             <div class="flex gap-3">
-                <a asp-action="Index" class="px-6 py-2.5 rounded-xl border border-outline-variant/50 bg-white text-on-surface hover:bg-surface-container-low transition-colors font-bold font-label text-sm shadow-sm">Cancel</a>
+                <a asp-action="Index" class="px-6 py-2.5 rounded-xl border border-outline-variant/50 bg-white text-on-surface hover:bg-surface-container-low transition-colors font-bold font-label text-sm shadow-sm">@Localizer["Button_Cancel"]</a>
                 <button type="submit" class="px-8 py-2.5 rounded-xl bg-primary text-white hover:bg-[#5a4b7b] shadow-lg shadow-primary/20 transition-all font-bold font-label flex items-center gap-2 text-sm hover:-translate-y-0.5 active:scale-95">
                     <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">save</span>
-                    Save Product
+                    @Localizer["FnB_SaveProductBtn"]
                 </button>
             </div>
         </div>
 
         <div class="grid grid-cols-12 gap-8">
-            
+
             <div class="col-span-12 lg:col-span-8 space-y-8">
-                
+
                 <section class="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/20">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="p-2 bg-primary-fixed text-primary rounded-xl">
                             <span class="material-symbols-outlined">fastfood</span>
                         </div>
-                        <h3 class="text-xl font-bold font-headline text-on-surface">Product Details</h3>
+                        <h3 class="text-xl font-bold font-headline text-on-surface">@Localizer["FnB_ProductDetails"]</h3>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-6">
                         <div class="col-span-2">
-                            <label asp-for="Name" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Product Name <span class="text-error">*</span></label>
-                            <input asp-for="Name" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="e.g. Large Salted Popcorn" />
+                            <label asp-for="Name" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["FnB_InputName"] <span class="text-error">*</span></label>
+                            <input asp-for="Name" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="@Localizer["FnB_InputNamePlaceholder"]" />
                             <span asp-validation-for="Name" class="text-error text-xs mt-1 block"></span>
                         </div>
-                        
+
                         <div class="col-span-2">
-                            <label asp-for="Description" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Description / Ingredients</label>
-                            <textarea asp-for="Description" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none leading-relaxed" placeholder="Describe the item (e.g. 150g of fresh popcorn with real butter)..." rows="3"></textarea>
+                            <label asp-for="Description" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["FnB_InputDesc"]</label>
+                            <textarea asp-for="Description" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none leading-relaxed" placeholder="@Localizer["FnB_InputDescPlaceholder"]" rows="3"></textarea>
                             <span asp-validation-for="Description" class="text-error text-xs mt-1 block"></span>
                         </div>
 
                         <div>
-                            <label asp-for="Price" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Price ($) <span class="text-error">*</span></label>
+                            <label asp-for="Price" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["FnB_InputPrice"] <span class="text-error">*</span></label>
                             <input asp-for="Price" type="number" step="0.01" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="0.00" />
                             <span asp-validation-for="Price" class="text-error text-xs mt-1 block"></span>
                         </div>
 
                         <div>
-                            <label asp-for="Category" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">Category <span class="text-error">*</span></label>
-                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<FnBCategory>()" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
-                                <option disabled selected value="">-- Select --</option>
+                            <label asp-for="Category" class="block text-[10px] font-bold text-outline mb-1.5 uppercase tracking-widest font-label">@Localizer["FnB_InputCategory"] <span class="text-error">*</span></label>
+                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<CinemaSystem.Models.Data.Enums.FnBCategory>()" class="w-full rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-sm font-semibold focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
+                                <option disabled selected value="">@Localizer["FnB_SelectCategory"]</option>
                             </select>
                             <span asp-validation-for="Category" class="text-error text-xs mt-1 block"></span>
                         </div>
@@ -89,32 +92,32 @@
             </div>
 
             <div class="col-span-12 lg:col-span-4 space-y-8">
-                
+
                 <section class="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/20">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="p-2 bg-tertiary-fixed text-tertiary rounded-xl">
                             <span class="material-symbols-outlined">image</span>
                         </div>
-                        <h3 class="text-xl font-bold font-headline text-on-surface">Product Image</h3>
+                        <h3 class="text-xl font-bold font-headline text-on-surface">@Localizer["FnB_ProductImage"]</h3>
                     </div>
-                    
+
                     <div>
                         <div class="relative group aspect-square rounded-2xl overflow-hidden bg-surface-container border-2 border-dashed border-outline-variant/50 flex flex-col items-center justify-center transition-all hover:bg-surface-container-low hover:border-primary file-upload-wrapper shadow-inner">
                             <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp" />
-                            
+
                             @if (!string.IsNullOrEmpty(Model.ImageUrl))
                             {
                                 <img src="@Model.ImageUrl" class="absolute inset-0 w-full h-full object-cover z-0 bg-white" alt="Product Image" />
                                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center text-white backdrop-blur-sm">
                                     <span class="material-symbols-outlined text-4xl mb-2">cloud_upload</span>
-                                    <span class="text-sm font-bold tracking-widest uppercase">Change Image</span>
+                                    <span class="text-sm font-bold tracking-widest uppercase">@Localizer["FnB_ChangeImage"]</span>
                                 </div>
                             }
                             else
                             {
                                 <div class="relative z-10 flex flex-col items-center text-outline-variant group-hover:text-primary transition-colors">
                                     <span class="material-symbols-outlined text-5xl mb-2 opacity-50">add_photo_alternate</span>
-                                    <span class="text-sm font-bold uppercase tracking-widest">Upload Image</span>
+                                    <span class="text-sm font-bold uppercase tracking-widest">@Localizer["FnB_UploadImage"]</span>
                                 </div>
                             }
                         </div>
@@ -122,11 +125,11 @@
                 </section>
 
                 <section class="bg-surface-container-low rounded-2xl p-6 shadow-sm border border-outline-variant/20">
-                    <h3 class="text-sm font-bold font-headline text-on-surface mb-4">Availability Status</h3>
+                    <h3 class="text-sm font-bold font-headline text-on-surface mb-4">@Localizer["FnB_AvailabilityStatus"]</h3>
                     <div class="flex items-center justify-between bg-white p-4 rounded-xl border border-outline-variant/30">
                         <div>
-                            <span class="text-sm font-bold text-on-surface block">Active in Menu</span>
-                            <span class="text-[10px] text-outline font-medium">Turn off to hide from customers if sold out.</span>
+                            <span class="text-sm font-bold text-on-surface block">@Localizer["FnB_ActiveInMenu"]</span>
+                            <span class="text-[10px] text-outline font-medium">@Localizer["FnB_ActiveDisclaimer"]</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" asp-for="IsActive" class="sr-only peer">

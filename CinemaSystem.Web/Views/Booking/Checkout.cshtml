@@ -114,27 +114,22 @@
                                 <div class="space-y-4">
                                     @foreach (var fnBProduct in Model.AvailableFnBProducts)
                                     {
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-[#cbc4cf]/20 shadow-sm transition-all hover:shadow-md">
-                                            <input type="hidden" name="concessionIds" value="@fnBProduct.Id" />
-                                            <input type="hidden" name="concessionQuantities" id="input-qty-@fnBProduct.Id" value="0" class="concession-qty-input" data-price="@fnBProduct.Price.ToString(CultureInfo.InvariantCulture)" />
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-[#cbc4cf]/20 shadow-sm">
+
+                                            <input type="hidden" name="FnBProductIds" value="@fnBProduct.Id" />
+
+                                            <input type="hidden" name="FnBProductQuantities" id="input-qty-@fnBProduct.Id" value="0" class="concession-qty-input" data-price="@fnBProduct.Price.ToString(CultureInfo.InvariantCulture)" />
 
                                             <div class="flex items-center gap-4">
-                                                <div class="w-16 h-16 rounded-xl bg-surface-container overflow-hidden border border-[#cbc4cf]/30 shrink-0">
-                                                    <img class="w-full h-full object-cover" alt="@fnBProduct.Name" src="@(string.IsNullOrEmpty(fnBProduct.ImageUrl) ? "https://via.placeholder.com/100" : fnBProduct.ImageUrl)"/>
-                                                </div>
-                                                <div>
-                                                    <p class="font-bold text-[#1a1c1c] text-sm">@fnBProduct.Name</p>
-                                                    <p class="text-[10px] text-[#7a757f] uppercase tracking-widest font-bold mb-1">@fnBProduct.Description</p>
-                                                    <span class="font-bold text-[#645485] text-sm">$@fnBProduct.Price.ToString("F2")</span>
-                                                </div>
+                                                <p class="font-bold text-[#1a1c1c] text-sm">@fnBProduct.Name</p>
                                             </div>
-                                            
-                                            <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 border border-[#cbc4cf]/30 w-32 sm:w-auto shrink-0 self-end sm:self-auto">
-                                                <button type="button" onclick="updateQty(@fnBProduct.Id, -1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e2e2e2] transition-colors active:scale-90 text-[#49454e]">
+
+                                            <div class="flex items-center justify-between bg-[#f3f3f3] rounded-full p-1.5 w-32">
+                                                <button type="button" onclick="updateQty(@fnBProduct.Id, -1)" class="...">
                                                     <span class="material-symbols-outlined text-sm">remove</span>
                                                 </button>
                                                 <span class="px-4 text-sm font-bold text-[#1a1c1c] font-mono" id="display-qty-@fnBProduct.Id">0</span>
-                                                <button type="button" onclick="updateQty(@fnBProduct.Id, 1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#eaddff] text-[#645485] hover:bg-[#645485] hover:text-white transition-colors active:scale-90">
+                                                <button type="button" onclick="updateQty(@fnBProduct.Id, 1)" class="...">
                                                     <span class="material-symbols-outlined text-sm">add</span>
                                                 </button>
                                             </div>

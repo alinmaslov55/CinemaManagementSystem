@@ -238,21 +238,23 @@ namespace CinemaSystem.Web.Controllers
 
             decimal FnBProductsTotal = 0;
 
-            if (FnBProductIds != null && FnBProductQuantities != null && FnBProductIds.Length == FnBProductQuantities.Length)
+            if (FnBProductIds != null && FnBProductQuantities != null)
             {
                 for (int i = 0; i < FnBProductIds.Length; i++)
                 {
-                    if (FnBProductQuantities[i] > 0)
+                    int productId = FnBProductIds[i];
+                    int quantity = FnBProductQuantities[i];
+
+                    if (quantity > 0)
                     {
-                        var concession = _unitOfWork.FnBProduct.Get(c => c.Id == FnBProductIds[i]);
+                        var concession = _unitOfWork.FnBProduct.Get(c => c.Id == productId);
                         if (concession != null)
                         {
-                            FnBProductsTotal += (concession.Price * FnBProductQuantities[i]);
-
+                            FnBProductsTotal += (concession.Price * quantity);
                             newBooking.BookingFnBs.Add(new BookingFnB
                             {
                                 FnBProductId = concession.Id,
-                                Quantity = FnBProductQuantities[i],
+                                Quantity = quantity,
                                 PriceAtPurchase = concession.Price
                             });
                         }
@@ -292,14 +294,13 @@ namespace CinemaSystem.Web.Controllers
 
             var completedBooking = _unitOfWork.Booking.Get(
                 b => b.Id == newBooking.Id,
-                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,User"
+                includeProperties: "Showtime,Showtime.Movie,Showtime.CinemaHall,Showtime.CinemaHall.Cinema,Tickets,Tickets.Seat,User,BookingFnBs,BookingFnBs.FnBProduct"
             );
 
             if (completedBooking != null && !string.IsNullOrEmpty(completedBooking.User?.Email))
             {
                 byte[] pdfAttachment = _ticketPdfService.GenerateTicketPdfBytes(completedBooking);
 
-                // Email formatat localizat (Title și Code sunt injectate în cheia din dicționar)
                 string subject = string.Format(_localizer["Email_TicketSubject"].Value, completedBooking.Showtime.Movie.Title, completedBooking.ConfirmationCode);
                 string htmlBody = _localizer["Email_TicketBody"].Value;
 

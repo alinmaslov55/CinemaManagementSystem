@@ -24,7 +24,9 @@ namespace CinemaSystem.DataAccess.Repository
                 objFromDb.HallType = obj.HallType;
                 objFromDb.CinemaId = obj.CinemaId;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.IsDeleted = obj.IsDeleted;
+
+                objFromDb.UpdatedDate = DateTime.UtcNow;
             }
         }
     }

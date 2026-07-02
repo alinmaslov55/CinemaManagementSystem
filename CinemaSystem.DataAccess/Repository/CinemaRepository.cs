@@ -20,10 +20,12 @@ namespace CinemaSystem.DataAccess.Repository
             if (objFromDb != null)
             {
                 objFromDb.Name = obj.Name;
+                objFromDb.City = obj.City;
                 objFromDb.Address = obj.Address;
                 objFromDb.Description = obj.Description;
+                objFromDb.IsDeleted = obj.IsDeleted;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.UpdatedDate = DateTime.UtcNow;
 
                 if (obj.Logo != null)
                 {

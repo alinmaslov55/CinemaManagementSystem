@@ -15,7 +15,24 @@ namespace CinemaSystem.DataAccess.Repository
 
         public void Update(FnBProduct obj)
         {
-            _db.FnBProducts.Update(obj);
+            var objFromDb = _db.FnBProducts.FirstOrDefault(u => u.Id == obj.Id);
+
+            if (objFromDb != null)
+            {
+                objFromDb.Name = obj.Name;
+                objFromDb.Description = obj.Description;
+                objFromDb.Price = obj.Price;
+                objFromDb.Category = obj.Category;
+                objFromDb.IsActive = obj.IsActive;
+
+                objFromDb.IsDeleted = obj.IsDeleted;
+                objFromDb.UpdatedDate = DateTime.UtcNow;
+
+                if (obj.ImageUrl != null)
+                {
+                    objFromDb.ImageUrl = obj.ImageUrl;
+                }
+            }
         }
     }
 }

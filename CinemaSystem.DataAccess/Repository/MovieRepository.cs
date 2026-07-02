@@ -30,7 +30,7 @@ namespace CinemaSystem.DataAccess.Repository
                 objFromDb.IsReleased = obj.IsReleased;
                 objFromDb.IsDeleted = obj.IsDeleted;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.UpdatedDate = DateTime.UtcNow;
 
                 if (obj.ImageUrl != null)
                 {

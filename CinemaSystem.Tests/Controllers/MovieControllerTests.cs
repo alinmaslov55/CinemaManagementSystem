@@ -1,19 +1,21 @@
-﻿using Xunit;
-using Moq;
+﻿using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Entities;
+using CinemaSystem.Utility;
+using CinemaSystem.Web;
+using CinemaSystem.Web.Controllers;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using System.Linq.Expressions;
+using Microsoft.Extensions.Localization;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-using CinemaSystem.Web.Controllers;
-using CinemaSystem.DataAccess.Repository.IRepository;
-using CinemaSystem.Models.Entities;
-using CinemaSystem.Utility;
-using Microsoft.AspNetCore.Hosting;
+using Xunit;
 
 namespace CinemaSystem.Tests.Controllers
 {
@@ -22,6 +24,8 @@ namespace CinemaSystem.Tests.Controllers
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IWebHostEnvironment> _mockWebHostEnv;
         private readonly Mock<IMovieSyncService> _mockMovieSyncService;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
+
         private readonly MovieController _controller;
 
         public MovieControllerTests()
@@ -29,6 +33,7 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockWebHostEnv = new Mock<IWebHostEnvironment>();
             _mockMovieSyncService = new Mock<IMovieSyncService>();
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
 
             _mockUnitOfWork.Setup(u => u.Movie.Add(It.IsAny<Movie>()));
             _mockUnitOfWork.Setup(u => u.Movie.Update(It.IsAny<Movie>()));
@@ -36,7 +41,8 @@ namespace CinemaSystem.Tests.Controllers
             _controller = new MovieController(
                 _mockUnitOfWork.Object,
                 _mockWebHostEnv.Object,
-                _mockMovieSyncService.Object
+                _mockMovieSyncService.Object,
+                _mockLocalizer.Object
             );
         }
 
@@ -117,6 +123,47 @@ namespace CinemaSystem.Tests.Controllers
 
             result.Should().BeOfType<NotFoundResult>();
         }
+        
+        [Fact]
+        public void DeleteGet_ReturnsNotFound_WhenIdIsNullOrZero()
+        {
+            var result = _controller.Delete(null);
+            result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public void DeletePOST_ReturnsNotFound_WhenEntityDoesNotExist()
+        {
+            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns((Movie)null);
+
+            var result = _controller.DeletePOST(99);
+
+            result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public void DeletePOST_SetsIsDeletedToTrue_AndDoesNotCallRemove()
+        {
+            var existingMovie = new Movie { Id = 1, IsDeleted = false };
+            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingMovie);
+
+            _mockLocalizer.Setup(l => l["Movie_ArchivedSuccess"])
+                          .Returns(new LocalizedString("Movie_ArchivedSuccess", "Movie archived successfully"));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+            var result = _controller.DeletePOST(1);
+
+            existingMovie.IsDeleted.Should().BeTrue();
+            _mockUnitOfWork.Verify(u => u.Movie.Update(existingMovie), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Movie.Remove(It.IsAny<Movie>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
+        }
 
         [Fact]
         public async Task UpsertPost_ReturnsViewResult_AndSetsError_WhenFileTypeIsInvalid()
@@ -124,6 +171,9 @@ namespace CinemaSystem.Tests.Controllers
             var movie = new Movie { Id = 0, Title = "Test Movie" };
             var mockFile = new Mock<IFormFile>();
             mockFile.Setup(f => f.FileName).Returns("script.js");
+
+            _mockLocalizer.Setup(l => l["Movie_InvalidFileType"])
+                          .Returns(new LocalizedString("Movie_InvalidFileType", "Invalid file type. Only JPG, PNG, and WEBP are allowed."));
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -141,6 +191,9 @@ namespace CinemaSystem.Tests.Controllers
 
             _mockMovieSyncService.Setup(m => m.FetchMovieRatingsAsync("Avatar"))
                                  .ReturnsAsync(("7.8", "82%"));
+
+            _mockLocalizer.Setup(l => l["Movie_CreatedSuccess"])
+                          .Returns(new LocalizedString("Movie_CreatedSuccess", "Movie created successfully"));
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -173,6 +226,9 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                            .Returns(existingMovie);
 
+            _mockLocalizer.Setup(l => l["Movie_UpdatedSuccess"])
+                          .Returns(new LocalizedString("Movie_UpdatedSuccess", "Movie updated successfully"));
+
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             var result = await _controller.Upsert(movieToUpdate, null);
@@ -181,44 +237,6 @@ namespace CinemaSystem.Tests.Controllers
 
             _mockUnitOfWork.Verify(u => u.Movie.Update(It.Is<Movie>(m => m.Title == "Dune")), Times.Once);
             _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-        }
-
-        [Fact]
-        public void DeleteGet_ReturnsNotFound_WhenIdIsNullOrZero()
-        {
-            var result = _controller.Delete(null);
-            result.Should().BeOfType<NotFoundResult>();
-        }
-
-        [Fact]
-        public void DeletePOST_ReturnsNotFound_WhenEntityDoesNotExist()
-        {
-            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns((Movie)null);
-
-            var result = _controller.DeletePOST(99);
-
-            result.Should().BeOfType<NotFoundResult>();
-        }
-
-        [Fact]
-        public void DeletePOST_SetsIsDeletedToTrue_AndDoesNotCallRemove()
-        {
-            var existingMovie = new Movie { Id = 1, IsDeleted = false };
-            _mockUnitOfWork.Setup(u => u.Movie.Get(It.IsAny<Expression<Func<Movie, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingMovie);
-
-            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-            var result = _controller.DeletePOST(1);
-
-            existingMovie.IsDeleted.Should().BeTrue();
-            _mockUnitOfWork.Verify(u => u.Movie.Update(existingMovie), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Movie.Remove(It.IsAny<Movie>()), Times.Never); // Protectia arhitecturala
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
         }
     }
 }

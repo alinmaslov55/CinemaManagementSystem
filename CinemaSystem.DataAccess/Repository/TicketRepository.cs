@@ -20,9 +20,11 @@ namespace CinemaSystem.DataAccess.Repository
             if (objFromDb != null)
             {
                 objFromDb.SeatId = obj.SeatId;
-                objFromDb.BookingId = obj.BookingId;
+                objFromDb.Price = obj.Price;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.IsDeleted = obj.IsDeleted;
+
+                objFromDb.UpdatedDate = DateTime.UtcNow;
             }
         }
     }

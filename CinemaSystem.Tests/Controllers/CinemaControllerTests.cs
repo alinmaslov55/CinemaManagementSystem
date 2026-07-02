@@ -1,12 +1,14 @@
 ﻿using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Web;
 using CinemaSystem.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Localization;
 using Moq;
 using System;
 using System.Linq.Expressions;
@@ -19,13 +21,15 @@ namespace CinemaSystem.Tests.Controllers
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IWebHostEnvironment> _mockWebHostEnv;
         private readonly CinemaController _controller;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
 
         public CinemaControllerTests()
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockWebHostEnv = new Mock<IWebHostEnvironment>();
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
 
-            _controller = new CinemaController(_mockUnitOfWork.Object, _mockWebHostEnv.Object);
+            _controller = new CinemaController(_mockUnitOfWork.Object, _mockWebHostEnv.Object, _mockLocalizer.Object);
         }
 
         [Fact]
@@ -136,27 +140,40 @@ namespace CinemaSystem.Tests.Controllers
         }
 
         [Fact]
-        public void UpsertPost_ReturnsViewResult_AndSetsTempDataError_WhenFileTypeIsInvalid()
+        public void DeletePOST_ReturnsNotFound_WhenEntityDoesNotExist()
         {
-            var vm = new CinemaVM { Id = 0, Name = "Test Cinema", City = "Test", Address = "Test" };
+            _mockUnitOfWork.Setup(u => u.Cinema.Get(It.IsAny<Expression<Func<Cinema, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns((Cinema)null);
 
-            var mockFile = new Mock<IFormFile>();
-            mockFile.Setup(f => f.FileName).Returns("malware.exe");
+            var result = _controller.DeletePOST(99);
+
+            result.Should().BeOfType<NotFoundResult>();
+        }
+        public void DeletePOST_SetsIsDeletedToTrue_AndCallsUpdate_WhenEntityExists()
+        {
+            var existingCinema = new Cinema { Id = 1, IsDeleted = false };
+
+            _mockUnitOfWork.Setup(u => u.Cinema.Get(It.IsAny<Expression<Func<Cinema, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingCinema);
+
+            _mockLocalizer.Setup(l => l["Cinema_ArchivedSuccess"])
+                          .Returns(new LocalizedString("Cinema_ArchivedSuccess", "Cinema archived successfully"));
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-            _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
 
-            var result = _controller.Upsert(vm, mockFile.Object);
+            var result = _controller.DeletePOST(1);
 
-            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            _controller.TempData["error"].Should().Be("Invalid file type. Only JPG, PNG, and WEBP are allowed.");
+            existingCinema.IsDeleted.Should().BeTrue();
 
-            _mockUnitOfWork.Verify(u => u.Cinema.Add(It.IsAny<Cinema>()), Times.Never);
-            _mockUnitOfWork.Verify(u => u.Cinema.Update(It.IsAny<Cinema>()), Times.Never);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Cinema.Update(existingCinema), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Cinema.Remove(It.IsAny<Cinema>()), Times.Never);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
+            _controller.TempData["success"].Should().Be("Cinema archived successfully");
         }
 
-        [Fact]
         public void UpsertPost_AddsNewCinema_WhenAddModeAndNoFile()
         {
             var vm = new CinemaVM
@@ -166,6 +183,9 @@ namespace CinemaSystem.Tests.Controllers
                 City = "New City",
                 Address = "New Address"
             };
+
+            _mockLocalizer.Setup(l => l["Cinema_CreatedSuccess"])
+                          .Returns(new LocalizedString("Cinema_CreatedSuccess", "Cinema created successfully"));
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
             _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
@@ -186,7 +206,29 @@ namespace CinemaSystem.Tests.Controllers
             _controller.TempData["success"].Should().Be("Cinema created successfully");
         }
 
-        [Fact]
+        public void UpsertPost_ReturnsViewResult_AndSetsTempDataError_WhenFileTypeIsInvalid()
+        {
+            var vm = new CinemaVM { Id = 0, Name = "Test Cinema", City = "Test", Address = "Test" };
+
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.FileName).Returns("malware.exe");
+
+            _mockLocalizer.Setup(l => l["Cinema_InvalidFileType"])
+                          .Returns(new LocalizedString("Cinema_InvalidFileType", "Invalid file type. Only JPG, PNG, and WEBP are allowed."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+            _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
+
+            var result = _controller.Upsert(vm, mockFile.Object);
+
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            _controller.TempData["error"].Should().Be("Invalid file type. Only JPG, PNG, and WEBP are allowed.");
+
+            _mockUnitOfWork.Verify(u => u.Cinema.Add(It.IsAny<Cinema>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Cinema.Update(It.IsAny<Cinema>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
+        }
+
         public void UpsertPost_UpdatesCinema_WhenEditModeAndNoFile()
         {
             var vm = new CinemaVM
@@ -208,6 +250,9 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Cinema.Get(It.IsAny<Expression<Func<Cinema, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                            .Returns(existingCinema);
 
+            _mockLocalizer.Setup(l => l["Cinema_UpdatedSuccess"])
+                          .Returns(new LocalizedString("Cinema_UpdatedSuccess", "Cinema updated successfully"));
+
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
             _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
 
@@ -224,41 +269,6 @@ namespace CinemaSystem.Tests.Controllers
             var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
             redirectResult.ActionName.Should().Be("Index");
             _controller.TempData["success"].Should().Be("Cinema updated successfully");
-        }
-
-
-        [Fact]
-        public void DeletePOST_ReturnsNotFound_WhenEntityDoesNotExist()
-        {
-            _mockUnitOfWork.Setup(u => u.Cinema.Get(It.IsAny<Expression<Func<Cinema, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns((Cinema)null);
-
-            var result = _controller.DeletePOST(99);
-
-            result.Should().BeOfType<NotFoundResult>();
-        }
-
-        [Fact]
-        public void DeletePOST_SetsIsDeletedToTrue_AndCallsUpdate_WhenEntityExists()
-        {
-            var existingCinema = new Cinema { Id = 1, IsDeleted = false };
-
-            _mockUnitOfWork.Setup(u => u.Cinema.Get(It.IsAny<Expression<Func<Cinema, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingCinema);
-
-            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-            var result = _controller.DeletePOST(1);
-
-            existingCinema.IsDeleted.Should().BeTrue();
-
-            _mockUnitOfWork.Verify(u => u.Cinema.Update(existingCinema), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Cinema.Remove(It.IsAny<Cinema>()), Times.Never);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
-            _controller.TempData["success"].Should().Be("Cinema archived successfully");
         }
     }
 }

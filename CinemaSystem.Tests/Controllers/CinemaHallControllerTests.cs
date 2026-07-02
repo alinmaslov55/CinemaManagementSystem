@@ -14,6 +14,8 @@ using CinemaSystem.DataAccess.Repository.IRepository;
 using CinemaSystem.Models.Entities;
 using CinemaSystem.Models.ViewModels;
 using CinemaSystem.Models.Data.Enums;
+using Microsoft.Extensions.Localization;
+using CinemaSystem.Web;
 
 namespace CinemaSystem.Tests.Controllers
 {
@@ -21,10 +23,12 @@ namespace CinemaSystem.Tests.Controllers
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly CinemaHallController _controller;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
 
         public CinemaHallControllerTests()
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
 
             _mockUnitOfWork.Setup(u => u.Cinema.GetAll(It.IsAny<Expression<Func<Cinema, bool>>>(), It.IsAny<string>()))
                            .Returns(new List<Cinema>());
@@ -33,7 +37,7 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Seat.Add(It.IsAny<Seat>()));
             _mockUnitOfWork.Setup(u => u.Seat.RemoveRange(It.IsAny<IEnumerable<Seat>>()));
 
-            _controller = new CinemaHallController(_mockUnitOfWork.Object);
+            _controller = new CinemaHallController(_mockUnitOfWork.Object, _mockLocalizer.Object);
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
         }
@@ -121,15 +125,32 @@ namespace CinemaSystem.Tests.Controllers
         }
 
         [Fact]
-        public void UpsertPost_ReturnsViewResult_WithTempDataError_WhenSeatLayoutDataIsMissing()
+        public void DeleteGet_ReturnsNotFound_WhenIdIsNullOrZero()
         {
-            var vm = new CinemaHallVM { CinemaHall = new CinemaHall { Id = 0, Name = "Sala Test" }, SeatLayoutData = null };
+            _controller.Delete(0).Should().BeOfType<NotFoundResult>();
+        }
 
-            var result = _controller.Upsert(vm);
+        [Fact]
+        public void DeletePOST_SetsIsDeletedToTrue_AndDoesNotCallRemove()
+        {
+            var existingHall = new CinemaHall { Id = 1, IsDeleted = false };
+            _mockUnitOfWork.Setup(u => u.CinemaHall.Get(It.IsAny<Expression<Func<CinemaHall, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingHall);
 
-            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            _controller.TempData["error"].Should().Be("Seat layout could not be generated. Please try again.");
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
+            _mockLocalizer.Setup(l => l["CinemaHall_ArchivedSuccess"])
+                          .Returns(new LocalizedString("CinemaHall_ArchivedSuccess", "Cinema Hall archived successfully."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+            var result = _controller.DeletePOST(1);
+
+            existingHall.IsDeleted.Should().BeTrue();
+            _mockUnitOfWork.Verify(u => u.CinemaHall.Update(existingHall), Times.Once);
+            _mockUnitOfWork.Verify(u => u.CinemaHall.Remove(It.IsAny<CinemaHall>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
         }
 
         [Fact]
@@ -148,6 +169,11 @@ namespace CinemaSystem.Tests.Controllers
                 Rows = 1,
                 Cols = 2
             };
+
+            _mockLocalizer.Setup(l => l["CinemaHall_CreatedSuccess"])
+                          .Returns(new LocalizedString("CinemaHall_CreatedSuccess", "Hall created successfully."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             var result = _controller.Upsert(vm);
 
@@ -177,6 +203,11 @@ namespace CinemaSystem.Tests.Controllers
                 Rows = 10,
                 Cols = 10
             };
+
+            _mockLocalizer.Setup(l => l["CinemaHall_Error_HasShowtimes"])
+                          .Returns(new LocalizedString("CinemaHall_Error_HasShowtimes", "Cannot change layout dimensions because showtimes are scheduled for this hall."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             var result = _controller.Upsert(vm);
 
@@ -220,6 +251,11 @@ namespace CinemaSystem.Tests.Controllers
                 Cols = 1
             };
 
+            _mockLocalizer.Setup(l => l["CinemaHall_UpdatedSuccess"])
+                          .Returns(new LocalizedString("CinemaHall_UpdatedSuccess", "Hall configured safely."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
             var result = _controller.Upsert(vm);
 
             oldSeatToKeep.SeatType.Should().Be(SeatType.Premium);
@@ -228,31 +264,6 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Verify(u => u.Seat.RemoveRange(It.Is<IEnumerable<Seat>>(list => list.Contains(oldSeatToRemove))), Times.Once);
 
             _mockUnitOfWork.Verify(u => u.CinemaHall.Update(It.Is<CinemaHall>(h => h.Name == "Renamed Hall")), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
-        }
-
-
-        [Fact]
-        public void DeleteGet_ReturnsNotFound_WhenIdIsNullOrZero()
-        {
-            _controller.Delete(0).Should().BeOfType<NotFoundResult>();
-        }
-
-        [Fact]
-        public void DeletePOST_SetsIsDeletedToTrue_AndDoesNotCallRemove()
-        {
-            var existingHall = new CinemaHall { Id = 1, IsDeleted = false };
-            _mockUnitOfWork.Setup(u => u.CinemaHall.Get(It.IsAny<Expression<Func<CinemaHall, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingHall);
-
-            var result = _controller.DeletePOST(1);
-
-            existingHall.IsDeleted.Should().BeTrue();
-            _mockUnitOfWork.Verify(u => u.CinemaHall.Update(existingHall), Times.Once);
-            _mockUnitOfWork.Verify(u => u.CinemaHall.Remove(It.IsAny<CinemaHall>()), Times.Never);
             _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
 
             var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;

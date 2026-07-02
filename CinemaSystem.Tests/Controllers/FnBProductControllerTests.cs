@@ -1,17 +1,19 @@
-﻿using Xunit;
-using Moq;
+﻿using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Entities;
+using CinemaSystem.Web;
+using CinemaSystem.Web.Areas.Admin.Controllers;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Hosting;
-using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Localization;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CinemaSystem.Web.Areas.Admin.Controllers;
-using CinemaSystem.DataAccess.Repository.IRepository;
-using CinemaSystem.Models.Entities;
+using System.Linq.Expressions;
+using Xunit;
 
 namespace CinemaSystem.Tests.Controllers
 {
@@ -19,6 +21,8 @@ namespace CinemaSystem.Tests.Controllers
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IWebHostEnvironment> _mockWebHostEnv;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
+
         private readonly FnBProductController _controller;
 
         public FnBProductControllerTests()
@@ -29,7 +33,8 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.FnBProduct.Add(It.IsAny<FnBProduct>()));
             _mockUnitOfWork.Setup(u => u.FnBProduct.Update(It.IsAny<FnBProduct>()));
 
-            _controller = new FnBProductController(_mockUnitOfWork.Object, _mockWebHostEnv.Object);
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
+            _controller = new FnBProductController(_mockUnitOfWork.Object, _mockWebHostEnv.Object, _mockLocalizer.Object);
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
         }
@@ -46,6 +51,99 @@ namespace CinemaSystem.Tests.Controllers
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeAssignableTo<IEnumerable<FnBProduct>>().Subject;
             model.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public void DeletePOST_SetsIsDeletedToTrue_AndDoesNotCallRemove()
+        {
+            var existingFnBProduct = new FnBProduct { Id = 1, IsDeleted = false };
+            _mockUnitOfWork.Setup(u => u.FnBProduct.Get(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingFnBProduct);
+
+            _mockLocalizer.Setup(l => l["FnB_ArchivedSuccess"])
+                          .Returns(new LocalizedString("FnB_ArchivedSuccess", "Food & Beverage item archived successfully."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+            var result = _controller.DeletePOST(1);
+
+            existingFnBProduct.IsDeleted.Should().BeTrue();
+            _mockUnitOfWork.Verify(u => u.FnBProduct.Update(existingFnBProduct), Times.Once);
+            _mockUnitOfWork.Verify(u => u.FnBProduct.Remove(It.IsAny<FnBProduct>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
+
+            _controller.TempData["success"].Should().Be("Food & Beverage item archived successfully.");
+        }
+
+        [Fact]
+        public void UpsertPost_AddsNewFnBProduct_WhenAddModeAndNoFile()
+        {
+            var newFnBProduct = new FnBProduct { Id = 0, Name = "Large Cola", Price = 4.99m };
+
+            _mockLocalizer.Setup(l => l["FnB_CreatedSuccess"])
+                          .Returns(new LocalizedString("FnB_CreatedSuccess", "Food & Beverage item created successfully."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+            _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
+
+            var result = _controller.Upsert(newFnBProduct, null);
+
+            _mockUnitOfWork.Verify(u => u.FnBProduct.Add(It.Is<FnBProduct>(c => c.Name == "Large Cola" && c.Price == 4.99m)), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
+
+            _controller.TempData["success"].Should().Be("Food & Beverage item created successfully.");
+        }
+
+        [Fact]
+        public void UpsertPost_UpdatesFnBProduct_WhenEditModeAndNoFile()
+        {
+            var existingFnBProduct = new FnBProduct { Id = 1, Name = "Old Name" };
+            var productToUpdate = new FnBProduct { Id = 1, Name = "New Name" };
+
+            _mockUnitOfWork.Setup(u => u.FnBProduct.Get(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingFnBProduct);
+
+            _mockLocalizer.Setup(l => l["FnB_UpdatedSuccess"])
+                          .Returns(new LocalizedString("FnB_UpdatedSuccess", "Food & Beverage item updated successfully."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+            _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
+
+            var result = _controller.Upsert(productToUpdate, null);
+
+            _mockUnitOfWork.Verify(u => u.FnBProduct.Update(It.Is<FnBProduct>(c => c.Name == "New Name")), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
+
+            _controller.TempData["success"].Should().Be("Food & Beverage item updated successfully.");
+        }
+
+        [Fact]
+        public void UpsertPost_ReturnsViewResult_AndSetsError_WhenFileTypeIsInvalid()
+        {
+            var concession = new FnBProduct { Id = 0, Name = "Test" };
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.FileName).Returns("document.pdf");
+
+            _mockLocalizer.Setup(l => l["FnB_InvalidFileType"])
+                          .Returns(new LocalizedString("FnB_InvalidFileType", "Invalid file type. Only JPG, PNG, and WEBP are allowed."));
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+            _mockWebHostEnv.Setup(m => m.WebRootPath).Returns("wwwroot");
+
+            var result = _controller.Upsert(concession, mockFile.Object);
+
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            _controller.TempData["error"].Should().Be("Invalid file type. Only JPG, PNG, and WEBP are allowed.");
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
         }
 
         [Theory]
@@ -111,19 +209,6 @@ namespace CinemaSystem.Tests.Controllers
             result.Should().BeOfType<NotFoundResult>();
         }
 
-        [Fact]
-        public void UpsertPost_ReturnsViewResult_AndSetsError_WhenFileTypeIsInvalid()
-        {
-            var concession = new FnBProduct { Id = 0, Name = "Test" };
-            var mockFile = new Mock<IFormFile>();
-            mockFile.Setup(f => f.FileName).Returns("document.pdf");
-
-            var result = _controller.Upsert(concession, mockFile.Object);
-
-            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            _controller.TempData["error"].Should().Be("Invalid file type. Only JPG, PNG, and WEBP are allowed.");
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
-        }
 
         [Theory]
         [InlineData(null)]
@@ -169,60 +254,6 @@ namespace CinemaSystem.Tests.Controllers
             result.Should().BeOfType<NotFoundResult>();
         }
 
-        [Fact]
-        public void DeletePOST_SetsIsDeletedToTrue_AndDoesNotCallRemove()
-        {
-            var existingFnBProduct = new FnBProduct { Id = 1, IsDeleted = false };
-            _mockUnitOfWork.Setup(u => u.FnBProduct.Get(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingFnBProduct);
 
-            var result = _controller.DeletePOST(1);
-
-            existingFnBProduct.IsDeleted.Should().BeTrue();
-            _mockUnitOfWork.Verify(u => u.FnBProduct.Update(existingFnBProduct), Times.Once);
-            _mockUnitOfWork.Verify(u => u.FnBProduct.Remove(It.IsAny<FnBProduct>()), Times.Never);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
-
-            _controller.TempData["success"].Should().Be("Food & Beverage item archived successfully.");
-        }
-
-        [Fact]
-        public void UpsertPost_AddsNewFnBProduct_WhenAddModeAndNoFile()
-        {
-            var newFnBProduct = new FnBProduct { Id = 0, Name = "Large Cola", Price = 4.99m };
-
-            var result = _controller.Upsert(newFnBProduct, null);
-
-            _mockUnitOfWork.Verify(u => u.FnBProduct.Add(It.Is<FnBProduct>(c => c.Name == "Large Cola" && c.Price == 4.99m)), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
-            
-            _controller.TempData["success"].Should().Be("Food & Beverage item created successfully.");
-        }
-
-        [Fact]
-        public void UpsertPost_UpdatesFnBProduct_WhenEditModeAndNoFile()
-        {
-            var existingFnBProduct = new FnBProduct { Id = 1, Name = "Old Name" };
-            var productToUpdate = new FnBProduct { Id = 1, Name = "New Name" };
-
-            _mockUnitOfWork.Setup(u => u.FnBProduct.Get(It.IsAny<Expression<Func<FnBProduct, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingFnBProduct);
-
-            var result = _controller.Upsert(productToUpdate, null);
-
-            _mockUnitOfWork.Verify(u => u.FnBProduct.Update(It.Is<FnBProduct>(c => c.Name == "New Name")), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
-
-            _controller.TempData["success"].Should().Be("Food & Beverage item updated successfully.");
-        }
     }
 }

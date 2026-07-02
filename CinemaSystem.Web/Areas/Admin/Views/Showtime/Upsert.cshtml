@@ -235,13 +235,13 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script>
         // Setare variabile JS folosind localizarea Razor
-        const textScheduleMovie = '@Localizer["Showtime_ModalScheduleMovie"]';
-        const textEditShowtime = '@Localizer["Showtime_ModalEditShowtime"]';
-        const textClickToSearch = '@Localizer["Showtime_ClickToSearch"]';
-        const textErrorSelectMovieTime = '@Localizer["Showtime_JS_SelectMovieTime"]';
-        const textErrorSaving = '@Localizer["Showtime_JS_ErrorSaving"]';
-        const textConfirmDelete = '@Localizer["Showtime_JS_ConfirmDelete"]';
-        const textErrorDeleting = '@Localizer["Showtime_JS_ErrorDeleting"]';
+        const textScheduleMovie = @Html.Raw(Json.Serialize(Localizer["Showtime_ModalScheduleMovie"].Value));
+        const textEditShowtime = @Html.Raw(Json.Serialize(Localizer["Showtime_ModalEditShowtime"].Value));
+        const textClickToSearch = @Html.Raw(Json.Serialize(Localizer["Showtime_ClickToSearch"].Value));
+        const textErrorSelectMovieTime = @Html.Raw(Json.Serialize(Localizer["Showtime_JS_SelectMovieTime"].Value));
+        const textErrorSaving = @Html.Raw(Json.Serialize(Localizer["Showtime_JS_ErrorSaving"].Value));
+        const textConfirmDelete = @Html.Raw(Json.Serialize(Localizer["Showtime_JS_ConfirmDelete"].Value));
+        const textErrorDeleting = @Html.Raw(Json.Serialize(Localizer["Showtime_JS_ErrorDeleting"].Value));
 
         const hallId = @Model.Hall.Id;
         const modal = document.getElementById('tailwindModal');

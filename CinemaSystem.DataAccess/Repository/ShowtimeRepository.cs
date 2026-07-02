@@ -27,7 +27,9 @@ namespace CinemaSystem.DataAccess.Repository
                 objFromDb.Language = obj.Language;
                 objFromDb.Subtitles = obj.Subtitles;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.IsDeleted = obj.IsDeleted;
+
+                objFromDb.UpdatedDate = DateTime.UtcNow;
             }
         }
     }

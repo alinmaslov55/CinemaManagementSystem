@@ -14,6 +14,7 @@ namespace CinemaSystem.Models.Entities
 
         [Required]
         public int MovieId { get; set; }
+        [ValidateNever]
         public virtual Movie Movie { get; set; }
 
         [Required]

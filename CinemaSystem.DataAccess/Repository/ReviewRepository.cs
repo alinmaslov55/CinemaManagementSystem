@@ -22,7 +22,9 @@ namespace CinemaSystem.DataAccess.Repository
                 objFromDb.Rating = obj.Rating;
                 objFromDb.Comment = obj.Comment;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.IsDeleted = obj.IsDeleted;
+
+                objFromDb.UpdatedDate = DateTime.UtcNow;
             }
         }
     }

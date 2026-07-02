@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CinemaSystem.Models.Data.Enums;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace CinemaSystem.Models.Entities
 {
@@ -19,6 +20,7 @@ namespace CinemaSystem.Models.Entities
 
         [Required]
         public int CinemaHallId { get; set; }
+        [ValidateNever]
         public virtual CinemaHall CinemaHall { get; set; }
     }
 }

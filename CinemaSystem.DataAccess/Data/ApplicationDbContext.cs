@@ -28,28 +28,18 @@ namespace CinemaSystem.DataAccess.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Top-Level Entities
             modelBuilder.Entity<Cinema>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Movie>().HasQueryFilter(e => !e.IsDeleted);
-
-            // First-Level Children
-            modelBuilder.Entity<CinemaHall>().HasQueryFilter(e => !e.IsDeleted && !e.Cinema.IsDeleted);
-            modelBuilder.Entity<Review>().HasQueryFilter(e => !e.IsDeleted && !e.Movie.IsDeleted);
-
-            // Second-Level Children
-            modelBuilder.Entity<Seat>().HasQueryFilter(e => !e.IsDeleted && !e.CinemaHall.IsDeleted);
-            modelBuilder.Entity<Showtime>().HasQueryFilter(e => !e.IsDeleted && !e.Movie.IsDeleted && !e.CinemaHall.IsDeleted);
-
-            // Third-Level Children
-            modelBuilder.Entity<Booking>().HasQueryFilter(e => !e.IsDeleted && !e.Showtime.IsDeleted);
-            modelBuilder.Entity<Ticket>().HasQueryFilter(e => !e.IsDeleted && !e.Seat.IsDeleted);
-
-            modelBuilder.Entity<SeatHold>().HasQueryFilter(e => !e.IsDeleted && !e.Seat.IsDeleted && !e.Showtime.IsDeleted);
-
+            modelBuilder.Entity<CinemaHall>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Review>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Seat>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Showtime>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Booking>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Ticket>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SeatHold>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<FnBProduct>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<BookingFnB>().HasQueryFilter(e => !e.IsDeleted && !e.Booking.IsDeleted);
-
-            modelBuilder.Entity<Equipment>().HasQueryFilter(e => !e.IsDeleted && !e.CinemaHall.IsDeleted);
+            modelBuilder.Entity<BookingFnB>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Equipment>().HasQueryFilter(e => !e.IsDeleted);
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

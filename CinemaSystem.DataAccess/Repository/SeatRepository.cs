@@ -23,9 +23,12 @@ namespace CinemaSystem.DataAccess.Repository
                 objFromDb.Column = obj.Column;
                 objFromDb.SeatType = obj.SeatType;
                 objFromDb.IsAccessible = obj.IsAccessible;
+
                 objFromDb.CinemaHallId = obj.CinemaHallId;
 
-                objFromDb.UpdatedDate = DateTime.Now;
+                objFromDb.IsDeleted = obj.IsDeleted;
+
+                objFromDb.UpdatedDate = DateTime.UtcNow;
             }
         }
     }

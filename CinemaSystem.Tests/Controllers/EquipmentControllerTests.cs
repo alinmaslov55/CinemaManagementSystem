@@ -1,17 +1,19 @@
-﻿using Xunit;
-using Moq;
+﻿using CinemaSystem.DataAccess.Repository.IRepository;
+using CinemaSystem.Models.Entities;
+using CinemaSystem.Models.ViewModels;
+using CinemaSystem.Web;
+using CinemaSystem.Web.Areas.Admin.Controllers;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using System.Linq.Expressions;
+using Microsoft.Extensions.Localization;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CinemaSystem.Web.Areas.Admin.Controllers;
-using CinemaSystem.DataAccess.Repository.IRepository;
-using CinemaSystem.Models.Entities;
-using CinemaSystem.Models.ViewModels;
+using System.Linq.Expressions;
+using Xunit;
 
 namespace CinemaSystem.Tests.Controllers
 {
@@ -19,6 +21,8 @@ namespace CinemaSystem.Tests.Controllers
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly EquipmentController _controller;
+        private readonly Mock<IStringLocalizer<SharedResource>> _mockLocalizer;
+
 
         public EquipmentControllerTests()
         {
@@ -29,7 +33,8 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Equipment.Add(It.IsAny<Equipment>()));
             _mockUnitOfWork.Setup(u => u.Equipment.Update(It.IsAny<Equipment>()));
 
-            _controller = new EquipmentController(_mockUnitOfWork.Object);
+            _mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
+            _controller = new EquipmentController(_mockUnitOfWork.Object, _mockLocalizer.Object);
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
         }
@@ -61,19 +66,6 @@ namespace CinemaSystem.Tests.Controllers
             model.Equipment.Id.Should().Be(0);
 
             model.Equipment.PurchaseDate.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(2));
-        }
-
-        [Fact]
-        public void UpsertGet_RedirectsToIndex_AndSetsTempData_WhenEntityDoesNotExist()
-        {
-            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns((Equipment)null);
-
-            var result = _controller.Upsert(99);
-
-            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirectResult.ActionName.Should().Be("Index");
-            _controller.TempData["error"].Should().Be("Error: Asset could not be found.");
         }
 
         [Fact]
@@ -121,10 +113,94 @@ namespace CinemaSystem.Tests.Controllers
             result.Should().BeOfType<NotFoundResult>();
         }
 
+        
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(0)]
+        public void DeleteGet_ReturnsNotFound_WhenIdIsNullOrZero(int? id)
+        {
+            _controller.Delete(id).Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public void DeletePOST_ReturnsNotFound_WhenEntityDoesNotExist()
+        {
+            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns((Equipment)null);
+
+            _controller.DeletePOST(99).Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public void DeleteAjax_SetsIsDeletedAndReturnsJsonTrue_WhenEntityExists()
+        {
+            var existingEquipment = new Equipment { Id = 1, IsDeleted = false };
+
+            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingEquipment);
+
+            _mockLocalizer.Setup(l => l["Equipment_DeleteSuccessAjax"])
+                          .Returns(new LocalizedString("Equipment_DeleteSuccessAjax", "Delete Successful"));
+
+            var result = _controller.DeleteAjax(1);
+
+            existingEquipment.IsDeleted.Should().BeTrue();
+            _mockUnitOfWork.Verify(u => u.Equipment.Update(existingEquipment), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
+            jsonResult.Value.Should().BeEquivalentTo(new { success = true, message = "Delete Successful" });
+        }
+
+        [Fact]
+        public void DeletePOST_SetsIsDeleted_AndDoesNotCallRemove()
+        {
+            var existingEquipment = new Equipment { Id = 1, IsDeleted = false };
+
+            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns(existingEquipment);
+
+            _mockLocalizer.Setup(l => l["Equipment_ArchivedSuccess"])
+                          .Returns(new LocalizedString("Equipment_ArchivedSuccess", "Equipment archived successfully"));
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+            var result = _controller.DeletePOST(1);
+
+            existingEquipment.IsDeleted.Should().BeTrue();
+            _mockUnitOfWork.Verify(u => u.Equipment.Update(existingEquipment), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Equipment.Remove(It.IsAny<Equipment>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+
+            var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+            redirectResult.ActionName.Should().Be("Index");
+        }
+
+        [Fact]
+        public void DeleteAjax_ReturnsJsonFalse_WhenEntityDoesNotExist()
+        {
+            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                           .Returns((Equipment)null);
+
+            _mockLocalizer.Setup(l => l["Equipment_Error_NotFoundAjax"])
+                          .Returns(new LocalizedString("Equipment_Error_NotFoundAjax", "Error: Asset not found."));
+
+            var result = _controller.DeleteAjax(99);
+
+            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
+
+            jsonResult.Value.Should().BeEquivalentTo(new { success = false, message = "Error: Asset not found." });
+            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
+        }
+
         [Fact]
         public void UpsertPost_AddsNewEquipment_WhenAddMode()
         {
             var vm = new EquipmentVM { Equipment = new Equipment { Id = 0, Name = "Laser Projector" } };
+
+            _mockLocalizer.Setup(l => l["Equipment_CreatedSuccess"])
+                          .Returns(new LocalizedString("Equipment_CreatedSuccess", "Equipment registered successfully"));
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             var result = _controller.Upsert(vm);
 
@@ -145,6 +221,10 @@ namespace CinemaSystem.Tests.Controllers
             _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                            .Returns(existingEquipment);
 
+            _mockLocalizer.Setup(l => l["Equipment_UpdatedSuccess"])
+                          .Returns(new LocalizedString("Equipment_UpdatedSuccess", "Equipment updated successfully"));
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
             var result = _controller.Upsert(vm);
 
             _mockUnitOfWork.Verify(u => u.Equipment.Update(It.Is<Equipment>(e => e.Name == "Updated Projector")), Times.Once);
@@ -155,71 +235,21 @@ namespace CinemaSystem.Tests.Controllers
             _controller.TempData["success"].Should().Be("Equipment updated successfully");
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData(0)]
-        public void DeleteGet_ReturnsNotFound_WhenIdIsNullOrZero(int? id)
-        {
-            _controller.Delete(id).Should().BeOfType<NotFoundResult>();
-        }
-
         [Fact]
-        public void DeletePOST_ReturnsNotFound_WhenEntityDoesNotExist()
+        public void UpsertGet_RedirectsToIndex_AndSetsTempData_WhenEntityDoesNotExist()
         {
             _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                            .Returns((Equipment)null);
 
-            _controller.DeletePOST(99).Should().BeOfType<NotFoundResult>();
-        }
+            _mockLocalizer.Setup(l => l["Equipment_Error_NotFound"])
+                          .Returns(new LocalizedString("Equipment_Error_NotFound", "Error: Asset could not be found."));
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
-        [Fact]
-        public void DeletePOST_SetsIsDeleted_AndDoesNotCallRemove()
-        {
-            var existingEquipment = new Equipment { Id = 1, IsDeleted = false };
-            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingEquipment);
-
-            var result = _controller.DeletePOST(1);
-
-            existingEquipment.IsDeleted.Should().BeTrue();
-            _mockUnitOfWork.Verify(u => u.Equipment.Update(existingEquipment), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Equipment.Remove(It.IsAny<Equipment>()), Times.Never);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
+            var result = _controller.Upsert(99);
 
             var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
             redirectResult.ActionName.Should().Be("Index");
-        }
-
-
-        [Fact]
-        public void DeleteAjax_ReturnsJsonFalse_WhenEntityDoesNotExist()
-        {
-            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns((Equipment)null);
-
-            var result = _controller.DeleteAjax(99);
-
-            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
-
-            jsonResult.Value.Should().BeEquivalentTo(new { success = false, message = "Error: Asset not found." });
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Never);
-        }
-
-        [Fact]
-        public void DeleteAjax_SetsIsDeletedAndReturnsJsonTrue_WhenEntityExists()
-        {
-            var existingEquipment = new Equipment { Id = 1, IsDeleted = false };
-            _mockUnitOfWork.Setup(u => u.Equipment.Get(It.IsAny<Expression<Func<Equipment, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .Returns(existingEquipment);
-
-            var result = _controller.DeleteAjax(1);
-
-            existingEquipment.IsDeleted.Should().BeTrue();
-            _mockUnitOfWork.Verify(u => u.Equipment.Update(existingEquipment), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Save(), Times.Once);
-
-            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
-            jsonResult.Value.Should().BeEquivalentTo(new { success = true, message = "Delete Successful" });
+            _controller.TempData["error"].Should().Be("Error: Asset could not be found.");
         }
     }
 }

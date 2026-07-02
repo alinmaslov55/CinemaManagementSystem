@@ -15,7 +15,24 @@ namespace CinemaSystem.DataAccess.Repository
 
         public void Update(Equipment obj)
         {
-            _db.Equipments.Update(obj);
+            var objFromDb = _db.Equipments.FirstOrDefault(u => u.Id == obj.Id);
+
+            if (objFromDb != null)
+            {
+                objFromDb.Name = obj.Name;
+                objFromDb.SerialNumber = obj.SerialNumber;
+                objFromDb.Type = obj.Type;
+                objFromDb.Status = obj.Status;
+                objFromDb.PurchaseDate = obj.PurchaseDate;
+                objFromDb.LastMaintenanceDate = obj.LastMaintenanceDate;
+                objFromDb.NextMaintenanceDate = obj.NextMaintenanceDate;
+                objFromDb.MaintenanceNotes = obj.MaintenanceNotes;
+                objFromDb.CinemaHallId = obj.CinemaHallId;
+
+                objFromDb.IsDeleted = obj.IsDeleted;
+
+                objFromDb.UpdatedDate = DateTime.UtcNow;
+            }
         }
     }
 }
